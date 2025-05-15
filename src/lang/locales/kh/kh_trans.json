@@ -1,0 +1,709 @@
+{
+  "home": {
+    "welcome": "សូមស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រងទិន្នន័យគុណភាព",
+    "click_cards": "ចុចលើសន្លឹកបៀខាងក្រោម ដើម្បីចាប់ផ្តើមរបាយការណ៍ត្រួតពិនិត្យ ឬការត្រួតពិនិត្យផ្ទាល់",
+    "unauthorized_access": "ការចូលប្រើដោយគ្មានការអនុញ្ញាត",
+    "loading": "កំពុង​ផ្ទុក...",
+    "fabric/cutting/scc": "ក្រណាត់ / កាត់ / SCC",
+    "order_data": "បញ្ជាទិញទិន្នន័យ",
+    "quality_inspection": "ការត្រួតពិនិត្យគុណភាព",
+    "qa_audit": "សវនកម្ម QA",
+    "data_analytics": "ការវិភាគទិន្នន័យ",
+    "bundle_registration": "ការបង្កើតជាបាច់/ដុំ",
+    "fabric": "ក្រណាត់",
+    "cutting": "តុកាត់",
+    "washing": "បោកគក់",
+    "opa": "OPA",
+    "scc": "SCC",
+    "packing": "ការវេចខ្ចប់",
+    "dyeing": "លាបពណ៌",
+    "ironing": "អ៊ុត",
+    "final_inspection": "ការត្រួតពិនិត្យចុងក្រោយ",
+    "qc_inline_roving": "QC ចលត័",
+    "qc1_inspection": "ការត្រួតពិនិត្យ QC1",
+    "qc2_repair": "QC2 Repair Tracking",
+    "qc2_inspection": "ការត្រួតពិនិត្យ QC2",
+    "qc2_repair_tracking": "QC2 Repair Tracking",
+    "printing_QR": "Printing QR",
+    "qa_audit_report": "របាយការណ៍សវនកម្ម QA",
+    "download_data": "ទាញយកទិន្នន័យ",
+    "live_dashboard": "ផ្ទាំងគ្រប់គ្រងផ្ទាល់"
+  },
+
+  "nav": {
+    "orders": "ការបញ្ជាទិញ",
+    "qc": "QC",
+    "qa": "QA",
+    "report": "របាយការណ៍",
+    "setting": "ការកំណត់",
+    "roles": "តួនាទី",
+    "users": "អ្នកប្រើប្រាស់"
+  },
+
+  "iro": {
+    "header": "ម៉ាស៊ីនស្កេនដំណើរការដែក",
+    "card": "ស្កេនកូដ QR នៅលើកញ្ចប់ដើម្បីកត់ត្រាព័ត៌មានលម្អិតអំពីដែក",
+    "qr_scan": "ស្កេន QR",
+    "auto_add": "បន្ថែមដោយស្វ័យប្រវត្តិ",
+    "ironing_id": "លេខសម្គាល់ដែក",
+    "task_no": "គ្មានកិច្ចការ",
+    "updated_date": "កាលបរិច្ឆេទធ្វើបច្ចុប្បន្នភាព",
+    "updated_time": "ពេលវេលាធ្វើបច្ចុប្បន្នភាព",
+    "pass_qty": "បរិមាណឆ្លងកាត់ (ជាតិដែក)"
+  },
+
+  "wash": {
+    "header": "ម៉ាស៊ីនស្កេនដំណើរការបោកគក់",
+    "card": "ស្កេនកូដ QR នៅលើកញ្ចប់ដើម្បីកត់ត្រាព័ត៌មានលម្អិតអំពីការលាង",
+    "washing_id": "លេខសម្គាល់ការបោកគក់",
+    "pass_qty": "បរិមាណឆ្លងកាត់ (លាង)"
+  },
+
+  "opa": {
+    "header": "ម៉ាស៊ីនស្កេនដំណើរការ OPA",
+    "card": "ស្កេនកូដ QR នៅលើកញ្ចប់ដើម្បីកត់ត្រាព័ត៌មានលម្អិត OPA",
+    "opa_id": "OPA ID",
+    "pass_qty": "បរិមាណឆ្លងកាត់ (OPA)"
+  },
+
+  "pack": {
+    "header": "ម៉ាស៊ីនស្កេនដំណើរការវេចខ្ចប់",
+    "card": "ស្កេនកូដ QR នៅលើកញ្ចប់ដើម្បីកត់ត្រាព័ត៌មានលម្អិតអំពីការវេចខ្ចប់",
+    "packing_id": "លេខសម្គាល់ការវេចខ្ចប់",
+    "pass_qty": "បរិមាណឆ្លងកាត់ (កញ្ចប់)"
+  },
+
+  "ana": {
+    "total_defects": "ពិការភាពសរុប",
+    "checked_qty": "ចំនួនដែលបានត្រួតពិនិត្យ",
+    "good_output": "ទិន្នផលល្អ",
+    "defect_pieces": "បំណែកខូច",
+    "return_defect": "ត្រឡប់កំហុស #",
+    "defect_rate": "អត្រាពិការភាព",
+    "defect_ratio": "សមាមាត្រពិការភាព",
+    "defect_rate_by": "អត្រាពិការភាពតាមឈ្មោះពិការ",
+    "all_categories": "ប្រភេទទាំងអស់",
+    "defect_rate_over": "អត្រាពិការភាពតាមពេលវេលា",
+    "all_defects": "ពិការភាពទាំងអស់",
+    "time": "ពេលវេលា",
+    "min": "នាទី",
+    "hr": "ម៉ោង",
+    "defect_rate_by_ca": "អត្រាពិការភាពតាមប្រភេទ",
+    "category": "ប្រភេទ"
+  },
+
+  "cut": {
+    "ok": "យល់ព្រម"
+  },
+
+  "bundle": {
+    "bundle_registration": "ការបង្កើតជាបាច់/ដុំ",
+    "registration": "ការចុះឈ្មោះ",
+    "data": "ទិន្នន័យ",
+    "reprint": "បោះពុម្ពឡើងវិញ",
+    "date": "កាលបរិច្ឆេទ",
+    "department": "ផ្នែក",
+    "select_department": "ជ្រើសរើសផ្នែក",
+    "qc1_endline": "QC1 Endline",
+    "washing": "លាង",
+    "sub_con": "កិច្ចសន្យាបន្ត",
+    "search_mono": "ស្វែងរក MONo",
+    "order_details": "ព័ត៌មានលម្អិតនៃការបញ្ជាទិញ",
+    "selected_mono": "បានជ្រើសរើស MONo",
+    "customer_style": "រចនាប័ទ្មអតិថិជន",
+    "buyer": "អ្នកទិញ",
+    "country": "ប្រទេស",
+    "order_qty": "បរិមាណបញ្ជាទិញ",
+    "factory": "រោងចក្រ",
+    "line_no": "ក្រុមដេរ",
+    "color": "ពណ៌",
+    "select_color": "ជ្រើសរើសពណ៌",
+    "no_colors_available": "មិនមានពណ៌",
+    "size": "សារី",
+    "select_size": "ជ្រើសរើសទំហំ",
+    "no_size_available": "គ្មានទំហំដែលអាចប្រើបាន",
+    "size_order_qty": "បរិមាណបញ្ជាទិញទំហំ",
+    "plan_cut_qty": "ផែនការកាត់បន្ថយបរិមាណ",
+    "total_garment_count": "ចំនួនសម្លៀកបំពាក់សរុប",
+    "count": "ចំនួន",
+    "bundle_qty": "ចំនួនដុំ",
+    "total_registered_bundle_qty": "បរិមាណកញ្ចប់ដែលបានចុះឈ្មោះសរុប",
+    "sub_con_factory": "រោងចក្របន្តកិច្ចសន្យា",
+    "select_sub_con_factory": "ជ្រើសរើសរោងចក្របន្តកិច្ចសន្យា",
+    "generate_qr": "បង្កើត QR",
+    "preview_qr": "មើល QR ជាមុន",
+    "record_id": "លេខសម្គាល់កំណត់ត្រា",
+    "package_no": "គ្មានកញ្ចប់",
+    "modify": "កែប្រែ",
+    "time": "ពេលវេលា",
+    "emp_id": "លេខសម្គាល់បុគ្គលិក",
+    "eng_name": "ឈ្មោះជាភាសាអង់គ្លេស",
+    "kh_name": "ឈ្មោះខ្មែរ",
+    "mono": "MONo",
+    "total_order_qty": "បរិមាណបញ្ជាទិញសរុប",
+    "color_chi": "ពណ៌-ចិន",
+    "order_cut_qty": "ការបញ្ជាទិញកាត់បរិមាណ",
+    "total_bundle_qty": "បរិមាណកញ្ចប់សរុប",
+    "edit": "កែសម្រួល",
+    "action": "សកម្មភាព",
+    "print_qr": "បោះពុម្ព QR",
+    "printing": "បោះពុម្ព..."
+  },
+
+  "defIm": {
+    "defect_images": "រូបភាពពិការ",
+    "defect_name": "ឈ្មោះខូច",
+    "images": "រូបភាព"
+  },
+
+  "downDa": {
+    "start_date": "កាលបរិច្ឆេទចាប់ផ្តើម",
+    "end_date": "កាលបរិច្ឆេទបញ្ចប់",
+    "type": "ប្រភេទ",
+    "record_per": "កត់ត្រាក្នុងមួយទំព័រ",
+    "style_no": "គ្មានរចនាប័ទ្ម",
+    "bundle_id": "លេខសម្គាល់កញ្ចប់",
+    "no_data": "រកមិនឃើញទិន្នន័យ",
+    "summary": "សង្ខេប",
+    "total_record": "កំណត់ត្រាសរុប",
+    "total_pages": "ទំព័រសរុប",
+    "search": "ស្វែងរក",
+    "searching": "កំពុងស្វែងរក ...",
+    "download_excel": "ទាញយក Excel",
+    "download_pdf": "ទាញយក PDF"
+  },
+
+  "dash": {
+    "coming_soon": "មកដល់ឆាប់ៗនេះ",
+    "filters": "តម្រង",
+    "apply": "អនុវត្ត",
+    "reset": "កំណត់ឡើងវិញ",
+    "applied_filters": "តម្រងដែលបានអនុវត្ត",
+    "total_pass": "ឆ្លងសរុប",
+    "total_rejects": "ការបដិសេធសរុប",
+    "defects_qty": "បរិមាណខូច",
+    "total_bundle": "កញ្ចប់សរុប",
+    "rank": "ចំណាត់ថ្នាក់",
+    "level": "កម្រិត",
+    "hide": "លាក់",
+    "show": "បង្ហាញ",
+    "qc2": "QC2"
+  },
+
+  "set": {
+    "head": "អ្នកមិនមានសិទ្ធិចូលប្រើទំព័រនេះទេ។",
+    "super_admin": "ការចុះឈ្មោះអ្នកគ្រប់គ្រងជាន់ខ្ពស់",
+    "role": "តួនាទី",
+    "job_title": "ចំណងជើងការងារ",
+    "search_emp_id": "ស្វែងរកលេខសម្គាល់បុគ្គលិក",
+    "selected_user_details": "ព័ត៌មានលម្អិតអ្នកប្រើប្រាស់ដែលបានជ្រើសរើស",
+    "name": "ឈ្មោះ",
+    "english_name": "ឈ្មោះភាសាអង់គ្លេស",
+    "khmer_name": "ឈ្មោះខ្មែរ",
+    "section": "ផ្នែក",
+    "phone_no": "លេខទូរស័ព្ទ",
+    "working_status": "ស្ថានភាពការងារ",
+    "current_super_admins": "អ្នកគ្រប់គ្រងជាន់ខ្ពស់បច្ចុប្បន្ន",
+    "delete": "លុប",
+    "register_super_admin": "ចុះឈ្មោះអ្នកគ្រប់គ្រងជាន់ខ្ពស់"
+  },
+
+  "insp": {
+    "submit": "ដាក់ស្នើ",
+    "pass": "ឆ្លងកាត់",
+    "reject": "បដិសេធ"
+  },
+
+  "detail": {
+    "head": "ព័ត៌មានលម្អិតនៃការត្រួតពិនិត្យគុណភាព",
+    "fill_below": "បំពេញខាងក្រោម",
+    "style_info": "ព័ត៌មានអំពីរចនាប័ទ្ម",
+    "customer": "អតិថិជន",
+    "order_info": "ព័ត៌មានបញ្ជាទិញ",
+    "select_factory": "ជ្រើសរើសរោងចក្រ",
+    "continue": "បន្តទៅអធិការកិច្ច",
+    "submit_details": "បញ្ជូនព័ត៌មានលម្អិត"
+  },
+
+  "return": {
+    "pass_return": "ត្រលប់មកវិញ",
+    "reject_return": "បដិសេធ_ត្រឡប់"
+  },
+
+  "sideBar": {
+    "qc2_order": "ការបញ្ជាទិញ QC2",
+    "defect": "ពិការភាព",
+    "output": "ទិន្នផល"
+  },
+
+  "languages": {
+    "en": "ភាសាអង់គ្លេស",
+    "kh": "ខ្មែរ",
+    "ch": "ចិន"
+  },
+  "userL": {
+    "search_here": "ស្វែងរកនៅទីនេះ ...",
+    "add_user": "បន្ថែមអ្នកប្រើប្រាស់",
+    "full_name": "ឈ្មោះពេញ",
+    "created_at": "បង្កើតនៅ",
+    "action": "សកម្មភាព",
+    "previous": "មុន",
+    "next": "បន្ទាប់"
+  },
+
+  "roleMan": {
+    "role_management": "ការគ្រប់គ្រងតួនាទី",
+    "current_roles": "តួនាទីបច្ចុប្បន្ន",
+    "add": "បន្ថែម",
+    "update_role": "ធ្វើបច្ចុប្បន្នភាពតួនាទី",
+    "select_role": "ជ្រើសរើសតួនាទី",
+    "job_titles": "ចំណងជើងការងារ",
+    "search_job_titles": "ស្វែងរកចំណងជើងការងារ"
+  },
+
+  "editU": {
+    "update_user": "ធ្វើបច្ចុប្បន្នភាពអ្នកប្រើប្រាស់",
+    "close_modal": "ម៉ូឌុលបិទ",
+    "email": "ម៉ូឌុលបិទ",
+    "optional": "ស្រេចចិត្ត",
+    "super_admin_user": "អ្នកប្រើប្រាស់នេះគឺជាអ្នកគ្រប់គ្រងជាន់ខ្ពស់",
+    "admin_user": "អ្នកប្រើប្រាស់នេះគឺជាអ្នកគ្រប់គ្រង",
+    "access": "ការចូលប្រើទាំងអស់ត្រូវបានផ្តល់",
+    "cancel": "បោះបង់",
+    "update": "ធ្វើបច្ចុប្បន្នភាព"
+  },
+
+  "delU": {
+    "confirm": "តើអ្នកប្រាកដថាចង់លុបអ្នកប្រើប្រាស់គណនីនេះ",
+    "yes": "បាទ ខ្ញុំប្រាកដ",
+    "no": "ទេ បោះបង់"
+  },
+
+  "createU": {
+    "create_user": "បង្កើតអ្នកប្រើប្រាស់ខាងក្រៅ",
+    "device": "ឧបករណ៍",
+    "default_password": "ពាក្យសម្ងាត់លំនាំដើម"
+  },
+
+  "preview": {
+    "defect_details": "ព័ត៌មានលម្អិតអំពីពិការភាព",
+    "defect_type": "ប្រភេទពិការភាព",
+    "quantity": "បរិមាណ"
+  },
+
+  "prevHeader": {
+    "style": "រចនាប័ទ្ម"
+  },
+
+  "checkQty": {
+    "value": "តម្លៃ"
+  },
+
+  "controlBut": {
+    "on": "បើក",
+    "return": "ត្រឡប់"
+  },
+
+  "defectPrint": {
+    "search_package": "ស្វែងរកកញ្ចប់",
+    "repair_group": "ក្រុមជួសជុល",
+    "search_repair": "ស្វែងរកក្រុមជួសជុល",
+    "no_defect_card": "រកមិនឃើញកាតដែលមានបញ្ហា",
+    "defect_count": "ចំនួនពិការភាព",
+    "mode": "របៀប",
+    "status": "ស្ថានភាព",
+    "in_progress": "កំពុងដំណើរការ",
+    "completed": "បានបញ្ចប់",
+    "both": "ទាំងពីរ",
+    "checked": "បានពិនិត្យ #",
+    "defectsN": "ពិការភាព #",
+    "rejectN": "បដិសេធ #",
+    "reworking": "ដំណើរការឡើងវិញ #",
+    "print_details": "ព័ត៌មានលម្អិតបោះពុម្ព"
+  },
+
+  "imageUpload": {
+    "upload_image": "បង្ហោះរូបភាព",
+    "capture": "ចាប់យក",
+    "upload": "ផ្ទុកឡើង",
+    "upload_message": "ទម្លាក់រូបភាពនៅទីនេះ ឬប្រើប៊ូតុងខាងលើ។"
+  },
+
+  "previewMode": {
+    "qc_inspection_report": "របាយការណ៍ត្រួតពិនិត្យ QC",
+    "close": "បិទ",
+    "no_data_card": "រកមិនឃើញកាតទិន្នន័យ",
+    "emp_name": "ឈ្មោះបុគ្គលិក",
+    "inspection_time": "ពេលវេលាត្រួតពិនិត្យ",
+    "inspection_date": "កាលបរិច្ឆេទត្រួតពិនិត្យ"
+  },
+
+  "summary": {
+    "defect_garment": "សម្លៀកបំពាក់ពិការ",
+    "return_defect": "ត្រឡប់បរិមាណខូច"
+  },
+
+  "editBundle": {
+    "edit_record": "កែសម្រួលកំណត់ត្រា",
+    "save": "រក្សាទុក"
+  },
+
+  "numPad": {
+    "enter_number": "បញ្ចូលលេខ",
+    "done": "រួចរាល់",
+    "enter_details": "បញ្ចូលព័ត៌មានលម្អិត"
+  },
+
+  "qrCodePrev": {
+    "repair": "ជួសជុល",
+    "defects": "ពិការភាព",
+    "print": "បោះពុម្ព"
+  },
+
+  "qrCodeScan": {
+    "loading_bundle": "កំពុងផ្ទុកទិន្នន័យបណ្តុំ...",
+    "separator_id": "លេខសម្គាល់អ្នកបំបែក",
+    "registered_date": "កាលបរិច្ឆេទចុះឈ្មោះ",
+    "registered_time": "ពេលវេលាចុះឈ្មោះ",
+    "sub_con_factory_name": "ឈ្មោះរោងចក្របន្តកិច្ចសន្យា",
+    "adding": "បន្ថែម"
+  },
+
+  "scan": {
+    "start": "ចាប់ផ្តើមម៉ាស៊ីនស្កេន",
+    "using": "ការប្រើប្រាស់",
+    "stop": "បញ្ឈប់ម៉ាស៊ីនស្កេន"
+  },
+
+  "subCon": {
+    "yes": "បាទ",
+    "no": "ទេ",
+    "select_sub_con_factory": "ជ្រើសរើសរោងចក្រក្រោមកិច្ចសន្យា"
+  },
+
+  "lineIn": {
+    "enter_line_no": "បញ្ចូលលេខបន្ទាត់"
+  },
+
+  "styleCode": {
+    "style_code": "កូដរចនាប័ទ្ម",
+    "select_style_code": "ជ្រើសរើសកូដរចនាប័ទ្ម"
+  },
+
+  "styleDig": {
+    "style_digit": "ខ្ទង់រចនាប័ទ្ម",
+    "enter_style_digit": "បញ្ចូលលេខរចនាប័ទ្ម"
+  },
+  "rePrint": {
+    "reprint_records": "កត់ត្រាឡើងវិញ",
+    "clear": "ច្បាស់",
+    "search_mono": "ស្វែងរក MONo...",
+    "search_package_no": "ស្វែងរកកញ្ចប់ ..",
+    "search_emp_id": "ស្វែងរកលេខសម្គាល់បុគ្គលិក..."
+  },
+  "qc2In": {
+    "language": "ភាសា",
+    "all_languages": "ភាសាទាំងអស់",
+    "sort": "តម្រៀប",
+    "printer": "ភ្ជាប់ម៉ាស៊ីនបោះពុម្ព",
+    "printing_method": "វិធីសាស្រ្តបោះពុម្ព",
+    "repair": "ដោយការជួសជុល",
+    "garment": "ដោយសម្លៀកបំពាក់",
+    "bundle": "ដោយបាច់",
+    "inspection": "អធិការកិច្ច",
+    "edit_inspection": "កែសម្រួលការត្រួតពិនិត្យ",
+    "defect_card": "ប័ណ្ណពិការ",
+    "fabric": "ក្រណាត់",
+    "workmanship": "ស្នាដៃ",
+    "cleanliness": "អនាម័យ",
+    "embellishment": "ការតុបតែង",
+    "measurement": "ការវាស់វែង",
+    "washing": "បោកគក់",
+    "finishing": "ការបញ្ចប់",
+    "miscellaneous": "ផ្សេងៗ",
+    "loading_data": "កំពុងផ្ទុកទិន្នន័យ...",
+    "reject_garment": "បដិសេធសម្លៀកបំពាក់",
+    "defect_qty": "បរិមាណខូច",
+    "pass_bundle": "កញ្ចប់លិខិតឆ្លងដែន",
+    "all": "ទាំងអស់",
+    "common": "ទូទៅ",
+    "type1": "ប្រភេទ 1",
+    "type2": "ប្រភេទទី 2"
+  },
+
+  "qcRoving": {
+    "qc_inline_roving_inspection": "QC ត្រួតពិនិត្យក្នុងក្រុមដេរ",
+    "qcInlineRoving": "QC ក្នុងក្រុម",
+    "data": "ទិន្នន័យ",
+    "date": "ថ្ងៃខែឆ្នាំ",
+    "lineNo": "ក្រុមដេរ",
+    "select_line_no": "ជ្រើសរើសក្រុម",
+    "search_mono": "ជ្រើសរើសលេខស្តាយ",
+    "moNo": "លេខស្តាយ",
+    "operationNo": "លេខសំគាល់តាមម៉ាស៊ីន",
+    "select_operation_no": "ជ្រើសរើសលេខសំគាល់តាមម៉ាស៊ីន",
+    "scanQR": "QR កូដស្កេន",
+    "inspectionType": "ប្រភេទការត្រួតពិនិត្យ",
+    "language": "ភាសា",
+    "normal": "ធម្មតា",
+    "critical": "ចំណុចពិសេស",
+    "quantity": "ចំនួន",
+    "spi": "ស្តង់ដារថ្នេរ",
+    "select_spi_status": "ជ្រើសរើសស្តង់ដារថ្នេរ ជាប់/ធ្លាក់",
+    "measurement": "ខ្នាត",
+    "select_measurement_status": "ជ្រើសរើសខ្នាត ជាប់/ធ្លាក់",
+    "quality": "គុណភាព",
+    "part": "ផ្ទាំងទីមួយ",
+    "status": "ស្ថានភាព",
+    "pass": "ជាប់",
+    "reject": "ធ្លាក់",
+    "no_defect_record": "គ្មានកំហុសសំរាប់ផ្ទាំងនេះ.",
+    "select_defect": "ជ្រើសរើសកំហុស",
+    "add": "បន្ថែម",
+    "defect_metrics": "កំហុស",
+    "defect_rate": "ភាគរយកំហុស",
+    "defect_ratio": "អត្រាភាពរយកំហុស",
+    "previous": "ទិន្នន័យពីមុន",
+    "next": "ចំនុចបន្ទាប់",
+    "preview": "ពិនិត្យមើលជាមុន",
+    "finish_inspection": "បញ្ចប់ការត្រួតពិនិត្យ"
+  },
+
+  "cutting": {
+    "cutting_inspection": "ត្រួតពិនិត្យតុកាត់",
+    "cuttingForm": "ទម្រង់របាយការណ៏តុកាត់",
+    "data": "ទិន្នន័យ",
+    "dataTabPlaceholder": "ខ្លឹមសារផ្ទាំងទិន្នន័យនឹងត្រូវបានអនុវត្តនៅទីនេះ។",
+    "dbTabPlaceholder": "ខ្លឹមសារផ្ទាំងមូលដ្ឋានទិន្នន័យនឹងត្រូវបានអនុវត្តនៅទីនេះ។",
+    "date": "កាលបរិច្ឆេទ",
+    "moNo": "លេខ MO",
+    "search_mono": "ស្វែងរកលេខ MO",
+    "lotNo": "លេខ Lot",
+    "search_lot_no": "ស្វែងរកលេខ...",
+    "enter_lot_no": "បញ្ចូលលេខ...",
+    "color": "ពណ៌",
+    "select_color": "ជ្រើសរើសពណ៌",
+    "customerStyle": "រចនាប័ទ្មអតិថិជន",
+    "buyer": "អ្នកទិញ",
+    "orderQty": "បរិមាណបញ្ជាទិញ",
+    "tableNo": "លេខតុ",
+    "search_table_no": "ជ្រើសរើសលេខតុ",
+    "cuttingTable": "តុកាត់",
+    "l": "L",
+    "layerQty": "ចំនួនផ្ទាំង :",
+    "totalPcs": "ចំនួនផ្ទាំងសរុប :",
+    "actualLayerQty": "ចំនួនផ្ទាំងជាក់ស្ដែង :",
+    "no": "លេខ",
+    "select": "ជ្រើសរើស",
+    "marker": "ពុម្ព",
+    "markerRatio": "សមាមាត្រពុម្ពស៊េរី",
+    "totalBundleQty": "ចំនួនដុំសរុប",
+    "bundleQtyCheck": "ចំនួនដុំពិនិត្យ",
+    "totalInspectionQty": "ចំនួនពិនិត្យសរុប",
+    "cuttingBy": "កាត់ដោយ",
+    "auto": "កាត់អូតូ",
+    "manual": "កាត់ដោយដៃ",
+    "samplingStandardAQL": "កំណត់តាមស្តង់ដារកម្រិត​ 1.0",
+    "panel": "ប្រភេទខោអាវ",
+    "selectGarmentType": "ជ្រើសរើសប្រភេទខោអាវ",
+    "select_panel": "ជ្រើសរើសបន្ទះ",
+    "size": "ទំហំ",
+    "select_size": "ជ្រើសរើសទំហំ",
+    "serialLetter": "អក្សរសៀរៀល",
+    "select_serial_letter": "ជ្រើសរើសអក្សរស៊េរីជាក្រុម",
+    "tolerance": "លើស/ខ្វះ",
+    "summaryDetails": "សរុបសេចក្ដីលំអិត",
+    "parts": "ផ្នែក",
+    "pass": "ជាប់",
+    "reject": "ធ្លាក់",
+    "rejectMeasurements": "បញ្ហាខ្នាត",
+    "rejectDefects": "បញ្ហាកំហុសធ្លាក់",
+    "passRate": "ភាគរយជាប់",
+    "measurementDetails": "ពត៌មានលម្អិតអំពីការវាស់ទំហំ",
+    "measurementPointKhmer": "ពត៌មានលម្អិតអំពីការវាស់ទំហំ (Khmer)",
+    "modifymeasurementPoint": "កែសម្រួលពត៌មានលម្អិតអំពីការវាស់ទំហំ",
+    "top": "លើ",
+    "middle": "កណ្ដាល",
+    "bottom": "ក្រោម",
+    "garment_top": "អាវ",
+    "garment_bottom": "ខោ",
+    "zipper": "អាវបើកមុខ",
+    "toplayer": "អាវ២ជាន់",
+    "dress": "រ៉ូប",
+    "col": "ជួរឈរ",
+    "panelName": "ឈ្មោះផ្ទាំង",
+    "side": "រើសផ្ទាំង",
+    "direction": "ទិសដៅ",
+    "lw": "ប្រវែង/ទទឹង",
+    "additionalInformation": "ព័ត៌មានបន្ថែម",
+    "samplingStandard": "ស្តង់ដារគំរូ: AQL 1.0",
+    "submit": "បញ្ចូល",
+    "error": "កំហុស",
+    "failedToFetchMONumbers": "បរាជ័យក្នុងការទាញយកលេខ MO ។",
+    "moNotFound": "លេខ MO \"{moNo}\" មិនត្រូវបានរកឃើញទេ។",
+    "failedToFetchMOData": "បរាជ័យក្នុងការទាញយកទិន្នន័យ MO ។",
+    "failedToFetchSizes": "បរាជ័យក្នុងការទាញយកទំហំ។",
+    "missingInformation": "ព័ត៌មានបាត់",
+    "fillRequiredFields": "សូមបំពេញវាលដែលត្រូវការទាំងអស់ជាមុនសិន។",
+    "success": "ជោគជ័យ",
+    "dataSaved": "ទិន្នន័យកាត់ត្រូវបានរក្សាទុកដោយជោគជ័យ!",
+    "failedToSaveData": "បរាជ័យក្នុងការរក្សាទុកទិន្នន័យកាត់។",
+    "loading": "កំពុងផ្ទុក...",
+    "defectBoxTitle": "លម្អិតកំហុស",
+    "noDefectsSelected": "មិនមានកំហុស​ដែល​ត្រូវ​បាន​ជ្រើស",
+    "addDefect": "បន្ថែមកំហុស",
+    "defects": "កំហុស",
+    "noDefects": "គ្មានកំហុស",
+    "close": "បិទ",
+    "defectDetailsAcrossPanel": "ព័ត៌មានលម្អិតកំហុសនៅលើផ្ទាំង",
+    "panelIndex": "ផ្ទាំងសម្គាល់",
+    "measurementPoint": "ចំណុចវាស់ខ្នាត",
+    "cuttingDefectIssue": "សម្គាល់កំហុសក្រណាត់",
+    "panelNameKhmer": "ឈ្មោះផ្ទាំង (Khmer)",
+    "spreadTable": "តុរាលដាល",
+    "spreadTableNo": "លេខតុរាលដាល",
+    "mackerNo": "លេខសញ្ញាសម្គាល់",
+    "mackerLength": "ប្រវែងសញ្ញាសម្គាល់",
+    "fabricType": "ប្រភេទក្រណាត់",
+    "material": "សម្ភារៈ",
+    "rollQty": "បរិមាណរមៀល",
+    "spreadYds": "ទីធ្លារាលដាល",
+    "unit": "ឯកតា",
+    "grossKgs": "ទម្ងន់សរុប (គីឡូក្រាម)",
+    "netKgs": "ទម្ងន់សុទ្ធ (គីឡូក្រាម)",
+    "totalTTLRoll": "សរុបរមៀល TTL",
+    "planLayers": "ស្រទាប់ផែនការ",
+    "actualLayers": "ស្រទាប់ជាក់ស្តែង",
+    "buyerStyle": "រចនាបថអ្នកទិញ",
+    "orderDetails": "ព័ត៌មានបញ្ជាទិញ",
+    "fabricDetails": "ព័ត៌មានក្រណាត់",
+    "cuttingTableDetails": "ព័ត៌មានតុកាត់",
+    "editModeOff": "កែសម្រួលបិទ",
+    "editModeOn": "កែសម្រួលបើក",
+    "modify": "កែសម្រួល",
+    "adding": "បន្ថែម",
+    "edit": "កែសម្រួល",
+    "activate": "បើក",
+    "addAdditionalPoints": "បន្ថែមចំណុចបន្ថែម",
+    "addPoint": "បន្ថែមចំណុច",
+    "totalCuttingTables": "ចំនួនតុតុកាត់",
+    "bundleNo": "លេខកញ្ចប់",
+    "bundleQty": "ចំនួនកញ្ចប់",
+    "use": "ប្រើ",
+    "pcs": "ចំនួន",
+    "select_bundle_qty": "ជ្រើសរើសចំនួនកញ្ចប់",
+    "panelType": "ប្រភេទផ្ទាំង",
+    "bundleDetails": "ព័ត៌មានលម្អិតកញ្ចប់",
+    "issues": "កំហុស",
+    "cuttingIssue": "កំហុសកាត់",
+    "remark": "កំណត់សម្គាល់",
+    "evidence": "ភស្តុតាង",
+    "addIssue": "បន្ថែមកំហុស",
+    "additionalComments": "មតិយោបល់បន្ថែម",
+    "additionalImages": "រូបភាពបន្ថែម",
+    "noPartsSelected": "មិនមានផ្នែកណាមួយដែលត្រូវបានជ្រើសរើស",
+    "selectIssue": "ជ្រើសរើសកំហុស",
+    "measurementPointChinese": "ពត៌មានលម្អិតអំពីការវាស់ទំហំ (Chinese)",
+    "panelNameChinese": "ឈ្មោះផ្ទាំង (Chinese)",
+    "invalidData": "ទិន្នន័យមិនត្រឹមត្រូវ",
+    "missingInspectionData": "សូមបញ្ចូលទិន្នន័យត្រួតពិនិត្យ",
+    "inspectionProgress": "ការត្រួតពិនិត្យកំពុងដំណើរការ",
+    "inspectionNotStarted": "ការត្រួតពិនិត្យមិនទាន់ចាប់ផ្តើម",
+    "completed": "បញ្ចប់",
+    "totalInspected": "ចំនួនដែលបានពិនិត្យ",
+    "failedToFetchTableNos": "បរាជ័យក្នុងការទាញយកលេខតុ។",
+    "failedToFetchCutPanelData": "បរាជ័យក្នុងការទាញយកទិន្នន័យផ្ទាំងកាត់។",
+    "failedToFetchInspectionProgress": "បរាជ័យក្នុងការទាញយកដំណើរការត្រួតពិនិត្យ។",
+    "failedToFetchPanels": "បរាជ័យក្នុងការទាញយកផ្ទាំង។",
+    "failedToFetchPanelIndexNames": "បរាជ័យក្នុងការទាញយកឈ្មោះសន្ទស្សន៍ផ្ទាំង។",
+    "failedToFetchMeasurementPoints": "បរាជ័យក្នុងការទាញយកចំណុចវាស់។",
+    "failedToFetchDefects": "បរាជ័យក្នុងការទាញយកកំហុស។",
+    "invalidBundleQty": "ចំនួនកញ្ចប់លើសពីចំនួនពិនិត្យដែលនៅសល់សម្រាប់ទំហំនេះ។",
+    "noPartsSelectedForBundle": "មិនមានផ្នែកណាមួយត្រូវបានជ្រើសរើសសម្រាប់កញ្ចប់នេះទេ។",
+    "loadingMeasurementData": "កំពុងផ្ទុកទិន្នន័យវាស់...",
+    "pcsName": "ឈ្មោះដុំ",
+    "defectName": "ឈ្មោះកំហុស",
+    "defectQty": "បរិមាណកំហុស",
+    "noDefectsRecorded": "គ្មានកំហុសត្រូវបានកត់ត្រាសម្រាប់ផ្នែកនេះទេ។",
+    "cuttingReportTitle": "របាយការណ៍ត្រួតពិនិត្យការកាត់",
+    "qcId": "អត្តសញ្ញាណប័ណ្ណ QC",
+    "inspectedSizesCount": "ទំហំបានត្រួតពិនិត្យ",
+    "results": "លទ្ធផល",
+    "report": "របាយការណ៍",
+    "viewReport": "មើលរបាយការណ៍",
+    "failedToFetchReports": "បរាជ័យក្នុងការទាញយករបាយការណ៍។",
+    "noReportsFound": "រកមិនឃើញរបាយការណ៍ដែលត្រូវនឹងលក្ខខណ្ឌរបស់អ្នកទេ។",
+    "cuttingInspectionReport": "របាយការណ៍ត្រួតពិនិត្យការកាត់",
+    "closeReport": "បិទរបាយការណ៍",
+    "failedToFetchReportDetails": "បរាជ័យក្នុងការទាញយកព័ត៌មានលម្អិតនៃរបាយការណ៍។",
+    "reportNotFound": "រកមិនឃើញរបាយការណ៍ទេ។",
+    "inspectionSummary": "សេចក្តីសង្ខេបនៃការត្រួតពិនិត្យ",
+    "total": "សរុប",
+    "inspectionDetailSummaryBySize": "សេចក្តីសង្ខេបលម្អិតនៃការត្រួតពិនិត្យតាមទំហំ",
+    "sizeSummaryFor": "សេចក្តីសង្ខេបសម្រាប់ទំហំ",
+    "measurementDataFor": "ទិន្នន័យវាស់សម្រាប់",
+    "defectDetailsFor": "ព័ត៌មានលម្អិតអំពីកំហុសសម្រាប់",
+    "cuttingIssuesTitle": "បញ្ហាការកាត់",
+    "issuesFound": "បញ្ហាដែលបានរកឃើញ",
+    "additionalImage": "រូបភាពបន្ថែម",
+    "noCuttingIssuesReported": "គ្មានបញ្ហាការកាត់ត្រូវបានរាយការណ៍សម្រាប់ទំហំនេះទេ។",
+    "failedToFetchQcInspectors": "បរាជ័យក្នុងការទាញយកអ្នកត្រួតពិនិត្យ QC ។"
+  },
+
+  "common": {
+    "startDate": "ថ្ងៃ​ចាប់ផ្តើម",
+    "endDate": "ថ្ងៃ​បញ្ចប់",
+    "search": "ស្វែងរក",
+    "all": "ទាំងអស់",
+    "previous": "មុន",
+    "next": "បន្ទាប់",
+    "page": "ទំព័រ",
+    "of": "នៃ",
+    "showing": "បង្ហាញ",
+    "reports": "របាយការណ៍",
+    "pass": "ជាប់",
+    "fail": "ធ្លាក់",
+    "loadingData": "កំពុងផ្ទុកទិន្នន័យ...",
+    "backToList": "ត្រឡប់ទៅបញ្ជីវិញ",
+    "invalidDateRange": "ជួរកាលបរិច្ឆេទមិនត្រឹមត្រូវ",
+    "endDateCannotBeBeforeStartDate": "កាលបរិច្ឆេទបញ្ចប់មិនអាចនៅមុនកាលបរិច្ឆេទចាប់ផ្តើមបានទេ។",
+    "total": "សរុប"
+  },
+
+  "cuttingReport": {
+    "title": "របាយការណ៍ត្រួតពិនិត្យកាត់",
+    "filters": "តម្រង",
+    "startDate": "កាលបរិច្ឆេទចាប់ផ្តើម",
+    "endDate": "កាលបរិច្ឆេទបញ្ចប់",
+    "moNo": "លេខ MO",
+    "lotNo": "លេខ Lot",
+    "selectLotNo": "ជ្រើសរើសលេខ Lot",
+    "buyer": "អ្នកទិញ",
+    "selectBuyer": "ជ្រើសរើសអ្នកទិញ",
+    "color": "ពណ៌",
+    "selectColor": "ជ្រើសរើសពណ៌",
+    "tableNo": "លេខតុ",
+    "selectTableNo": "ជ្រើសរើសលេខតុ",
+    "orderQty": "បរិមាណបញ្ជាទិញ",
+    "totalPcs": "ចំនួនសរុប",
+    "passPcs": "ចំនួនជាប់",
+    "rejectPcs": "ចំនួនបដិសេធ",
+    "measurementDefects": "កំហុសការវាស់វែង",
+    "physicalDefects": "កំហុសរូបរាង",
+    "passRate": "អត្រាជាប់",
+    "result": "លទ្ធផល"
+  },
+
+  "editGar": {
+    "edit_garment": "កែសម្រួលសម្លៀកបំពាក់",
+    "select_garment": "សម្លៀកបំពាក់ដែលបានជ្រើសរើស",
+    "select_defect": "ជ្រើសរើសពិការភាព",
+    "add_defect": "បន្ថែមពិការភាព"
+  },
+
+  "defName": {
+    "defect_code": "លេខកូដខូច",
+    "chinese_name": "ឈ្មោះចិន",
+    "printing_name": "ឈ្មោះបោះពុម្ព"
+  }
+}

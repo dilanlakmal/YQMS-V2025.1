@@ -1,0 +1,711 @@
+{
+  "home": {
+    "welcome": "Welcome to Quality Data Management System",
+    "click_cards": "Click on the cards below to start inspection Reports or Live monitoring",
+    "unauthorized_access": "Unauthorized Access",
+    "loading": "Loading...",
+    "fabric/cutting/scc": "Fabric/Cutting/SCC",
+    "order_data": "Order Data",
+    "quality_inspection": "Quality Inspection",
+    "qa_audit": "QA Audit",
+    "data_analytics": "Data Analytics",
+    "bundle_registration": "Bundle Registration",
+    "fabric": "Fabric",
+    "cutting": "Cutting",
+    "washing": "Washing",
+    "opa": "OPA",
+    "scc": "SCC",
+    "packing": "Packing",
+    "dyeing": "Dyeing",
+    "ironing": "Ironing",
+    "final_inspection": "Final Inspection",
+    "qc_inline_roving": "QC Inline Roving",
+    "qc1_inspection": "QC1 Inspection",
+    "qc2_repair": "QC2 Repair Tracking",
+    "qc2_inspection": "QC2 Inspection",
+    "qc2_repair_tracking": "QC2 Repair Tracking",
+    "printing_QR": "Printing QR",
+    "qa_audit_report": "QA Audit Report",
+    "download_data": "Download Data",
+    "live_dashboard": "Live Dashboard"
+  },
+
+  "nav": {
+    "orders": "Orders",
+    "qc": "QC",
+    "qa": "QA",
+    "report": "Report",
+    "setting": "Setting",
+    "roles": "Roles",
+    "users": "Users"
+  },
+
+  "iro": {
+    "header": "Ironing Process Scanner",
+    "card": "Scan the QR code on the bundle to record ironing details",
+    "qr_scan": "QR Scan",
+    "auto_add": "Auto Add",
+    "ironing_id": "Ironing ID",
+    "task_no": "Task No",
+    "updated_date": "Updated Date",
+    "updated_time": "Updated Time",
+    "pass_qty": "Pass Qty (Iron)"
+  },
+
+  "wash": {
+    "header": "Washing Process Scanner",
+    "card": "Scan the QR code on the bundle to record washing details",
+    "washing_id": "WashingID",
+    "pass_qty": "Pass Qty (Wash)"
+  },
+
+  "opa": {
+    "header": "OPA Process Scanner",
+    "card": "Scan the QR code on the bundle to record OPA details",
+    "opa_id": "OPA ID",
+    "pass_qty": "Pass Qty (OPA)"
+  },
+
+  "pack": {
+    "header": "Packing Process Scanner",
+    "card": "Scan the QR code on the bundle to record packing details",
+    "packing_id": "Packing ID",
+    "pass_qty": "Pass Qty (Pack)"
+  },
+
+  "ana": {
+    "total_defects": "Total Defects",
+    "checked_qty": "Checked Qty",
+    "good_output": "Good Output",
+    "defect_pieces": "Defect Pieces",
+    "return_defect": "Return Defect #",
+    "defect_rate": "Defect Rate",
+    "defect_ratio": "Defect Ratio",
+    "defect_rate_by": "Defect Rate by Defect Name",
+    "all_categories": "All Categories",
+    "defect_rate_over": "Defect Rate Over Time",
+    "all_defects": "All Defects",
+    "time": "Time",
+    "min": "Minutes",
+    "hr": "Hour",
+    "defect_rate_by_ca": "Defect Rate By Category",
+    "category": "Category"
+  },
+
+  "cut": {
+    "ok": "OK"
+  },
+
+  "bundle": {
+    "bundle_registration": "Bundle Registration",
+    "registration": "Registration",
+    "data": "Data",
+    "reprint": "Reprint",
+    "date": "Date",
+    "department": "Department",
+    "select_department": "Select Department",
+    "qc1_endline": "QC1 Endline",
+    "washing": "Washing",
+    "sub_con": "Sub-con",
+    "search_mono": "Search MONo",
+    "order_details": "Order Details",
+    "selected_mono": "Selected MONo",
+    "customer_style": "Customer Style",
+    "buyer": "Buyer",
+    "country": "Country",
+    "order_qty": "Order Qty",
+    "factory": "Factory",
+    "line_no": "Line No",
+    "color": "Color",
+    "select_color": "Select Color",
+    "no_colors_available": "No Colors Available",
+    "size": "Size",
+    "select_size": "Select Size",
+    "no_size_available": "No Size Available",
+    "size_order_qty": "Size Order Qty",
+    "plan_cut_qty": "Plan Cut Qty",
+    "total_garment_count": "Total Garment Count",
+    "count": "Count",
+    "bundle_qty": "Bundle Qty",
+    "total_registered_bundle_qty": "Total Registered Bundle Qty",
+    "sub_con_factory": "Sub-con Factory",
+    "select_sub_con_factory": "Select Sub-con Factory",
+    "generate_qr": "Generate QR",
+    "preview_qr": "Preview QR",
+    "record_id": "Record ID",
+    "package_no": "Package No",
+    "modify": "Modify",
+    "time": "Time",
+    "emp_id": "Employee ID",
+    "eng_name": "EngName",
+    "kh_name": "KhName",
+    "mono": "MONo",
+    "total_order_qty": "Total Order Qty",
+    "color_chi": "Color-Chi",
+    "order_cut_qty": "Order Cut Qty",
+    "total_bundle_qty": "Total Bundle Qty",
+    "edit": "Edit",
+    "action": "Action",
+    "print_qr": "Print QR",
+    "printing": "Printing..."
+  },
+
+  "defIm": {
+    "defect_images": "Defect Images",
+    "defect_name": "Defect Name",
+    "images": "Images"
+  },
+
+  "downDa": {
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "type": "Type",
+    "record_per": "Record Per Page",
+    "style_no": "Style No",
+    "bundle_id": "Bundle ID",
+    "no_data": "No Data Found",
+    "summary": "Summary",
+    "total_record": "Total Records",
+    "total_pages": "Total Pages",
+    "search": "Search",
+    "searching": "Searching...",
+    "download_excel": "Download Excel",
+    "download_pdf": "Download PDF"
+  },
+
+  "dash": {
+    "coming_soon": "Coming Soon",
+    "filters": "Filters",
+    "apply": "Apply",
+    "reset": "Reset",
+    "applied_filters": "Applied Filters",
+    "total_pass": "Total pass",
+    "total_rejects": "Total Rejects",
+    "defects_qty": "Defect Qty",
+    "total_bundle": "Total Bundle",
+    "rank": "Rank",
+    "level": "Level",
+    "hide": "Hide",
+    "show": "Show",
+    "qc2": "QC2"
+  },
+
+  "set": {
+    "head": "You do not have permission to access this page.",
+    "super_admin": "Super Admin Registration",
+    "role": "Role",
+    "job_title": "Job Title",
+    "search_emp_id": "Search Employee ID",
+    "selected_user_details": "Selected User Details",
+    "name": "Name",
+    "english_name": "English Name",
+    "khmer_name": "Khmer Name",
+    "section": "Section",
+    "phone_no": "Phone Number",
+    "working_status": "Working Status",
+    "current_super_admins": "Current Super Admins",
+    "delete": "Delete",
+    "register_super_admin": "Register Super Admin"
+  },
+
+  "insp": {
+    "submit": "Submit",
+    "pass": "Pass",
+    "reject": "Reject"
+  },
+
+  "detail": {
+    "head": "Quality Inspection Details",
+    "fill_below": "Fill Below",
+    "style_info": "Style Info",
+    "customer": "Customer",
+    "order_info": "Order Info",
+    "select_factory": "Select Factory",
+    "continue": "Continue to Inspection",
+    "submit_details": "Submit Details"
+  },
+
+  "return": {
+    "pass_return": "Pass Return",
+    "reject_return": "Reject_return"
+  },
+
+  "sideBar": {
+    "qc2_order": "QC2 Order",
+    "defect": "Defect",
+    "output": "Output"
+  },
+
+  "languages": {
+    "en": "English",
+    "kh": "Khmer",
+    "ch": "Chinese"
+  },
+
+  "userL": {
+    "search_here": "Search Here...",
+    "add_user": "Add User",
+    "full_name": "Full Name",
+    "created_at": "Created At",
+    "action": "Action",
+    "previous": "Previous",
+    "next": "Next"
+  },
+
+  "roleMan": {
+    "role_management": "Role Management",
+    "current_roles": "Current Roles",
+    "add": "Add",
+    "update_role": "Update Role",
+    "select_role": "Select Role",
+    "job_titles": "Job Titles",
+    "search_job_titles": "Search Job Titles"
+  },
+
+  "editU": {
+    "update_user": "Update User",
+    "close_modal": "Close Modal",
+    "email": "Email",
+    "optional": "Optional",
+    "super_admin_user": "This user is a Super Admin",
+    "admin_user": "This user is an Admin",
+    "access": "All Access Granted",
+    "cancel": "Cancel",
+    "update": "Update"
+  },
+
+  "delU": {
+    "confirm": "Are you sure you want to delete this account user",
+    "yes": "Yes, I'm sure",
+    "no": "No, cancel"
+  },
+
+  "createU": {
+    "create_user": "Create an External User",
+    "device": "Device",
+    "default_password": "Default Password"
+  },
+
+  "preview": {
+    "defect_details": "Defect Details",
+    "defect_type": "Defect Type",
+    "quantity": "Quantity"
+  },
+
+  "prevHeader": {
+    "style": "Style"
+  },
+
+  "checkQty": {
+    "value": "Value"
+  },
+
+  "controlBut": {
+    "on": "ON",
+    "return": "Return"
+  },
+
+  "defectPrint": {
+    "search_package": "Search Package No",
+    "repair_group": "Repair Group",
+    "search_repair": "Search Repair Group",
+    "no_defect_card": "No defect cards found",
+    "defect_count": "Defect Count",
+    "mode": "Mode",
+    "status": "Status",
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "both": "Both",
+    "checked": "Checked #",
+    "defectsN": "Defect #",
+    "rejectN": "Reject #",
+    "reworking": "Reworking #",
+    "print_details": "Print Details"
+  },
+
+  "imageUpload": {
+    "upload_image": "Upload Images",
+    "capture": "Capture",
+    "upload": "Upload",
+    "upload_message": "Drop images here or use the buttons above."
+  },
+
+  "previewMode": {
+    "qc_inspection_report": "QC Inspection Report",
+    "close": "Close",
+    "no_data_card": "No data cards found",
+    "emp_name": "Employee Name",
+    "inspection_time": "Inspection Time",
+    "inspection_date": "Inspection Date"
+  },
+
+  "summary": {
+    "defect_garment": "Defect Garments",
+    "return_defect": "Return Def. Qty"
+  },
+
+  "editBundle": {
+    "edit_record": "Edit Record",
+    "save": "Save"
+  },
+
+  "numPad": {
+    "enter_number": "Enter Number",
+    "done": "Done",
+    "enter_details": "Enter Details"
+  },
+
+  "qrCodePrev": {
+    "repair": "Repair",
+    "defects": "Defects",
+    "print": "Print"
+  },
+
+  "qrCodeScan": {
+    "loading_bundle": "Loading bundle data...",
+    "separator_id": "Separator ID",
+    "registered_date": "Registered Date",
+    "registered_time": "Registered Time",
+    "sub_con_factory_name": "Sub-con Factory Name",
+    "adding": "Adding"
+  },
+
+  "scan": {
+    "start": "Start Scanner",
+    "using": "Using",
+    "stop": "Stop Scanner"
+  },
+
+  "subCon": {
+    "yes": "Yes",
+    "no": "No",
+    "select_sub_con_factory": "Select Sub-con Factory"
+  },
+
+  "lineIn": {
+    "enter_line_no": "Enter Line Number"
+  },
+
+  "styleCode": {
+    "style_code": "Style Code",
+    "select_style_code": "Select Style Code"
+  },
+
+  "styleDig": {
+    "style_digit": "Style Digit",
+    "enter_style_digit": "Enter Style Digit"
+  },
+  "rePrint": {
+    "reprint_records": "Reprint Records",
+    "clear": "Clear",
+    "search_mono": "Search MONo...",
+    "search_package_no": "Search Package No...",
+    "search_emp_id": "Search Emp ID..."
+  },
+  "qc2In": {
+    "language": "Language",
+    "all_languages": "All Languages",
+    "sort": "Sort",
+    "printer": "Connect Printer",
+    "printing_method": "Printing Method",
+    "repair": "By Repair",
+    "garment": "By garments",
+    "bundle": "By Bundle",
+    "inspection": "Inspection",
+    "edit_inspection": "Edit Inspection",
+    "defect_card": "Defect Card",
+    "fabric": "Fabric",
+    "workmanship": "Workmanship",
+    "cleanliness": "Cleanliness",
+    "embellishment": "Embellishment",
+    "measurement": "Measurement",
+    "washing": "Washing",
+    "finishing": "Finishing",
+    "miscellaneous": "miscellaneous",
+    "loading_data": "Loading Data...",
+    "reject_garment": "Reject Garment",
+    "defect_qty": "Defect Qty",
+    "pass_bundle": "Pass Bundle",
+    "all": "All",
+    "common": "Common",
+    "type1": "Type 1",
+    "type2": "Type 2"
+  },
+
+  "qcRoving": {
+    "qc_inline_roving_inspection": "QC Inline Roving Inspection",
+    "qcInlineRoving": "QC Inline Roving",
+    "data": "Data",
+    "date": "Date",
+    "lineNo": "Line No",
+    "select_line_no": "Select Line No",
+    "search_mono": "Search MO No...",
+    "moNo": "MO No",
+    "operationNo": "Operation No",
+    "select_operation_no": "Select Operation No",
+    "scanQR": "Scan QR",
+    "inspectionType": "Inspection Type",
+    "language": "Language",
+    "normal": "Normal",
+    "critical": "Critical",
+    "quantity": "Quantity",
+    "spi": "SPI",
+    "select_spi_status": "Select SPI Status",
+    "measurement": "Measurement",
+    "select_measurement_status": "Select Measurement Status",
+    "quality": "Quality",
+    "part": "Part",
+    "status": "Status",
+    "pass": "Pass",
+    "reject": "Reject",
+    "no_defect_record": "No defect recorded for this Part.",
+    "select_defect": "Select Defect",
+    "add": "Add",
+    "defect_metrics": "Defect Metrics",
+    "defect_rate": "Defect Rate",
+    "defect_ratio": "Defect Ratio",
+    "previous": "Previous",
+    "next": "Next",
+    "preview": "Preview",
+    "finish_inspection": "Finish Inspection"
+  },
+
+  "cutting": {
+    "cutting_inspection": "Cutting Inspection",
+    "cuttingForm": "Cutting Form",
+    "data": "Data",
+    "dataTabPlaceholder": "Data tab content will be implemented here.",
+    "dbTabPlaceholder": "Database tab content will be implemented here.",
+    "date": "Date",
+    "moNo": "MO No",
+    "search_mono": "Search MO No",
+    "lotNo": "Lot No",
+    "search_lot_no": "Search...",
+    "enter_lot_no": "Type...",
+    "color": "Color",
+    "select_color": "Select Color",
+    "customerStyle": "Customer Style",
+    "buyer": "Buyer",
+    "orderQty": "Order Quantity",
+    "tableNo": "Table No",
+    "search_table_no": "Search Table No",
+    "cuttingTable": "Cutting Table",
+    "l": "L",
+    "layerQty": "Layer Qty :",
+    "totalPcs": "Total Pcs :",
+    "actualLayerQty": "Actual Layer Qty :",
+    "no": "No",
+    "select": "Select",
+    "marker": "Marker",
+    "markerRatio": "Marker Ratio",
+    "totalBundleQty": "Total Bundle Qty",
+    "bundleQtyCheck": "Bundle Qty Check",
+    "totalInspectionQty": "Total Inspection Qty",
+    "cuttingBy": "Cutting by",
+    "auto": "Auto",
+    "manual": "Manual",
+    "samplingStandardAQL": "Sampling standard: AQL 1.0",
+    "panel": "Garment Type",
+    "selectGarmentType": "Select a Garment Type",
+    "select_panel": "Select Panel",
+    "size": "Size",
+    "select_size": "Select Size",
+    "serialLetter": "Serial Letter",
+    "select_serial_letter": "Select Serial Letter",
+    "tolerance": "Tolerance",
+    "summaryDetails": "Summary Details",
+    "parts": "Parts",
+    "pass": "Pass",
+    "reject": "Reject",
+    "rejectMeasurements": "Reject Measurements",
+    "rejectDefects": "Reject Defects",
+    "passRate": "Pass Rate",
+    "measurementDetails": "Measurement Details",
+    "top": "Top",
+    "middle": "Middle",
+    "bottom": "Bottom",
+    "garment_top": "Top",
+    "garment_bottom": "Bottom",
+    "zipper": "Zipper Jacket",
+    "toplayer": "Top Layer",
+    "dress": "Dress",
+    "col": "Col",
+    "panelName": "Part Name",
+    "side": "Side",
+    "direction": "Direction",
+    "lw": "L/W",
+    "additionalInformation": "Additional Information",
+    "samplingStandard": "Sampling standard: AQL 1.0",
+    "submit": "Submit",
+    "error": "Error",
+    "failedToFetchMONumbers": "Failed to fetch MO numbers.",
+    "moNotFound": "MO Number \"{moNo}\" not found.",
+    "failedToFetchMOData": "Failed to fetch MO data.",
+    "failedToFetchSizes": "Failed to fetch sizes.",
+    "missingInformation": "Missing Information",
+    "fillRequiredFields": "Please fill all required fields first.",
+    "success": "Success",
+    "dataSaved": "Cutting data saved successfully!",
+    "failedToSaveData": "Failed to save Cutting data.",
+    "loading": "Loading...",
+    "defectBoxTitle": "Defect Details",
+    "noDefectsSelected": "No defects selected",
+    "addDefect": "Add Defect",
+    "defects": "Defect(s)",
+    "noDefects": "No defects",
+    "close": "Close",
+    "defectDetailsAcrossPanel": "Fabric Defect Details Across panel",
+    "panelIndex": "Part No",
+    "measurementPoint": "Measurement Points",
+    "measurementPointKhmer": "Measurement Points (Khmer)",
+    "modifymeasurementPoint": "Modify Measurement Points",
+    "cuttingDefectIssue": "Cutting Defect Issues",
+    "panelNameKhmer": "Part Name (Khmer)",
+    "spreadTable": "Spread Table",
+    "spreadTableNo": "Spread Table No",
+    "mackerNo": "Marker No",
+    "mackerLength": "Marker Length",
+    "fabricType": "Fabric Type",
+    "material": "Material",
+    "rollQty": "Roll Quantity",
+    "spreadYds": "Spread Yards",
+    "unit": "Unit",
+    "grossKgs": "Gross Kgs",
+    "netKgs": "Net Kgs",
+    "totalTTLRoll": "Total TTL Roll",
+    "planLayers": "Plan Layers",
+    "actualLayers": "Actual Layers",
+    "buyerStyle": "Buyer Style",
+    "orderDetails": "Order Details",
+    "fabricDetails": "Fabric Details",
+    "cuttingTableDetails": "Cutting Table Details",
+    "editModeOff": "Edit Mode Off",
+    "editModeOn": "Edit Mode On",
+    "modify": "Modify",
+    "adding": "Adding",
+    "edit": "Edit",
+    "activate": "Activate",
+    "addAdditionalPoints": "Add Additional Measurement Points",
+    "addPoint": "Add",
+    "totalCuttingTables": "Total Cutting Tables",
+    "bundleNo": "Bundle No",
+    "bundleQty": "Bundle Qty",
+    "use": "Use",
+    "pcs": "No of Pcs",
+    "select_bundle_qty": "Select Bundle Qty",
+    "panelType": "Panel Type",
+    "bundleDetails": "Bundle Details",
+    "issues": "Cutting Defects Across Size",
+    "cuttingIssue": "Cutting Defects",
+    "remark": "Remarks",
+    "evidence": "Evidence",
+    "addIssue": "Add Cutting Defect",
+    "additionalComments": "Additional Comments",
+    "additionalImages": "Additional Images",
+    "noPartsSelected": "No parts selected",
+    "selectIssue": "Select Cutting Defect",
+    "measurementPointChinese": "Measurement Points (Chinese)",
+    "panelNameChinese": "Part Name (Chinese)",
+    "invalidData": "Invalid data",
+    "missingInspectionData": "Missing inspection data",
+    "inspectionProgress": "Inspection progress bar",
+    "inspectionNotStarted": "Inspection not started, waiting for data...",
+    "completed": "Inspection Completed",
+    "totalInspected": "Total Inspected",
+    "failedToFetchTableNos": "Failed to fetch Table Nos.",
+    "failedToFetchCutPanelData": "Failed to fetch Cut Panel data.",
+    "failedToFetchInspectionProgress": "Failed to fetch inspection progress.",
+    "failedToFetchPanels": "Failed to fetch panels.",
+    "failedToFetchPanelIndexNames": "Failed to fetch panel index names.",
+    "failedToFetchMeasurementPoints": "Failed to fetch measurement points.",
+    "failedToFetchDefects": "Failed to fetch defects.",
+    "invalidBundleQty": "Bundle Qty exceeds remaining check quantity for this size.",
+    "noPartsSelectedForBundle": "No parts selected for this bundle.",
+    "loadingMeasurementData": "Loading measurement data...",
+    "pcsName": "Pcs Name",
+    "defectName": "Defect Name",
+    "defectQty": "Defect Qty",
+    "noDefectsRecorded": "No defects recorded for this part.",
+    "cuttingReportTitle": "Cutting Inspection Report",
+    "qcId": "QC ID",
+    "inspectedSizesCount": "Inspected Sizes",
+    "results": "Results",
+    "report": "Report",
+    "viewReport": "View Report",
+    "failedToFetchReports": "Failed to fetch reports.",
+    "noReportsFound": "No reports found matching your criteria.",
+    "cuttingInspectionReport": "Cutting Inspection Report",
+    "closeReport": "Close Report",
+    "failedToFetchReportDetails": "Failed to fetch report details.",
+    "reportNotFound": "Report not found.",
+    "inspectionSummary": "Inspection Summary",
+    "total": "Total",
+    "inspectionDetailSummaryBySize": "Inspection Detail Summary By Size",
+    "sizeSummaryFor": "Size Summary for",
+    "measurementDataFor": "Measurement Data for",
+    "defectDetailsFor": "Defect Details for",
+    "cuttingIssuesTitle": "Cutting Issues",
+    "issuesFound": "Issues Found",
+    "additionalImage": "Additional Image",
+    "noCuttingIssuesReported": "No cutting issues reported for this size.",
+    "failedToFetchQcInspectors": "Failed to fetch QC inspectors."
+  },
+
+  "common": {
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "search": "Search",
+    "all": "All",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of",
+    "showing": "Showing",
+    "reports": "reports",
+    "pass": "PASS",
+    "fail": "FAIL",
+    "loadingData": "Loading data...",
+    "backToList": "Back to List",
+    "invalidDateRange": "Invalid Date Range",
+    "endDateCannotBeBeforeStartDate": "End date cannot be before start date.",
+    "total": "Total"
+  },
+
+  "cuttingReport": {
+    "title": "Cutting Inspection Report",
+    "filters": "Filters",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "moNo": "MO No",
+    "lotNo": "Lot No",
+    "selectLotNo": "Select Lot No",
+    "buyer": "Buyer",
+    "selectBuyer": "Select Buyer",
+    "color": "Color",
+    "selectColor": "Select Color",
+    "tableNo": "Table No",
+    "selectTableNo": "Select Table No",
+    "orderQty": "Order Quantity",
+    "totalPcs": "Total Pieces",
+    "passPcs": "Pass Pieces",
+    "rejectPcs": "Reject Pieces",
+    "measurementDefects": "Measurement Defects",
+    "physicalDefects": "Physical Defects",
+    "passRate": "Pass Rate",
+    "result": "Result"
+  },
+
+  "editGar": {
+    "edit_garment": "Edit Garment",
+    "select_garment": "Selected Garment",
+    "select_defect": "Select a defect",
+    "add_defect": "Add Defect",
+    "garment_no": "Garment No"
+  },
+
+  "defName": {
+    "defect_code": "Defect Code",
+    "chinese_name": "Chinese Name",
+    "printing_name": "Printing Name"
+  }
+}

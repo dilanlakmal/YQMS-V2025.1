@@ -1,0 +1,709 @@
+{
+  "home": {
+    "welcome": "欢迎使用质量数据管理系统",
+    "click_cards": "点击下面的卡片开始检查报告或实时监控",
+    "unauthorized_access": "未经授权的访问",
+    "loading": "加载中...",
+    "fabric/cutting/scc": "织物/切割/SCC",
+    "order_data": "订单数据",
+    "quality_inspection": "质量检验",
+    "qa_audit": "质量保证审计",
+    "data_analytics": "数据分析",
+    "bundle_registration": "捆绑注册",
+    "fabric": "织物",
+    "cutting": "切割",
+    "washing": "洗涤",
+    "opa": "OPA",
+    "scc": "SCC",
+    "packing": "包装",
+    "dyeing": "染色",
+    "ironing": "熨烫",
+    "final_inspection": "最终检验",
+    "qc_inline_roving": "Qc 在线粗纱",
+    "qc1_inspection": "QC1检验",
+    "qc2_repair": "QC2 Repair Tracking",
+    "qc2_inspection": "QC2检验",
+    "qc2_repair_tracking": "QC2 Repair Tracking",
+    "printing_QR": "Printing QR",
+    "qa_audit_report": "质量保证审计报告",
+    "download_data": "下载数据",
+    "live_dashboard": "实时仪表板"
+  },
+
+  "nav": {
+    "orders": "订单",
+    "qc": "QC",
+    "qa": "QA",
+    "report": "报告",
+    "setting": "设置",
+    "roles": "角色",
+    "users": "用户"
+  },
+
+  "iro": {
+    "header": "熨烫过程扫描仪",
+    "card": "扫描包裹上的二维码记录熨烫详情",
+    "qr_scan": "二维码扫描",
+    "auto_add": "自动添加",
+    "ironing_id": "熨烫ID",
+    "task_no": "任务号",
+    "updated_date": "更新日期",
+    "updated_time": "更新时间",
+    "pass_qty": "通行数量（铁)"
+  },
+
+  "wash": {
+    "header": "洗涤过程扫描仪",
+    "card": "扫描包裹上的二维码记录洗涤详情",
+    "washing_id": "洗涤 ID",
+    "pass_qty": "通过数量（清洗)"
+  },
+
+  "opa": {
+    "header": "OPA 进程扫描仪",
+    "card": "扫描包裹上的二维码记录 OPA 详情",
+    "opa_id": "OPA ID",
+    "pass_qty": "通行证数量（OPA)"
+  },
+
+  "pack": {
+    "header": "包装过程扫描仪",
+    "card": "扫描包裹上的二维码记录包装详情",
+    "packing_id": "包装编号",
+    "pass_qty": "通行证数量（包)"
+  },
+
+  "ana": {
+    "total_defects": "总缺陷",
+    "checked_qty": "已检查数量",
+    "good_output": "良好输出",
+    "defect_pieces": "缺陷件",
+    "return_defect": "退回缺陷编号",
+    "defect_rate": "缺陷率",
+    "defect_ratio": "缺陷率",
+    "defect_rate_by": "按缺陷名称划分的缺陷率",
+    "all_categories": "所有类别",
+    "defect_rate_over": "随时间推移的缺陷率",
+    "all_defects": "全部缺陷",
+    "time": "时间",
+    "min": "分钟",
+    "hr": "小时",
+    "defect_rate_by_ca": "按类别划分的缺陷率",
+    "category": "类别"
+  },
+
+  "cut": {
+    "ok": "好的"
+  },
+
+  "bundle": {
+    "bundle_registration": "捆绑注册",
+    "registration": "登记",
+    "data": "数据",
+    "reprint": "重印",
+    "date": "日期",
+    "department": "部门",
+    "select_department": "选择部门",
+    "qc1_endline": "QC1 终点线",
+    "washing": "洗涤",
+    "sub_con": "分包合同",
+    "search_mono": "搜索 MONo",
+    "order_details": "订单详情",
+    "selected_mono": "选定的 MONo",
+    "customer_style": "顾客风格",
+    "buyer": "买方",
+    "country": "国家",
+    "order_qty": "订单数量",
+    "factory": "工厂",
+    "line_no": "线路号",
+    "color": "颜色",
+    "select_color": "选择颜色",
+    "no_colors_available": "无可用颜色",
+    "size": "尺寸",
+    "select_size": "选择尺寸",
+    "no_size_available": "无可用尺寸",
+    "size_order_qty": "尺寸订单数量",
+    "plan_cut_qty": "计划切割数量",
+    "total_garment_count": "服装总数",
+    "count": "数数",
+    "bundle_qty": "捆包数量",
+    "total_registered_bundle_qty": "总注册捆绑数量",
+    "sub_con_factory": "分包工厂",
+    "select_sub_con_factory": "选择分包工厂",
+    "generate_qr": "生成二维码",
+    "preview_qr": "预览二维码",
+    "record_id": "记录 ID",
+    "package_no": "包裹编号",
+    "modify": "调整",
+    "time": "时间",
+    "emp_id": "员工 ID",
+    "eng_name": "英文名",
+    "kh_name": "高棉名字",
+    "mono": "MONo",
+    "total_order_qty": "订单总数",
+    "color_chi": "颜色-中文名",
+    "order_cut_qty": "订单切割数量",
+    "total_bundle_qty": "总捆绑数量",
+    "edit": "编辑",
+    "action": "行动",
+    "print_qr": "打印二维码",
+    "printing": "印刷..."
+  },
+
+  "defIm": {
+    "defect_images": "缺陷图像",
+    "defect_name": "缺陷名称",
+    "images": "图像"
+  },
+
+  "downDa": {
+    "start_date": "开始日期",
+    "end_date": "结束日期",
+    "type": "类型",
+    "record_per": "每页记录数",
+    "style_no": "款式号",
+    "bundle_id": "捆绑包 ID",
+    "no_data": "未找到数据",
+    "summary": "概括",
+    "total_record": "总记录",
+    "total_pages": "总页数",
+    "search": "搜索",
+    "searching": "正在搜索...",
+    "download_excel": "下载 Excel",
+    "download_pdf": "下载 PDF"
+  },
+
+  "dash": {
+    "coming_soon": "即将推出",
+    "filters": "过滤器",
+    "apply": "申请",
+    "reset": "重置",
+    "applied_filters": "已应用过滤器",
+    "total_pass": "全胜",
+    "total_rejects": "全部被拒绝",
+    "defects_qty": "缺陷数量",
+    "total_bundle": "总包",
+    "rank": "秩",
+    "level": "等级",
+    "hide": "隐藏",
+    "show": "展示",
+    "qc2": "QC2"
+  },
+
+  "set": {
+    "head": "您无权访问此页面。",
+    "super_admin": "超级管理员注册",
+    "role": "角色",
+    "job_title": "职称",
+    "search_emp_id": "搜索员工 ID",
+    "selected_user_details": "选定用户的详细信息",
+    "name": "姓名",
+    "english_name": "英文名",
+    "khmer_name": "高棉名字",
+    "section": "部分",
+    "phone_no": "部分",
+    "working_status": "工作状态",
+    "current_super_admins": "现任超级管理员",
+    "delete": "删除",
+    "register_super_admin": "注册超级管理员"
+  },
+
+  "insp": {
+    "submit": "提交",
+    "pass": "经过",
+    "reject": "拒绝"
+  },
+
+  "detail": {
+    "head": "质检详情",
+    "fill_below": "填写下方内容",
+    "style_info": "风格信息",
+    "customer": "顾客",
+    "order_info": "订单信息",
+    "select_factory": "选择工厂",
+    "continue": "继续检查",
+    "submit_details": "提交详细信息"
+  },
+
+  "return": {
+    "pass_return": "通行证返回",
+    "reject_return": "拒绝退货"
+  },
+
+  "sideBar": {
+    "qc2_order": "QC2订单",
+    "defect": "缺点",
+    "output": "输出"
+  },
+
+  "languages": {
+    "en": "英语",
+    "kh": "高棉语",
+    "ch": "中国人"
+  },
+  "userL": {
+    "search_here": "在这里搜索...",
+    "add_user": "添加用户",
+    "full_name": "姓名",
+    "created_at": "创建于",
+    "action": "行动",
+    "previous": "以前的",
+    "next": "下一个"
+  },
+
+  "roleMan": {
+    "role_management": "角色管理",
+    "current_roles": "当前角色",
+    "add": "添加",
+    "update_role": "更新角色",
+    "select_role": "选择角色",
+    "job_titles": "职位名称",
+    "search_job_titles": "搜索职位名称"
+  },
+
+  "editU": {
+    "update_user": "更新用户",
+    "close_modal": "关闭模式",
+    "email": "电子邮件",
+    "optional": "选修的",
+    "super_admin_user": "此用户是超级管理员",
+    "admin_user": "此用户是管理员",
+    "access": "已授予全部访问权限",
+    "cancel": "取消",
+    "update": "更新"
+  },
+
+  "delU": {
+    "confirm": "您确定要删除此帐户用户吗",
+    "yes": "是的，我确定",
+    "no": "否，取消"
+  },
+
+  "createU": {
+    "create_user": "创建外部用户",
+    "device": "设备",
+    "default_password": "默认密码"
+  },
+
+  "preview": {
+    "defect_details": "缺陷详情",
+    "defect_type": "缺陷类型",
+    "quantity": "数量"
+  },
+
+  "prevHeader": {
+    "style": "风格"
+  },
+
+  "checkQty": {
+    "value": "价值"
+  },
+
+  "controlBut": {
+    "on": "在",
+    "return": "返回"
+  },
+
+  "defectPrint": {
+    "search_package": "搜索包裹编号",
+    "repair_group": "搜索维修组",
+    "search_repair": "搜索维修组",
+    "no_defect_card": "未发现缺陷卡",
+    "defect_count": "缺陷数量",
+    "mode": "模式",
+    "status": "地位",
+    "in_progress": "进行中",
+    "completed": "完全的",
+    "both": "两个都",
+    "checked": "已检查 #",
+    "defectsN": "缺点 #",
+    "rejectN": "拒绝 #",
+    "reworking": "重做 #",
+    "print_details": "打印详细信息"
+  },
+
+  "imageUpload": {
+    "upload_image": "上传图片",
+    "capture": "捕获",
+    "upload": "上传",
+    "upload_message": "将图像拖放到此处或使用上面的按钮。"
+  },
+
+  "previewMode": {
+    "qc_inspection_report": "QC检验报告",
+    "close": "关闭",
+    "no_data_card": "未找到数据卡",
+    "emp_name": "员工姓名",
+    "inspection_time": "检查时间",
+    "inspection_date": "检查日期"
+  },
+
+  "summary": {
+    "defect_garment": "瑕疵服装",
+    "return_defect": "退回缺陷数量"
+  },
+
+  "editBundle": {
+    "edit_record": "编辑记录",
+    "save": "节省"
+  },
+
+  "numPad": {
+    "enter_number": "输入号码",
+    "done": "完毕",
+    "enter_details": "输入详细信息"
+  },
+
+  "qrCodePrev": {
+    "repair": "维修",
+    "defects": "缺陷",
+    "print": "打印"
+  },
+
+  "qrCodeScan": {
+    "loading_bundle": "正在加载捆绑数据...",
+    "separator_id": "分隔符 ID",
+    "registered_date": "注册日期",
+    "registered_time": "注册时间",
+    "sub_con_factory_name": "分包工厂名称",
+    "adding": "添加"
+  },
+
+  "scan": {
+    "start": "启动扫描仪",
+    "using": "使用",
+    "stop": "停止扫描仪"
+  },
+
+  "subCon": {
+    "yes": "是的",
+    "no": "不",
+    "select_sub_con_factory": "选择分包工厂"
+  },
+
+  "lineIn": {
+    "enter_line_no": "输入行号"
+  },
+
+  "styleCode": {
+    "style_code": "风格代码",
+    "select_style_code": "选择样式代码"
+  },
+
+  "styleDig": {
+    "style_digit": "风格数字",
+    "enter_style_digit": "输入款式数字"
+  },
+  "rePrint": {
+    "reprint_records": "重印记录",
+    "clear": "清除",
+    "search_mono": "搜索 MONo...",
+    "search_package_no": "搜索包裹编号...",
+    "search_emp_id": "搜索员工 ID..."
+  },
+  "qc2In": {
+    "language": "语言",
+    "all_languages": "所有语言",
+    "sort": "种类",
+    "printer": "连接打印机",
+    "printing_method": "印刷方法",
+    "repair": "通过修复",
+    "garment": "通过服装",
+    "bundle": "按捆绑",
+    "inspection": "检查",
+    "edit_inspection": "编辑检查",
+    "defect_card": "缺陷卡",
+    "fabric": "织物",
+    "workmanship": "做工",
+    "cleanliness": "清洁",
+    "embellishment": "点缀",
+    "measurement": "测量",
+    "washing": "洗涤",
+    "finishing": "精加工",
+    "miscellaneous": "各种各样的",
+    "loading_data": "正在加载数据...",
+    "reject_garment": "拒绝服装",
+    "defect_qty": "缺陷数量",
+    "pass_bundle": "通行证套餐",
+    "all": "全部",
+    "common": "常见的",
+    "type1": "类型 1",
+    "type2": "类型 2"
+  },
+
+  "qcRoving": {
+    "qc_inline_roving_inspection": "QC内联巡检",
+    "qcInlineRoving": "QC内联巡检",
+    "data": "数据",
+    "date": "日期",
+    "lineNo": "生产线编号",
+    "select_line_no": "选择生产线编号",
+    "search_mono": "搜索MO编号...",
+    "moNo": "MO编号",
+    "operationNo": "操作编号",
+    "select_operation_no": "选择操作编号",
+    "scanQR": "扫描二维码",
+    "inspectionType": "检查类型",
+    "language": "语言",
+    "normal": "普通",
+    "critical": "关键",
+    "quantity": "数量",
+    "spi": "SPI",
+    "select_spi_status": "选择SPI状态",
+    "measurement": "测量",
+    "select_measurement_status": "选择测量状态",
+    "quality": "质量",
+    "part": "部件",
+    "status": "状态",
+    "pass": "通过",
+    "reject": "拒绝",
+    "no_defect_record": "此部件没有记录缺陷。",
+    "select_defect": "选择缺陷",
+    "add": "添加",
+    "defect_metrics": "缺陷指标",
+    "defect_rate": "缺陷率",
+    "defect_ratio": "缺陷比例",
+    "previous": "上一个",
+    "next": "下一个",
+    "preview": "预览",
+    "finish_inspection": "完成检查"
+  },
+
+  "cutting": {
+    "cutting_inspection": "裁剪检查",
+    "cuttingForm": "裁剪表格",
+    "data": "数据",
+    "dataTabPlaceholder": "数据选项卡内容将在这里实现。",
+    "dbTabPlaceholder": "数据库选项卡内容将在这里实现。",
+    "date": "日期",
+    "moNo": "制造订单号",
+    "search_mono": "搜索制造订单号",
+    "lotNo": "批次号",
+    "search_lot_no": "搜索批次号...",
+    "enter_lot_no": "输入批次号...",
+    "color": "颜色",
+    "select_color": "选择颜色",
+    "customerStyle": "客户款式",
+    "buyer": "买家",
+    "orderQty": "订单数量",
+    "tableNo": "桌子编号",
+    "search_table_no": "选择桌子编号",
+    "cuttingTable": "裁剪台",
+    "l": "L",
+    "layerQty": "层数量 :",
+    "totalPcs": "总件数 :",
+    "actualLayerQty": "实际层数量 :",
+    "no": "编号",
+    "select": "选择",
+    "marker": "标记",
+    "markerRatio": "标记比例",
+    "totalBundleQty": "总捆数量",
+    "bundleQtyCheck": "捆数量检查",
+    "totalInspectionQty": "总检查数量",
+    "cuttingBy": "裁剪方式",
+    "auto": "自动",
+    "manual": "手动",
+    "samplingStandardAQL": "抽样标准: AQL 1.0",
+    "panel": "面板",
+    "selectGarmentType": "选择服装类型",
+    "select_panel": "选择面板",
+    "size": "尺寸",
+    "select_size": "选择尺寸",
+    "serialLetter": "序列字母",
+    "select_serial_letter": "选择序列字母",
+    "tolerance": "公差",
+    "summaryDetails": "概要详情",
+    "parts": "部件",
+    "pass": "通过",
+    "reject": "拒绝",
+    "rejectMeasurements": "测量拒绝",
+    "rejectDefects": "缺陷拒绝",
+    "passRate": "通过率",
+    "measurementDetails": "测量详情",
+    "top": "顶部",
+    "middle": "中间",
+    "bottom": "底部",
+    "garment_top": "顶部",
+    "garment_bottom": "底部",
+    "zipper": "拉链",
+    "toplayer": "顶部层",
+    "dress": "裙子",
+    "col": "列",
+    "panelName": "面板名称",
+    "side": "侧面",
+    "direction": "方向",
+    "lw": "长/宽",
+    "additionalInformation": "附加信息",
+    "samplingStandard": "抽样标准：AQL 1.0",
+    "submit": "提交",
+    "error": "错误",
+    "failedToFetchMONumbers": "无法获取制造订单号。",
+    "moNotFound": "制造订单号 \"{moNo}\" 未找到。",
+    "failedToFetchMOData": "无法获取制造订单数据。",
+    "failedToFetchSizes": "无法获取尺寸。",
+    "missingInformation": "信息缺失",
+    "fillRequiredFields": "请先填写所有必填字段。",
+    "success": "成功",
+    "dataSaved": "裁剪数据保存成功！",
+    "failedToSaveData": "无法保存裁剪数据。",
+    "loading": "加载中...",
+    "defectBoxTitle": "缺陷",
+    "noDefectsSelected": "未选择缺陷",
+    "addDefect": "添加缺陷",
+    "defects": "缺陷",
+    "noDefects": "无缺陷",
+    "close": "关闭",
+    "defectDetailsAcrossPanel": "面板缺陷详情",
+    "panelIndex": "面板索引",
+    "measurementPoint": "测量点",
+    "measurementPointKhmer": "测量点 (khmer)",
+    "modifymeasurementPoint": "修改测量点",
+    "cuttingDefectIssue": "缺陷",
+    "panelNameKhmer": "面板名称 (Chi)",
+    "spreadTable": "铺布台",
+    "spreadTableNo": "铺布台编号",
+    "mackerNo": "标记编号",
+    "mackerLength": "标记长度",
+    "fabricType": "面料类型",
+    "material": "材料",
+    "rollQty": "卷数",
+    "spreadYds": "铺布码数",
+    "unit": "单位",
+    "grossKgs": "毛重（公斤）",
+    "netKgs": "净重（公斤）",
+    "totalTTLRoll": "总TTL卷数",
+    "planLayers": "计划层数",
+    "actualLayers": "实际层数",
+    "buyerStyle": "买家款式",
+    "orderDetails": "订单详情",
+    "fabricDetails": "面料详情",
+    "cuttingTableDetails": "裁剪台详情",
+    "editModeOff": "编辑模式关闭",
+    "editModeOn": "编辑模式打开",
+    "modify": "修改",
+    "adding": "添加",
+    "edit": "编辑",
+    "activate": "激活",
+    "addAdditionalPoints": "添加附加点",
+    "addPoint": "添加点",
+    "totalCuttingTables": "总裁剪台",
+    "bundleNo": "捆绑包编号",
+    "bundleQty": "捆绑包数量",
+    "use": "使用",
+    "pcs": "件",
+    "select_bundle_qty": "选择捆绑包数量",
+    "panelType": "面板类型",
+    "bundleDetails": "捆绑包详情",
+    "issues": "问题",
+    "cuttingIssue": "裁剪问题",
+    "remark": "备注",
+    "evidence": "证据",
+    "addIssue": "添加问题",
+    "additionalComments": "附加评论",
+    "additionalImages": "附加图像",
+    "noPartsSelected": "未选择部件",
+    "selectIssue": "选择问题",
+    "measurementPointChinese": "测量点 (Chinese)",
+    "panelNameChinese": "面板名称 (Chinese)",
+    "invalidData": "无效数据",
+    "missingInspectionData": "缺少检查数据",
+    "inspectionProgress": "Inspection progress bar",
+    "inspectionNotStarted": "Inspection not started, waiting for data...",
+    "completed": "Inspection Completed",
+    "totalInspected": "Total Inspected",
+    "failedToFetchTableNos": "获取台号失败。",
+    "failedToFetchCutPanelData": "获取裁片数据失败。",
+    "failedToFetchInspectionProgress": "获取检查进度失败。",
+    "failedToFetchPanels": "获取裁片类型失败。",
+    "failedToFetchPanelIndexNames": "获取裁片索引名称失败。",
+    "failedToFetchMeasurementPoints": "获取测量点失败。",
+    "failedToFetchDefects": "获取瑕疵信息失败。",
+    "invalidBundleQty": "捆包数量超过了此尺码剩余的检查数量。",
+    "noPartsSelectedForBundle": "此捆包未选择任何部件。",
+    "loadingMeasurementData": "正在加载测量数据...",
+    "pcsName": "件名",
+    "defectName": "瑕疵名称",
+    "defectQty": "瑕疵数量",
+    "noDefectsRecorded": "此部件未记录瑕疵。",
+    "cuttingReportTitle": "裁剪检查报告",
+    "qcId": "QC工号",
+    "inspectedSizesCount": "已检尺码数",
+    "results": "结果",
+    "report": "报告",
+    "viewReport": "查看报告",
+    "failedToFetchReports": "获取报告失败。",
+    "noReportsFound": "未找到符合条件的报告。",
+    "cuttingInspectionReport": "裁剪检查报告",
+    "closeReport": "关闭报告",
+    "failedToFetchReportDetails": "获取报告详情失败。",
+    "reportNotFound": "未找到报告。",
+    "inspectionSummary": "检查概要",
+    "total": "总计",
+    "inspectionDetailSummaryBySize": "按尺码检查详细概要",
+    "sizeSummaryFor": "尺码概要",
+    "measurementDataFor": "测量数据",
+    "defectDetailsFor": "瑕疵详情",
+    "cuttingIssuesTitle": "裁剪问题",
+    "issuesFound": "发现问题",
+    "additionalImage": "附加图片",
+    "noCuttingIssuesReported": "此尺码未报告裁剪问题。",
+    "failedToFetchQcInspectors": "获取QC检验员失败。"
+  },
+
+  "common": {
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "search": "搜索",
+    "all": "全部",
+    "previous": "上一页",
+    "next": "下一页",
+    "page": "页",
+    "of": "共",
+    "showing": "显示",
+    "reports": "报告",
+    "pass": "通过",
+    "fail": "失败",
+    "loadingData": "正在加载数据...",
+    "backToList": "返回列表",
+    "invalidDateRange": "无效日期范围",
+    "endDateCannotBeBeforeStartDate": "结束日期不能早于开始日期。",
+    "total": "总计"
+  },
+
+  "cuttingReport": {
+    "title": "裁剪检查报告",
+    "filters": "筛选",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "moNo": "制造订单号",
+    "lotNo": "批次号",
+    "selectLotNo": "选择批次号",
+    "buyer": "买家",
+    "selectBuyer": "选择买家",
+    "color": "颜色",
+    "selectColor": "选择颜色",
+    "tableNo": "桌子编号",
+    "selectTableNo": "选择桌子编号",
+    "orderQty": "订单数量",
+    "totalPcs": "总件数",
+    "passPcs": "通过件数",
+    "rejectPcs": "拒绝件数",
+    "measurementDefects": "测量缺陷",
+    "physicalDefects": "物理缺陷",
+    "passRate": "通过率",
+    "result": "结果"
+  },
+
+  "editGar": {
+    "edit_garment": "编辑服装",
+    "select_garment": "精选服装",
+    "select_defect": "选择缺陷",
+    "add_defect": "添加缺陷"
+  },
+
+  "defName": {
+    "defect_code": "缺陷代码",
+    "chinese_name": "中文名",
+    "printing_name": "打印姓名"
+  }
+}
