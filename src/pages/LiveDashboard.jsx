@@ -1,32 +1,33 @@
 import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { API_BASE_URL } from "../../config";
-import React, { useEffect, useRef, useState } from "react";
-import LiveStyleCard from "../components/inspection/liveDashboard/LiveStyleCard";
+import CuttingGarmentTypeTrendAnalysis from "../components/inspection/cutting/report/CuttingGarmentTypeTrendAnalysis";
+import DigitalMeasurementBuyerSpec from "../components/inspection/digital_measurement/DigitalMeasurementBuyerSpec";
+import CuttingReport from "../components/inspection/liveDashboard/CuttingReport";
+import DailySummary from "../components/inspection/liveDashboard/DailySummary";
+import DefectBarChart from "../components/inspection/liveDashboard/DefectBarChart";
+import DigitalMeasurement from "../components/inspection/liveDashboard/DigitalMeasurement";
+import FilterPane from "../components/inspection/liveDashboard/FilterPane";
+import HomeMenu from "../components/inspection/liveDashboard/HomeMenu";
+import InspectorCard from "../components/inspection/liveDashboard/InspectorCard";
+import IroningLive from "../components/inspection/liveDashboard/IroningLive";
+import LineBarChart from "../components/inspection/liveDashboard/LineBarChart";
 import LineCard from "../components/inspection/liveDashboard/LineCard";
-import TrendAnalysisMO from "../components/inspection/liveDashboard/TrendAnalysisMO";
+import LiveStyleCard from "../components/inspection/liveDashboard/LiveStyleCard";
+import LiveSummary from "../components/inspection/liveDashboard/LiveSummary";
+import MOBarChart from "../components/inspection/liveDashboard/MOBarChart";
+import NavigationPanel from "../components/inspection/liveDashboard/NavigationPanel";
+import OPALive from "../components/inspection/liveDashboard/OPALive";
+import OrderData from "../components/inspection/liveDashboard/OrderData";
+import QCSunriseDashboard from "../components/inspection/liveDashboard/QCSunriseDashboard";
+import RovingReport from "../components/inspection/liveDashboard/RovingReport"; // Added import
+import SummaryCard from "../components/inspection/liveDashboard/SummaryCard";
 import TrendAnalysisLine from "../components/inspection/liveDashboard/TrendAnalysisLine";
 import TrendAnalysisLineDefects from "../components/inspection/liveDashboard/TrendAnalysisLineDefects";
-import NavigationPanel from "../components/inspection/liveDashboard/NavigationPanel";
-import LiveSummary from "../components/inspection/liveDashboard/LiveSummary";
-import SummaryCard from "../components/inspection/liveDashboard/SummaryCard";
-import DefectBarChart from "../components/inspection/liveDashboard/DefectBarChart";
-import MOBarChart from "../components/inspection/liveDashboard/MOBarChart";
-import LineBarChart from "../components/inspection/liveDashboard/LineBarChart";
-import FilterPane from "../components/inspection/liveDashboard/FilterPane";
-import OrderData from "../components/inspection/liveDashboard/OrderData";
+import TrendAnalysisMO from "../components/inspection/liveDashboard/TrendAnalysisMO";
 import WashingLive from "../components/inspection/liveDashboard/WashingLive";
-import IroningLive from "../components/inspection/liveDashboard/IroningLive";
-import OPALive from "../components/inspection/liveDashboard/OPALive";
-import DailySummary from "../components/inspection/liveDashboard/DailySummary";
 import WeeklySummary from "../components/inspection/liveDashboard/WeeklySummary";
-import InspectorCard from "../components/inspection/liveDashboard/InspectorCard";
-import RovingReport from "../components/inspection/liveDashboard/RovingReport"; // Added import
-import CuttingReport from "../components/inspection/liveDashboard/CuttingReport";
-import HomeMenu from "../components/inspection/liveDashboard/HomeMenu";
-import QCSunriseDashboard from "../components/inspection/liveDashboard/QCSunriseDashboard";
-import DigitalMeasurement from "../components/inspection/liveDashboard/DigitalMeasurement";
-import DigitalMeasurementBuyerSpec from "../components/inspection/digital_measurement/DigitalMeasurementBuyerSpec";
 
 const LiveDashboard = () => {
   const [activeSection, setActiveSection] = useState("Home");
@@ -55,7 +56,7 @@ const LiveDashboard = () => {
     defectsQty: 0,
     totalBundles: 0,
     defectRate: 0,
-    defectRatio: 0
+    defectRatio: 0,
   });
   const [defectRates, setDefectRates] = useState([]);
   const [moSummaries, setMoSummaries] = useState([]);
@@ -92,7 +93,7 @@ const LiveDashboard = () => {
         defectsQty: 0,
         totalBundles: 0,
         defectRate: 0,
-        defectRatio: 0
+        defectRatio: 0,
       });
     }
   };
@@ -101,7 +102,7 @@ const LiveDashboard = () => {
   const fetchDefectRates = async (filters = {}) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/qc2-defect-rates`, {
-        params: filters
+        params: filters,
       });
       const sorted = response.data.sort((a, b) => b.defectRate - a.defectRate);
       let rank = 1;
@@ -123,7 +124,7 @@ const LiveDashboard = () => {
   const fetchMoSummaries = async (filters = {}) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/qc2-mo-summaries`, {
-        params: { ...filters, groupByMO: "true" }
+        params: { ...filters, groupByMO: "true" },
       });
       setMoSummaries(response.data);
     } catch (error) {
@@ -210,7 +211,7 @@ const LiveDashboard = () => {
       fetchMoSummaries(filters),
       fetchHourlyDefectRates(filters),
       fetchLineDefectRates(filters),
-      fetchInspectors(filters)
+      fetchInspectors(filters),
     ]);
   };
 
@@ -233,7 +234,7 @@ const LiveDashboard = () => {
       fetchMoSummaries(),
       fetchHourlyDefectRates(),
       fetchLineDefectRates(),
-      fetchInspectors()
+      fetchInspectors(),
     ]);
   };
 
@@ -246,7 +247,7 @@ const LiveDashboard = () => {
         fetchMoSummaries(),
         fetchHourlyDefectRates(),
         fetchLineDefectRates(),
-        fetchInspectors()
+        fetchInspectors(),
       ]);
     };
     fetchInitialData();
@@ -259,7 +260,7 @@ const LiveDashboard = () => {
         fetchMoSummaries(currentFilters),
         fetchHourlyDefectRates(currentFilters),
         fetchLineDefectRates(currentFilters),
-        fetchInspectors(currentFilters)
+        fetchInspectors(currentFilters),
       ]);
     }, 5000);
 
@@ -299,7 +300,7 @@ const LiveDashboard = () => {
   useEffect(() => {
     const socket = io(`${API_BASE_URL}`, {
       path: "/socket.io",
-      transports: ["websocket"]
+      transports: ["websocket"],
     });
 
     socket.on("qc2_data_updated", async () => {
@@ -311,7 +312,7 @@ const LiveDashboard = () => {
         fetchMoSummaries(currentFilters),
         fetchHourlyDefectRates(currentFilters),
         fetchLineDefectRates(currentFilters),
-        fetchInspectors(currentFilters)
+        fetchInspectors(currentFilters),
       ]);
     });
 
@@ -408,7 +409,7 @@ const LiveDashboard = () => {
           "Line Hr Trend",
           "Daily Summary",
           "Weekly Analysis",
-          "Monthly Analysis"
+          "Monthly Analysis",
         ].includes(activeSection) && (
           <FilterPane
             startDate={startDate}
@@ -442,7 +443,10 @@ const LiveDashboard = () => {
         )}
 
         {activeSection === "QC Inline Roving" && <RovingReport />}
-        {activeSection === "Cutting" && <CuttingReport />}
+        {activeSection === "Cutting Reports" && <CuttingReport />}
+        {activeSection === "Cutting Trend" && (
+          <CuttingGarmentTypeTrendAnalysis />
+        )}
         {activeSection === "Buyer Specs" && <DigitalMeasurementBuyerSpec />}
         {activeSection === "Measurement Summary" && <DigitalMeasurement />}
         {activeSection === "Daily Analysis" && <QCSunriseDashboard />}
@@ -643,7 +647,7 @@ const LiveDashboard = () => {
                           return totalCheckedQty > 0
                             ? totalDefectsQty / totalCheckedQty
                             : 0;
-                        })()
+                        })(),
                       }))
                       .sort((a, b) => b.defectRate - a.defectRate) // Sort by defectRate descending
                       .map(({ lineNo }) => (

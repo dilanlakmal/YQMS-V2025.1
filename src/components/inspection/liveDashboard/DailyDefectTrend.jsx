@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { API_BASE_URL } from "../../../../config"; // Adjust path as needed
-import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable"; // Explicitly import autoTable
+import React, { useEffect, useState } from "react";
+import { FaFileExcel, FaFilePdf } from "react-icons/fa";
+import * as XLSX from "xlsx";
+import { API_BASE_URL } from "../../../../config"; // Adjust path as needed
 // Add a fallback import for debugging
 if (typeof autoTable === "undefined") {
   console.error("jspdf-autotable not loaded. Attempting default import.");
@@ -11,7 +12,6 @@ if (typeof autoTable === "undefined") {
     global.autoTable = module.default;
   });
 }
-import { FaFileExcel, FaFilePdf } from "react-icons/fa";
 
 const DailyDefectTrend = ({ filters }) => {
   const [summaryData, setSummaryData] = useState([]);
@@ -22,7 +22,7 @@ const DailyDefectTrend = ({ filters }) => {
     addMO: false,
     addBuyer: false,
     addColors: false,
-    addSizes: false
+    addSizes: false,
   });
   const [rows, setRows] = useState([]);
   const [uniqueDates, setUniqueDates] = useState([]);
@@ -148,7 +148,7 @@ const DailyDefectTrend = ({ filters }) => {
             type: "group",
             key: value,
             path: [...path, value],
-            data: groupData
+            data: groupData,
           });
           const subRows = buildRows(
             subHierarchy,
@@ -192,7 +192,7 @@ const DailyDefectTrend = ({ filters }) => {
           type: "defect",
           key: defectName,
           path: [...path, defectName],
-          data: defectData
+          data: defectData,
         });
       });
     }
@@ -257,7 +257,7 @@ const DailyDefectTrend = ({ filters }) => {
 
     exportData.push([
       "Daily Defect Trend Analysis",
-      ...Array(uniqueDates.length).fill("")
+      ...Array(uniqueDates.length).fill(""),
     ]);
     ratesMap.set("0-0", 0);
 
@@ -288,7 +288,7 @@ const DailyDefectTrend = ({ filters }) => {
         ...(customFilters.addMO ? ["moNo"] : []),
         ...(customFilters.addBuyer ? ["buyer"] : []),
         ...(customFilters.addColors ? ["color"] : []),
-        ...(customFilters.addSizes ? ["size"] : [])
+        ...(customFilters.addSizes ? ["size"] : []),
       ]);
       const sum = getSumForGroup(hierarchy, date);
       const rate =
@@ -321,7 +321,7 @@ const DailyDefectTrend = ({ filters }) => {
             top: { style: "thin" },
             bottom: { style: "thin" },
             left: { style: "thin" },
-            right: { style: "thin" }
+            right: { style: "thin" },
           },
           fill: {
             fgColor: {
@@ -332,13 +332,13 @@ const DailyDefectTrend = ({ filters }) => {
                   ? getBackgroundColorHex(rate)
                   : row < 2
                   ? "FFFFFF"
-                  : "E5E7EB"
-            }
+                  : "E5E7EB",
+            },
           },
           alignment: {
             horizontal: col === 0 ? "left" : "center",
-            vertical: "middle"
-          }
+            vertical: "middle",
+          },
         };
       }
     }
@@ -371,13 +371,13 @@ const DailyDefectTrend = ({ filters }) => {
       headStyles: {
         fillColor: [173, 216, 230],
         textColor: [55, 65, 81],
-        fontStyle: "bold"
+        fontStyle: "bold",
       },
       styles: {
         cellPadding: 2,
         fontSize: 8,
         halign: "center",
-        valign: "middle"
+        valign: "middle",
       },
       columnStyles: { 0: { halign: "left" } },
       didParseCell: (data) => {
@@ -407,7 +407,7 @@ const DailyDefectTrend = ({ filters }) => {
       },
       didDrawPage: () => {
         doc.text("Daily Defect Trend Analysis", 14, 10);
-      }
+      },
     });
 
     doc.save("DailyDefectTrend.pdf");
@@ -450,7 +450,7 @@ const DailyDefectTrend = ({ filters }) => {
             onChange={(e) =>
               setCustomFilters((prev) => ({
                 ...prev,
-                addLines: e.target.checked
+                addLines: e.target.checked,
               }))
             }
             disabled={isLineNoFiltered}
@@ -481,7 +481,7 @@ const DailyDefectTrend = ({ filters }) => {
             onChange={(e) =>
               setCustomFilters((prev) => ({
                 ...prev,
-                addBuyer: e.target.checked
+                addBuyer: e.target.checked,
               }))
             }
             className="mr-1"
@@ -495,7 +495,7 @@ const DailyDefectTrend = ({ filters }) => {
             onChange={(e) =>
               setCustomFilters((prev) => ({
                 ...prev,
-                addColors: e.target.checked
+                addColors: e.target.checked,
               }))
             }
             disabled={isColorFiltered}
@@ -512,7 +512,7 @@ const DailyDefectTrend = ({ filters }) => {
             onChange={(e) =>
               setCustomFilters((prev) => ({
                 ...prev,
-                addSizes: e.target.checked
+                addSizes: e.target.checked,
               }))
             }
             disabled={isSizeFiltered}

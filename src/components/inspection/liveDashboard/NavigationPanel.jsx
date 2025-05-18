@@ -1,41 +1,48 @@
-import React, { useState } from "react";
 import {
-  Menu,
-  ChevronLeft,
-  ChevronDown,
-  ChevronRight,
-  Package,
-  Shirt,
-  Eye,
   BarChart,
-  Clock,
-  TrendingUp,
-  Calendar,
-  FileText,
   Box,
+  Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Eye,
+  FileText,
+  Home,
+  Menu,
+  Package,
   Search,
-  Home
+  Shirt,
+  TrendingUp,
 } from "lucide-react";
+import React, { useState } from "react";
 
 const NavigationPanel = ({
   isOpen,
   toggleNav,
   setActiveSection,
-  activeSection
+  activeSection,
 }) => {
   const [expandedMenus, setExpandedMenus] = useState({});
 
   const menuItems = [
     { name: "Home", icon: <Home size={18} />, subMenus: [] },
     { name: "QC Inline Roving", icon: <Search size={16} />, subMenus: [] },
-    { name: "Cutting", icon: <Search size={16} />, subMenus: [] },
+    {
+      name: "Cutting",
+      icon: <Search size={16} />,
+      subMenus: [
+        { name: "Cutting Reports", icon: <BarChart size={16} /> },
+        { name: "Cutting Trend", icon: <TrendingUp size={16} /> },
+      ],
+    },
     {
       name: "Digital Measurement",
       icon: <Shirt size={16} />,
       subMenus: [
         { name: "Buyer Specs", icon: <BarChart size={16} /> },
-        { name: "Measurement Summary", icon: <TrendingUp size={16} /> }
-      ]
+        { name: "Measurement Summary", icon: <TrendingUp size={16} /> },
+      ],
     },
     {
       name: "QC 1 Dashboard",
@@ -44,8 +51,8 @@ const NavigationPanel = ({
         { name: "Daily Analysis", icon: <BarChart size={16} /> },
         { name: "Daily Trend", icon: <TrendingUp size={16} /> },
         { name: "Monthly Trend", icon: <TrendingUp size={16} /> },
-        { name: "Yearly Trend", icon: <TrendingUp size={16} /> }
-      ]
+        { name: "Yearly Trend", icon: <TrendingUp size={16} /> },
+      ],
     },
     { name: "Order Data", icon: <Package size={18} />, subMenus: [] },
     { name: "Washing", icon: <Shirt size={18} />, subMenus: [] },
@@ -60,16 +67,16 @@ const NavigationPanel = ({
         { name: "Line Hr Trend", icon: <TrendingUp size={16} /> },
         { name: "Daily Summary", icon: <Calendar size={16} /> },
         { name: "Weekly Analysis", icon: <FileText size={16} /> },
-        { name: "Monthly Analysis", icon: <FileText size={16} /> }
-      ]
+        { name: "Monthly Analysis", icon: <FileText size={16} /> },
+      ],
     },
-    { name: "Packing", icon: <Box size={18} />, subMenus: [] }
+    { name: "Packing", icon: <Box size={18} />, subMenus: [] },
   ];
 
   const toggleMenu = (menuName) => {
     setExpandedMenus((prev) => ({
       ...prev,
-      [menuName]: !prev[menuName]
+      [menuName]: !prev[menuName],
     }));
   };
 
