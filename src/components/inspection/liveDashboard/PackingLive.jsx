@@ -1,93 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-// import { API_BASE_URL } from "../../../../config";
-// import DataTableWOI from "./DataTableWOI";
-// import FilterPaneWOI from "./FilterPaneWOI";
-
-// const WashingLive = () => {
-//   const [tableData, setTableData] = useState([]);
-//   const [totalRecords, setTotalRecords] = useState(0);
-//   const [page, setPage] = useState(1);
-//   const limit = 50;
-
-//   const [filters, setFilters] = useState({
-//     moNo: "",
-//     custStyle: "",
-//     buyer: "",
-//     color: "",
-//     size: "",
-//     empId: ""
-//   });
-
-//   // Fetch washing data
-//   const fetchWashingData = async (filters = {}, currentPage = page) => {
-//     try {
-//       const response = await axios.get(`${API_BASE_URL}/api/washing-summary`, {
-//         params: { ...filters, page: currentPage, limit }
-//       });
-//       setTableData(response.data.tableData);
-//       setTotalRecords(response.data.total);
-//     } catch (error) {
-//       console.error("Error fetching washing data:", error);
-//     }
-//   };
-
-//   // Handle pagination
-//   const handlePageChange = async (newPage) => {
-//     setPage(newPage);
-//     await fetchWashingData(filters, newPage);
-//   };
-
-//   // Initial fetch and auto-refresh
-//   useEffect(() => {
-//     fetchWashingData();
-
-//     const intervalId = setInterval(() => fetchWashingData(filters), 5000);
-//     return () => clearInterval(intervalId);
-//   }, [filters]);
-
-//   return (
-//     <div className="p-6 bg-gray-100 min-h-screen">
-//       <FilterPaneWOI
-//         module="washing"
-//         empIdField="emp_id_washing"
-//         filters={filters}
-//         setFilters={setFilters}
-//         fetchData={fetchWashingData}
-//         setPage={setPage}
-//       />
-//       <DataTableWOI
-//         tableData={tableData}
-//         totalRecords={totalRecords}
-//         page={page}
-//         limit={limit}
-//         handlePageChange={handlePageChange}
-//       />
-//     </div>
-//   );
-// };
-
-// export default WashingLive;
-
-// // CSS for custom scrollbar (optional)
-// // Add to your global CSS file or a <style> tag in index.html
-// /*
-// .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
-// .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-// .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
-// .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a1a1a1; }
-// */
-
-// // For sticky columns in inspector table, define CSS variables for column widths
-// /*
-// :root {
-//   --emp-id-width: 80px;
-//   --emp-id-width-md: 100px;
-//   --emp-name-width: 120px;
-//   --emp-name-width-md: 150px;
-// }
-// */
-
 import axios from "axios";
 import {
   BarElement,
@@ -101,7 +11,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels"; // For displaying labels on bars
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import { format as formatDateFn, parse } from "date-fns";
 import {
   ArrowDown,
@@ -111,20 +21,25 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter as FilterIcon,
+  Package as PackageIcon,
   RotateCcw,
   Search as SearchIcon,
   TrendingDown,
-  TrendingUp,
   X,
-} from "lucide-react"; // Added Check, X
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+} from "lucide-react"; // PackageIcon for Packing
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Bar } from "react-chartjs-2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Select from "react-select";
 import { API_BASE_URL } from "../../../../config";
 
-// Register ChartJS components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -135,19 +50,19 @@ ChartJS.register(
   PointElement,
   LineElement,
   Filler,
-  ChartDataLabels // Register the datalabels plugin
+  ChartDataLabels
 );
 
-const normalizeDateStringForAPI = (date) => {
+const normalizeDateStringForAPI_Packing = (date) => {
   if (!date) return null;
   try {
     return formatDateFn(new Date(date), "MM/dd/yyyy");
   } catch (e) {
-    console.error("Error normalizing date for API:", date, e);
+    console.error("Error normalizing date for API (Packing):", date, e);
     return String(date);
   }
 };
-const formatDisplayDate = (dateString) => {
+const formatDisplayDate_Packing = (dateString) => {
   if (!dateString) return "N/A";
   try {
     return formatDateFn(new Date(dateString), "MM/dd/yyyy");
@@ -155,15 +70,59 @@ const formatDisplayDate = (dateString) => {
     return String(dateString);
   }
 };
-const LoadingSpinner = () => (
+const LoadingSpinner_Packing = () => (
   <div className="flex justify-center items-center h-32">
     {" "}
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>{" "}
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>{" "}
   </div>
-);
+); // Green for Packing
 
-const SummaryStatCard = ({ title, currentValue, previousDayValue, icon }) => {
-  const IconComponent = icon || TrendingUp;
+const SummaryStatCard_Packing = ({
+  title,
+  value1,
+  label1,
+  value2,
+  label2,
+  icon,
+}) => {
+  const IconComponent = icon || PackageIcon;
+  return (
+    <div className="bg-white p-5 shadow-xl rounded-xl border border-gray-200 flex flex-col justify-between min-h-[160px] hover:shadow-2xl transition-shadow duration-300">
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+            {title}
+          </h3>
+          <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+            {" "}
+            <IconComponent size={20} />{" "}
+          </div>
+        </div>
+        {label1 && <p className="text-gray-600 text-xs mt-1">{label1}</p>}
+        <p className="text-3xl font-bold text-gray-800">
+          {value1.toLocaleString()}
+        </p>
+        {label2 && (
+          <p className="text-gray-600 text-xs mt-2 pt-2 border-t border-gray-100">
+            {label2}
+          </p>
+        )}
+        {value2 !== undefined && (
+          <p className="text-2xl font-semibold text-gray-700 mt-1">
+            {value2.toLocaleString()}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+const SummaryStatCardSimple_Packing = ({
+  title,
+  currentValue,
+  previousDayValue,
+  icon,
+}) => {
+  const IconComponent = icon || PackageIcon;
   const prevValue = previousDayValue || 0;
   const currValue = currentValue || 0;
   let percentageChange = 0;
@@ -190,7 +149,7 @@ const SummaryStatCard = ({ title, currentValue, previousDayValue, icon }) => {
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
             {title}
           </h3>{" "}
-          <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+          <div className="p-2 bg-green-100 text-green-600 rounded-lg">
             {" "}
             <IconComponent size={20} />{" "}
           </div>{" "}
@@ -220,7 +179,7 @@ const SummaryStatCard = ({ title, currentValue, previousDayValue, icon }) => {
   );
 };
 
-const InspectorColumnToggleButton = ({ label, isActive, onClick }) => (
+const InspectorColumnToggleButton_Packing = ({ label, isActive, onClick }) => (
   <button
     onClick={onClick}
     className={`flex items-center px-2 py-1 md:px-3 md:py-1.5 text-[10px] md:text-xs text-white rounded-md shadow-sm transition-colors duration-150
@@ -239,9 +198,9 @@ const InspectorColumnToggleButton = ({ label, isActive, onClick }) => (
   </button>
 );
 
-const WashingLive = () => {
+const PackingLive = () => {
   const [isFilterVisible, setIsFilterVisible] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
   const [isLoadingHourlyChart, setIsLoadingHourlyChart] = useState(false);
 
@@ -266,14 +225,16 @@ const WashingLive = () => {
     qcIds: [],
   });
   const [summaryData, setSummaryData] = useState({
-    totalWashingQty: 0,
-    totalBundles: 0,
-    totalRewashQty: 0,
+    totalPackingQty: 0,
+    totalOrderCardBundles: 0,
+    totalDefectCards: 0,
+    totalDefectCardQty: 0,
   });
   const [previousDaySummary, setPreviousDaySummary] = useState({
-    totalWashingQty: 0,
-    totalBundles: 0,
-    totalRewashQty: 0,
+    totalPackingQty: 0,
+    totalOrderCardBundles: 0,
+    totalDefectCards: 0,
+    totalDefectCardQty: 0,
   });
   const [inspectorSummary, setInspectorSummary] = useState([]);
   const [detailedRecords, setDetailedRecords] = useState([]);
@@ -285,23 +246,51 @@ const WashingLive = () => {
   });
 
   const [hourlyChartData, setHourlyChartData] = useState([]);
-  const [chartDataType, setChartDataType] = useState("washing"); // 'washing' or 'bundle'
+  const [chartDataType, setChartDataType] = useState("packingQty"); // 'packingQty', 'orderBundles', 'defectCards', 'defectQty'
 
-  // Inspector table column visibility state
   const [visibleCols, setVisibleCols] = useState({
-    totalWashingQty: true,
-    totalBundles: true,
-    totalRewashQty: true,
+    totalPackingQty: true,
+    totalOrderCardBundles: true,
+    totalDefectCards: true,
+    totalDefectCardQty: true,
   });
 
-  const buildFilterQueryParams = (filtersToBuild) => {
+  const currentFiltersRef = useRef({});
+
+  useEffect(() => {
+    currentFiltersRef.current = {
+      startDate,
+      endDate,
+      moNo,
+      packageNo,
+      custStyle,
+      buyer,
+      color,
+      size,
+      qcId,
+    };
+  }, [
+    startDate,
+    endDate,
+    moNo,
+    packageNo,
+    custStyle,
+    buyer,
+    color,
+    size,
+    qcId,
+  ]);
+
+  const buildFilterQueryParams = useCallback((filtersToBuild) => {
     const queryParams = {};
     if (filtersToBuild.startDate)
-      queryParams.startDate = normalizeDateStringForAPI(
+      queryParams.startDate = normalizeDateStringForAPI_Packing(
         filtersToBuild.startDate
       );
     if (filtersToBuild.endDate)
-      queryParams.endDate = normalizeDateStringForAPI(filtersToBuild.endDate);
+      queryParams.endDate = normalizeDateStringForAPI_Packing(
+        filtersToBuild.endDate
+      );
     if (filtersToBuild.moNo) queryParams.moNo = filtersToBuild.moNo.value;
     if (filtersToBuild.packageNo)
       queryParams.packageNo = filtersToBuild.packageNo.value;
@@ -312,122 +301,121 @@ const WashingLive = () => {
     if (filtersToBuild.size) queryParams.size = filtersToBuild.size.value;
     if (filtersToBuild.qcId) queryParams.qcId = filtersToBuild.qcId.value;
     return queryParams;
-  };
-
-  const fetchFilterOptions = useCallback(async (currentFilters = {}) => {
-    setIsLoadingFilters(true);
-    try {
-      const queryParamsForFilters = {}; // Build this from currentFilters.value
-      if (currentFilters.startDate)
-        queryParamsForFilters.startDate = normalizeDateStringForAPI(
-          currentFilters.startDate
-        );
-      if (currentFilters.endDate)
-        queryParamsForFilters.endDate = normalizeDateStringForAPI(
-          currentFilters.endDate
-        );
-      if (currentFilters.moNo)
-        queryParamsForFilters.moNo = currentFilters.moNo.value;
-      if (currentFilters.packageNo)
-        queryParamsForFilters.packageNo = currentFilters.packageNo.value;
-      if (currentFilters.custStyle)
-        queryParamsForFilters.custStyle = currentFilters.custStyle.value;
-      if (currentFilters.buyer)
-        queryParamsForFilters.buyer = currentFilters.buyer.value;
-      if (currentFilters.color)
-        queryParamsForFilters.color = currentFilters.color.value;
-      if (currentFilters.size)
-        queryParamsForFilters.size = currentFilters.size.value;
-      if (currentFilters.qcId)
-        queryParamsForFilters.qcId = currentFilters.qcId.value;
-
-      const response = await axios.get(`${API_BASE_URL}/api/washing/filters`, {
-        params: queryParamsForFilters,
-      });
-      setFilterOptions(response.data);
-    } catch (error) {
-      console.error("Error fetching filter options:", error);
-      setFilterOptions({
-        moNos: [],
-        packageNos: [],
-        custStyles: [],
-        buyers: [],
-        colors: [],
-        sizes: [],
-        qcIds: [],
-      });
-    } finally {
-      setIsLoadingFilters(false);
-    }
   }, []);
 
-  const fetchHourlyChartData = useCallback(async (filters = {}) => {
-    setIsLoadingHourlyChart(true);
-    try {
-      const queryParams = buildFilterQueryParams(filters);
-      const response = await axios.get(
-        `${API_BASE_URL}/api/washing/hourly-summary`,
-        { params: queryParams }
-      );
-      setHourlyChartData(response.data || []);
-    } catch (error) {
-      console.error("Error fetching hourly chart data:", error);
-      setHourlyChartData([]);
-    } finally {
-      setIsLoadingHourlyChart(false);
-    }
-  }, []);
+  const fetchFilterOptions = useCallback(
+    async (currentFilters = {}) => {
+      setIsLoadingFilters(true);
+      try {
+        const queryParamsForFilters = buildFilterQueryParams(currentFilters);
+        const response = await axios.get(
+          `${API_BASE_URL}/api/packing/filters`,
+          { params: queryParamsForFilters }
+        );
+        setFilterOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching Packing filter options:", error);
+        setFilterOptions({
+          moNos: [],
+          packageNos: [],
+          custStyles: [],
+          buyers: [],
+          colors: [],
+          sizes: [],
+          qcIds: [],
+        });
+      } finally {
+        setIsLoadingFilters(false);
+      }
+    },
+    [buildFilterQueryParams]
+  );
+
+  const fetchHourlyChartData = useCallback(
+    async (filters = {}) => {
+      setIsLoadingHourlyChart(true);
+      try {
+        const queryParams = buildFilterQueryParams(filters);
+        const response = await axios.get(
+          `${API_BASE_URL}/api/packing/hourly-summary`,
+          { params: queryParams }
+        );
+        setHourlyChartData(response.data || []);
+      } catch (error) {
+        console.error("Error fetching hourly Packing chart data:", error);
+        setHourlyChartData([]);
+      } finally {
+        setIsLoadingHourlyChart(false);
+      }
+    },
+    [buildFilterQueryParams]
+  );
 
   const fetchData = useCallback(
-    async (filters = {}, page = 1) => {
-      setIsLoading(true);
-      fetchHourlyChartData(filters); // Fetch chart data along with main data
+    async (filters = {}, page = 1, isInitialLoad = false) => {
+      if (isInitialLoad) setIsLoading(true);
+
+      const chartPromise = fetchHourlyChartData(filters);
+      const filterOptionsPromise =
+        isInitialLoad || Object.keys(filters).length === 0
+          ? fetchFilterOptions(filters)
+          : Promise.resolve();
+
       try {
         const queryParams = {
           ...buildFilterQueryParams(filters),
           page,
           limit: pagination.limit,
         };
-        const response = await axios.get(
-          `${API_BASE_URL}/api/washing/dashboard-data`,
+        const mainDataPromise = axios.get(
+          `${API_BASE_URL}/api/packing/dashboard-data`,
           { params: queryParams }
         );
+
+        const [mainDataResponse] = await Promise.all([
+          mainDataPromise,
+          chartPromise,
+          filterOptionsPromise,
+        ]);
+
+        const data = mainDataResponse.data;
         setSummaryData(
-          response.data.overallSummary || {
-            totalWashingQty: 0,
-            totalBundles: 0,
-            totalRewashQty: 0,
+          data.overallSummary || {
+            totalPackingQty: 0,
+            totalOrderCardBundles: 0,
+            totalDefectCards: 0,
+            totalDefectCardQty: 0,
           }
         );
         setPreviousDaySummary(
-          response.data.previousDaySummary || {
-            totalWashingQty: 0,
-            totalBundles: 0,
-            totalRewashQty: 0,
+          data.previousDaySummary || {
+            totalPackingQty: 0,
+            totalOrderCardBundles: 0,
+            totalDefectCards: 0,
+            totalDefectCardQty: 0,
           }
         );
-        setInspectorSummary(response.data.inspectorSummaryData || []);
-        setDetailedRecords(response.data.detailedRecords || []);
+        setInspectorSummary(data.inspectorSummaryData || []);
+        setDetailedRecords(data.detailedRecords || []);
         setPagination(
-          response.data.pagination || {
+          data.pagination || {
             currentPage: 1,
             totalPages: 1,
             totalRecords: 0,
             limit: 20,
           }
         );
-        // ... (setAppliedFiltersForDisplay logic)
+
         const displayableFilters = {};
         if (filters.startDate)
-          displayableFilters["Start Date"] = normalizeDateStringForAPI(
+          displayableFilters["Start Date"] = normalizeDateStringForAPI_Packing(
             filters.startDate
           );
         if (filters.endDate)
-          displayableFilters["End Date"] = normalizeDateStringForAPI(
+          displayableFilters["End Date"] = normalizeDateStringForAPI_Packing(
             filters.endDate
           );
-        if (filters.moNo)
-          displayableFilters["MO No (selectedMono)"] = filters.moNo.label;
+        if (filters.moNo) displayableFilters["MO No"] = filters.moNo.label;
         if (filters.packageNo)
           displayableFilters["Package No"] = filters.packageNo.label;
         if (filters.custStyle)
@@ -435,51 +423,49 @@ const WashingLive = () => {
         if (filters.buyer) displayableFilters["Buyer"] = filters.buyer.label;
         if (filters.color) displayableFilters["Color"] = filters.color.label;
         if (filters.size) displayableFilters["Size"] = filters.size.label;
-        if (filters.qcId) displayableFilters["QC ID"] = filters.qcId.label;
+        if (filters.qcId)
+          displayableFilters["QC ID (Packing)"] = filters.qcId.label;
         setAppliedFiltersForDisplay(displayableFilters);
       } catch (error) {
-        console.error(
-          "Error fetching washing dashboard data:",
-          error
-        ); /* Reset states */
+        console.error("Error fetching Packing dashboard data:", error);
+        setSummaryData({
+          totalPackingQty: 0,
+          totalOrderCardBundles: 0,
+          totalDefectCards: 0,
+          totalDefectCardQty: 0,
+        });
+        setPreviousDaySummary({
+          totalPackingQty: 0,
+          totalOrderCardBundles: 0,
+          totalDefectCards: 0,
+          totalDefectCardQty: 0,
+        });
+        setInspectorSummary([]);
+        setDetailedRecords([]);
       } finally {
-        setIsLoading(false);
+        if (isInitialLoad) setIsLoading(false);
       }
     },
-    [pagination.limit, fetchHourlyChartData]
-  ); // Added fetchHourlyChartData
+    [
+      pagination.limit,
+      buildFilterQueryParams,
+      fetchHourlyChartData,
+      fetchFilterOptions,
+    ]
+  );
 
   useEffect(() => {
-    const initialFilters = {
-      startDate,
-      endDate,
-      moNo,
-      packageNo,
-      custStyle,
-      buyer,
-      color,
-      size,
-      qcId,
-    };
-    fetchFilterOptions(initialFilters);
-    fetchData(initialFilters);
+    fetchData(currentFiltersRef.current, 1, true);
+    const intervalId = setInterval(() => {
+      fetchData(currentFiltersRef.current, pagination.currentPage, false);
+    }, 30000);
+    return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleApplyFilters = () => {
-    const currentFilters = {
-      startDate,
-      endDate,
-      moNo,
-      packageNo,
-      custStyle,
-      buyer,
-      color,
-      size,
-      qcId,
-    };
-    fetchData(currentFilters, 1);
-    fetchFilterOptions(currentFilters);
+    fetchData(currentFiltersRef.current, 1, false);
+    fetchFilterOptions(currentFiltersRef.current);
   };
 
   const handleResetFilters = () => {
@@ -492,48 +478,34 @@ const WashingLive = () => {
     setColor(null);
     setSize(null);
     setQcId(null);
+    const emptyFilters = {};
+    currentFiltersRef.current = emptyFilters;
     setAppliedFiltersForDisplay({});
-    fetchData({}, 1);
-    fetchFilterOptions({});
+    fetchData(emptyFilters, 1, false);
+    fetchFilterOptions(emptyFilters);
   };
 
   const handlePageChange = (newPage) => {
-    const currentFilters = {
-      startDate,
-      endDate,
-      moNo,
-      packageNo,
-      custStyle,
-      buyer,
-      color,
-      size,
-      qcId,
-    };
-    fetchData(currentFilters, newPage);
+    fetchData(currentFiltersRef.current, newPage, false);
   };
 
-  // Inspector table column toggle logic
-  const handleColToggle = (colName) => {
+  const handleColToggle = (colName) =>
     setVisibleCols((prev) => ({ ...prev, [colName]: !prev[colName] }));
-  };
-  const handleAddAllCols = () => {
+  const handleAddAllCols = () =>
     setVisibleCols({
-      totalWashingQty: true,
-      totalBundles: true,
-      totalRewashQty: true,
+      totalPackingQty: true,
+      totalOrderCardBundles: true,
+      totalDefectCards: true,
+      totalDefectCardQty: true,
     });
-  };
-  const handleClearSomeCols = () => {
-    // "Clear All" now clears only Bundle and Rewash
+  const handleClearSomeCols = () =>
     setVisibleCols((prev) => ({
       ...prev,
-      totalBundles: false,
-      totalRewashQty: false,
+      totalDefectCards: false,
+      totalDefectCardQty: false,
     }));
-  };
 
   const inspectorTableData = useMemo(() => {
-    /* ... same as before ... */
     const dataByInspector = {};
     const allDatesSet = new Set();
     inspectorSummary.forEach((item) => {
@@ -544,12 +516,13 @@ const WashingLive = () => {
           dates: {},
         };
       }
-      const displayDate = formatDisplayDate(item.date);
+      const displayDate = formatDisplayDate_Packing(item.date);
       allDatesSet.add(displayDate);
       dataByInspector[item.emp_id].dates[displayDate] = {
-        totalWashingQty: item.dailyWashingQty,
-        totalBundles: item.dailyBundles,
-        totalRewashQty: item.dailyRewashQty,
+        totalPackingQty: item.dailyTotalPackingQty,
+        totalOrderCardBundles: item.dailyOrderCardBundles,
+        totalDefectCards: item.dailyDefectCards,
+        totalDefectCardQty: item.dailyDefectCardQty,
       };
     });
     const sortedDates = Array.from(allDatesSet).sort(
@@ -559,7 +532,6 @@ const WashingLive = () => {
   }, [inspectorSummary]);
 
   const selectStyles = {
-    /* ... same, ensure zIndex for menu ... */
     control: (p) => ({
       ...p,
       minHeight: "38px",
@@ -578,7 +550,6 @@ const WashingLive = () => {
     "w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm h-[38px]";
 
   const filterFields = [
-    /* ... same ... */
     {
       label: "Start Date",
       state: startDate,
@@ -593,7 +564,7 @@ const WashingLive = () => {
       minDate: startDate,
     },
     {
-      label: "MO No (selectedMono)",
+      label: "MO No",
       state: moNo,
       setState: setMoNo,
       options: filterOptions.moNos,
@@ -641,7 +612,7 @@ const WashingLive = () => {
       placeholder: "Select Size...",
     },
     {
-      label: "QC ID",
+      label: "QC ID (Packing)",
       state: qcId,
       setState: setQcId,
       options: filterOptions.qcIds,
@@ -650,9 +621,7 @@ const WashingLive = () => {
     },
   ];
 
-  // Hourly Bar Chart Data and Options
-  const formatHourLabel = (hourStr) => {
-    // HH to HH AM/PM
+  const formatHourLabel_Packing = (hourStr) => {
     if (!hourStr) return "";
     try {
       const date = parse(hourStr, "HH", new Date());
@@ -662,39 +631,65 @@ const WashingLive = () => {
     }
   };
 
-  const hourlyBarChartOptions = {
+  const getChartTitleAndData = () => {
+    switch (chartDataType) {
+      case "packingQty":
+        return {
+          title: "Total Packing Qty",
+          dataKey: "totalPackingQty",
+          changeKey: "packingQtyChange",
+        };
+      case "orderBundles":
+        return {
+          title: "Total Order Bundles",
+          dataKey: "totalOrderCardBundles",
+          changeKey: "orderCardBundlesChange",
+        };
+      case "defectCards":
+        return {
+          title: "Total Defect Cards",
+          dataKey: "totalDefectCards",
+          changeKey: "defectCardsChange",
+        };
+      case "defectQty":
+        return {
+          title: "Total Defect Card Qty",
+          dataKey: "totalDefectCardQty",
+          changeKey: "defectCardQtyChange",
+        };
+      default:
+        return {
+          title: "Total Packing Qty",
+          dataKey: "totalPackingQty",
+          changeKey: "packingQtyChange",
+        };
+    }
+  };
+  const currentChartInfo = getChartTitleAndData();
+
+  const hourlyBarChartOptions_Packing = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      title: {
-        display: true,
-        text: `Hourly ${
-          chartDataType === "washing" ? "Washing Qty" : "Bundle Count"
-        }`,
-      },
+      title: { display: true, text: `Hourly ${currentChartInfo.title}` },
       datalabels: {
         anchor: "end",
         align: "end",
         formatter: (value, context) => {
           const item = hourlyChartData[context.dataIndex];
-          const change =
-            chartDataType === "washing"
-              ? parseFloat(item.washingQtyChange)
-              : parseFloat(item.bundleQtyChange);
+          if (!item) return value.toLocaleString();
+          const change = parseFloat(item[currentChartInfo.changeKey]);
           let changeStr = "";
-          if (change > 0) changeStr = ` ▲${change}%`;
-          else if (change < 0) changeStr = ` ▼${Math.abs(change)}%`;
-
+          if (change > 0) changeStr = ` ▲${change.toFixed(1)}%`;
+          else if (change < 0) changeStr = ` ▼${Math.abs(change).toFixed(1)}%`;
           return `${value.toLocaleString()}${changeStr}`;
         },
         color: (context) => {
           const item = hourlyChartData[context.dataIndex];
-          const change =
-            chartDataType === "washing"
-              ? parseFloat(item.washingQtyChange)
-              : parseFloat(item.bundleQtyChange);
-          return change < 0 ? "#EF4444" : change > 0 ? "#22C55E" : "#6B7280"; // Red, Green, Gray
+          if (!item) return "#6B7280";
+          const change = parseFloat(item[currentChartInfo.changeKey]);
+          return change < 0 ? "#EF4444" : change > 0 ? "#22C55E" : "#6B7280";
         },
         font: { size: 10 },
       },
@@ -711,27 +706,26 @@ const WashingLive = () => {
     },
   };
 
-  const preparedHourlyChartData = {
-    labels: hourlyChartData.map((d) => formatHourLabel(d.hour)),
+  const preparedHourlyChartData_Packing = {
+    labels: hourlyChartData.map((d) => formatHourLabel_Packing(d.hour)),
     datasets: [
       {
-        label:
-          chartDataType === "washing" ? "Total Washing Qty" : "Total Bundles",
-        data: hourlyChartData.map((d) =>
-          chartDataType === "washing" ? d.totalWashingQty : d.totalBundles
-        ),
-        backgroundColor:
-          chartDataType === "washing"
-            ? "rgba(54, 162, 235, 0.6)"
-            : "rgba(75, 192, 192, 0.6)",
-        borderColor:
-          chartDataType === "washing"
-            ? "rgba(54, 162, 235, 1)"
-            : "rgba(75, 192, 192, 1)",
+        label: currentChartInfo.title,
+        data: hourlyChartData.map((d) => d[currentChartInfo.dataKey] || 0),
+        backgroundColor: "rgba(34, 197, 94, 0.6)", // Green for Packing
+        borderColor: "rgba(34, 197, 94, 1)",
         borderWidth: 1,
       },
     ],
   };
+
+  if (isLoading && !detailedRecords.length) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner_Packing />
+      </div>
+    );
+  }
 
   return (
     <div className="p-2 md:p-4 bg-gray-50 min-h-screen">
@@ -739,13 +733,13 @@ const WashingLive = () => {
         {" "}
         <h1 className="text-lg md:text-2xl font-semibold text-gray-800 text-center">
           {" "}
-          Yorkmars (Cambodia) Garment MFG Co., LTD | Washing Live Dashboard{" "}
+          Yorkmars (Cambodia) Garment MFG Co., LTD | Packing Live Dashboard{" "}
         </h1>{" "}
       </header>
 
       <button
         onClick={() => setIsFilterVisible(!isFilterVisible)}
-        className="mb-4 px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center text-xs md:text-sm shadow-md"
+        className="mb-4 px-3 py-1.5 md:px-4 md:py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center text-xs md:text-sm shadow-md"
       >
         {" "}
         <FilterIcon size={16} className="mr-1 md:mr-2" />{" "}
@@ -759,7 +753,6 @@ const WashingLive = () => {
 
       {isFilterVisible && (
         <div className="mb-4 md:mb-6 p-3 md:p-4 bg-white shadow-lg rounded-lg border border-gray-200">
-          {" "}
           <div className="flex flex-nowrap gap-x-3 md:gap-x-4 overflow-x-auto pb-2 custom-scrollbar">
             {" "}
             {filterFields.map((f) => (
@@ -802,7 +795,7 @@ const WashingLive = () => {
             {" "}
             <button
               onClick={handleApplyFilters}
-              disabled={isLoading || isLoadingFilters}
+              disabled={isLoadingFilters}
               className="w-full sm:w-auto px-4 py-1.5 md:px-6 md:py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center justify-center text-xs md:text-sm shadow-md disabled:opacity-60"
             >
               {" "}
@@ -810,47 +803,51 @@ const WashingLive = () => {
             </button>{" "}
             <button
               onClick={handleResetFilters}
-              disabled={isLoading || isLoadingFilters}
+              disabled={isLoadingFilters}
               className="w-full sm:w-auto p-2 md:p-2.5 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 shadow-md disabled:opacity-60"
               title="Clear Filters"
             >
               {" "}
               <RotateCcw size={16} />{" "}
             </button>{" "}
-          </div>{" "}
+          </div>
         </div>
       )}
 
-      {isLoading && <LoadingSpinner />}
+      {isLoading && detailedRecords.length > 0 && (
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-500 bg-opacity-50 z-50">
+          <LoadingSpinner_Packing />
+        </div>
+      )}
 
-      {!isLoading && (
+      {(!isLoading || detailedRecords.length > 0) && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5 mb-4 md:mb-8">
-            {" "}
-            <SummaryStatCard
-              title="Total Washing Qty"
-              currentValue={summaryData.totalWashingQty}
-              previousDayValue={previousDaySummary.totalWashingQty}
-              icon={TrendingUp}
-            />{" "}
-            <SummaryStatCard
-              title="Total Bundles"
-              currentValue={summaryData.totalBundles}
-              previousDayValue={previousDaySummary.totalBundles}
-              icon={TrendingUp}
-            />{" "}
-            <SummaryStatCard
-              title="Total Rewash Qty"
-              currentValue={summaryData.totalRewashQty}
-              previousDayValue={previousDaySummary.totalRewashQty}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-5 mb-4 md:mb-8">
+            <SummaryStatCardSimple_Packing
+              title="Total Packing Qty"
+              currentValue={summaryData.totalPackingQty}
+              previousDayValue={previousDaySummary.totalPackingQty}
+              icon={PackageIcon}
+            />
+            <SummaryStatCardSimple_Packing
+              title="Total Order Bundles"
+              currentValue={summaryData.totalOrderCardBundles}
+              previousDayValue={previousDaySummary.totalOrderCardBundles}
+              icon={PackageIcon}
+            />
+            <SummaryStatCard_Packing
+              title="Defect Card Info"
+              value1={summaryData.totalDefectCards}
+              label1="Total Defect Cards (Count)"
+              value2={summaryData.totalDefectCardQty}
+              label2="Defect Card Qty (Sum)"
               icon={TrendingDown}
-            />{" "}
+            />
           </div>
 
-          {/* Inspector Summary Table */}
           <div className="mb-4 md:mb-8 p-3 md:p-4 bg-white shadow-xl rounded-xl border border-gray-200">
             <h2 className="text-base md:text-xl font-semibold text-gray-700 mb-2">
-              Washing Qty Summary by Inspector
+              Packing Qty Summary by Inspector
             </h2>
             {Object.keys(appliedFiltersForDisplay).length > 0 && (
               <div className="mb-2 md:mb-3 text-[10px] md:text-xs text-gray-500 italic">
@@ -872,30 +869,32 @@ const WashingLive = () => {
                 onClick={handleClearSomeCols}
                 className="px-2 py-1 md:px-3 md:py-1.5 text-[10px] md:text-xs text-white rounded-md shadow-sm bg-orange-500 hover:bg-orange-600"
               >
-                Clear Some
+                Clear Defect Info
               </button>
               <div className="flex gap-1 md:gap-2 ml-auto">
-                {" "}
-                {/* Group toggle buttons */}
-                <InspectorColumnToggleButton
-                  label="Wash Qty"
-                  isActive={visibleCols.totalWashingQty}
-                  onClick={() => handleColToggle("totalWashingQty")}
+                <InspectorColumnToggleButton_Packing
+                  label="Total Pack Qty"
+                  isActive={visibleCols.totalPackingQty}
+                  onClick={() => handleColToggle("totalPackingQty")}
                 />
-                <InspectorColumnToggleButton
-                  label="Bundles"
-                  isActive={visibleCols.totalBundles}
-                  onClick={() => handleColToggle("totalBundles")}
+                <InspectorColumnToggleButton_Packing
+                  label="Order Bundles"
+                  isActive={visibleCols.totalOrderCardBundles}
+                  onClick={() => handleColToggle("totalOrderCardBundles")}
                 />
-                <InspectorColumnToggleButton
-                  label="Rewash Qty"
-                  isActive={visibleCols.totalRewashQty}
-                  onClick={() => handleColToggle("totalRewashQty")}
+                <InspectorColumnToggleButton_Packing
+                  label="Defect Cards"
+                  isActive={visibleCols.totalDefectCards}
+                  onClick={() => handleColToggle("totalDefectCards")}
+                />
+                <InspectorColumnToggleButton_Packing
+                  label="Defect Qty"
+                  isActive={visibleCols.totalDefectCardQty}
+                  onClick={() => handleColToggle("totalDefectCardQty")}
                 />
               </div>
             </div>
             <div className="overflow-x-auto custom-scrollbar text-[11px] md:text-sm">
-              {/* Inspector Table (same structure as before, ensure styles are applied for beauty) */}
               <table className="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-md overflow-hidden">
                 <thead className="bg-gray-100">
                   <tr className="text-gray-600 uppercase text-xs tracking-wider">
@@ -912,25 +911,30 @@ const WashingLive = () => {
                           Object.values(visibleCols).filter((v) => v).length ||
                           1
                         }
-                        className="px-1 py-2 md:px-1 md:py-3 text-center font-semibold border-r min-w-[120px] md:min-w-[150px]"
+                        className="px-1 py-2 md:px-1 md:py-3 text-center font-semibold border-r min-w-[200px] md:min-w-[240px]"
                       >
                         {date}
                         {Object.values(visibleCols).filter((v) => v).length >
                           0 && (
-                          <div className="flex justify-around mt-0.5 md:mt-1 text-[9px] md:text-[10px] font-normal normal-case text-gray-500">
-                            {visibleCols.totalWashingQty && (
-                              <span className="w-1/3 text-center px-0.5">
-                                Wash
+                          <div className="grid grid-cols-4 mt-0.5 md:mt-1 text-[9px] md:text-[10px] font-normal normal-case text-gray-500">
+                            {visibleCols.totalPackingQty && (
+                              <span className="text-center px-0.5">
+                                Total Qty
                               </span>
                             )}
-                            {visibleCols.totalBundles && (
-                              <span className="w-1/3 text-center px-0.5">
-                                Bundle
+                            {visibleCols.totalOrderCardBundles && (
+                              <span className="text-center px-0.5">
+                                Order Bdl
                               </span>
                             )}
-                            {visibleCols.totalRewashQty && (
-                              <span className="w-1/3 text-center px-0.5">
-                                Rewash
+                            {visibleCols.totalDefectCards && (
+                              <span className="text-center px-0.5">
+                                Def Cards
+                              </span>
+                            )}
+                            {visibleCols.totalDefectCardQty && (
+                              <span className="text-center px-0.5">
+                                Def Qty
                               </span>
                             )}
                           </div>
@@ -944,10 +948,10 @@ const WashingLive = () => {
                     inspectorTableData.data.map((inspector) => (
                       <tr
                         key={inspector.emp_id}
-                        className="hover:bg-blue-50 transition-colors duration-150"
+                        className="hover:bg-green-50 transition-colors duration-150"
                       >
                         <td
-                          className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r sticky left-0 bg-white hover:bg-blue-50 z-10"
+                          className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r sticky left-0 bg-white hover:bg-green-50 z-10"
                           style={{
                             width: "var(--emp-id-width, 80px)",
                             minWidth: "var(--emp-id-width, 80px)",
@@ -956,7 +960,7 @@ const WashingLive = () => {
                           {inspector.emp_id}
                         </td>
                         <td
-                          className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r sticky left-[calc(var(--emp-id-width,80px)+1px)] md:left-[calc(var(--emp-id-width-md,100px)+1px)] bg-white hover:bg-blue-50 z-10"
+                          className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r sticky left-[calc(var(--emp-id-width,80px)+1px)] md:left-[calc(var(--emp-id-width-md,100px)+1px)] bg-white hover:bg-green-50 z-10"
                           style={{
                             width: "var(--emp-name-width, 120px)",
                             minWidth: "var(--emp-name-width, 120px)",
@@ -971,19 +975,24 @@ const WashingLive = () => {
                           ).some((v) => v);
                           return hasVisibleCols ? (
                             <React.Fragment key={`${inspector.emp_id}-${date}`}>
-                              {visibleCols.totalWashingQty && (
+                              {visibleCols.totalPackingQty && (
                                 <td className="px-1 py-1.5 md:px-1 md:py-2 text-center border-r">
-                                  {dayData.totalWashingQty || 0}
+                                  {dayData.totalPackingQty || 0}
                                 </td>
                               )}
-                              {visibleCols.totalBundles && (
+                              {visibleCols.totalOrderCardBundles && (
                                 <td className="px-1 py-1.5 md:px-1 md:py-2 text-center border-r">
-                                  {dayData.totalBundles || 0}
+                                  {dayData.totalOrderCardBundles || 0}
                                 </td>
                               )}
-                              {visibleCols.totalRewashQty && (
+                              {visibleCols.totalDefectCards && (
                                 <td className="px-1 py-1.5 md:px-1 md:py-2 text-center border-r">
-                                  {dayData.totalRewashQty || 0}
+                                  {dayData.totalDefectCards || 0}
+                                </td>
+                              )}
+                              {visibleCols.totalDefectCardQty && (
+                                <td className="px-1 py-1.5 md:px-1 md:py-2 text-center border-r">
+                                  {dayData.totalDefectCardQty || 0}
                                 </td>
                               )}
                             </React.Fragment>
@@ -1009,7 +1018,7 @@ const WashingLive = () => {
                         }
                         className="text-center py-4 text-gray-500"
                       >
-                        No summary data for selected filters.
+                        No summary data available for selected filters.
                       </td>
                     </tr>
                   )}
@@ -1018,58 +1027,73 @@ const WashingLive = () => {
             </div>
           </div>
 
-          {/* Hourly Washing Chart */}
           <div className="mb-4 md:mb-8 p-3 md:p-4 bg-white shadow-xl rounded-xl border border-gray-200">
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-base md:text-xl font-semibold text-gray-700">
-                Hourly Performance
+                Hourly Performance (Packing)
               </h2>
-              <div className="flex space-x-1">
+              <div className="flex flex-wrap gap-1">
                 <button
-                  onClick={() => setChartDataType("washing")}
+                  onClick={() => setChartDataType("packingQty")}
                   className={`px-2 py-1 text-xs rounded-md ${
-                    chartDataType === "washing"
-                      ? "bg-blue-500 text-white"
+                    chartDataType === "packingQty"
+                      ? "bg-green-500 text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                 >
-                  Washing Qty
+                  Total Qty
                 </button>
                 <button
-                  onClick={() => setChartDataType("bundle")}
+                  onClick={() => setChartDataType("orderBundles")}
                   className={`px-2 py-1 text-xs rounded-md ${
-                    chartDataType === "bundle"
-                      ? "bg-teal-500 text-white"
+                    chartDataType === "orderBundles"
+                      ? "bg-green-500 text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                 >
-                  Bundle Count
+                  Order Bundles
+                </button>
+                <button
+                  onClick={() => setChartDataType("defectCards")}
+                  className={`px-2 py-1 text-xs rounded-md ${
+                    chartDataType === "defectCards"
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  Defect Cards
+                </button>
+                <button
+                  onClick={() => setChartDataType("defectQty")}
+                  className={`px-2 py-1 text-xs rounded-md ${
+                    chartDataType === "defectQty"
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  Defect Qty
                 </button>
               </div>
             </div>
             {isLoadingHourlyChart ? (
-              <LoadingSpinner />
+              <LoadingSpinner_Packing />
             ) : hourlyChartData.length > 0 ? (
               <div className="h-[300px] md:h-[400px]">
-                {" "}
-                {/* Set a fixed height for the chart container */}
                 <Bar
-                  options={hourlyBarChartOptions}
-                  data={preparedHourlyChartData}
+                  options={hourlyBarChartOptions_Packing}
+                  data={preparedHourlyChartData_Packing}
                 />
               </div>
             ) : (
               <p className="text-center text-gray-500 py-8">
-                No hourly data available for selected filters.
+                No hourly Packing data available for selected filters.
               </p>
             )}
           </div>
 
-          {/* Detailed Records Table */}
           <div className="p-3 md:p-4 bg-white shadow-xl rounded-xl border border-gray-200">
-            {/* ... Detailed Table structure same as before, ensure styles are applied ... */}
             <h2 className="text-base md:text-xl font-semibold text-gray-700 mb-3 md:mb-4">
-              Detailed Washing Records
+              Detailed Packing Records
             </h2>
             <div className="overflow-x-auto max-h-[500px] md:max-h-[600px] custom-scrollbar text-[11px] md:text-sm">
               <table className="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-md overflow-hidden">
@@ -1082,14 +1106,13 @@ const WashingLive = () => {
                       "Dept.",
                       "MO No",
                       "Pkg No",
+                      "Card Type",
                       "Cust. Style",
                       "Buyer",
                       "Color",
                       "Size",
                       "Insp. Time",
-                      "Wash Qty",
-                      "Bundles",
-                      "Rewash Qty",
+                      "Packed Qty",
                     ].map((h, idx) => (
                       <th
                         key={h}
@@ -1109,25 +1132,30 @@ const WashingLive = () => {
                     detailedRecords.map((record, index) => (
                       <tr
                         key={index}
-                        className="hover:bg-blue-50 transition-colors duration-150"
+                        className="hover:bg-green-50 transition-colors duration-150"
                       >
-                        <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r sticky left-0 bg-white hover:bg-blue-50 z-0">
-                          {formatDisplayDate(record.washing_updated_date)}
+                        <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r sticky left-0 bg-white hover:bg-green-50 z-0">
+                          {formatDisplayDate_Packing(
+                            record.packing_updated_date
+                          )}
                         </td>
                         <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r">
-                          {record.emp_id_washing}
+                          {record.emp_id_packing}
                         </td>
                         <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r">
-                          {record.eng_name_washing || "N/A"}
+                          {record.eng_name_packing || "N/A"}
                         </td>
                         <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r">
-                          {record.dept_name_washing || "N/A"}
+                          {record.dept_name_packing || "N/A"}
                         </td>
                         <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r">
                           {record.selectedMono || "N/A"}
                         </td>
                         <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r">
                           {record.package_no}
+                        </td>
+                        <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r">
+                          {record.cardType}
                         </td>
                         <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r">
                           {record.custStyle || "N/A"}
@@ -1142,33 +1170,27 @@ const WashingLive = () => {
                           {record.size || "N/A"}
                         </td>
                         <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r">
-                          {record.washing_update_time || "N/A"}
+                          {record.packing_update_time || "N/A"}
                         </td>
                         <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r text-center">
-                          {record.washingQty || 0}
-                        </td>
-                        <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r text-center">
-                          {1}
-                        </td>
-                        <td className="px-2 py-1.5 md:px-3 md:py-2 whitespace-nowrap border-r text-center">
-                          {record.rewashQty || 0}
+                          {record.passQtyPack || 0}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
                       <td
-                        colSpan={14}
+                        colSpan={13}
                         className="text-center py-4 text-gray-500"
                       >
-                        No detailed records for selected filters.
+                        No detailed Packing records available for selected
+                        filters.
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
-            {/* Pagination (same structure) */}
             {pagination.totalPages > 1 && (
               <div className="mt-3 md:mt-4 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
                 {" "}
@@ -1220,4 +1242,4 @@ const WashingLive = () => {
   );
 };
 
-export default WashingLive;
+export default PackingLive;

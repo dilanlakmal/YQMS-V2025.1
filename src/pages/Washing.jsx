@@ -123,7 +123,7 @@ const WashingPage = () => {
           sub_con: defectData.sub_con,
           sub_con_factory: defectData.sub_con_factory,
           bundle_id: defectData.bundle_id,
-          bundle_random_id: defectData.bundle_random_id
+          bundle_random_id: defectData.bundle_random_id,
         };
         setScannedData(formattedData);
         setPassQtyWash(defectData.totalRejectGarmentCount); // Use totalRejectGarmentCount for Pass Wash Qty
@@ -157,13 +157,13 @@ const WashingPage = () => {
         washing_updated_date: now.toLocaleDateString("en-US", {
           month: "2-digit",
           day: "2-digit",
-          year: "numeric"
+          year: "numeric",
         }),
         washing_update_time: now.toLocaleTimeString("en-US", {
           hour12: false,
           hour: "2-digit",
           minute: "2-digit",
-          second: "2-digit"
+          second: "2-digit",
         }),
         package_no: scannedData.package_no,
         ...scannedData,
@@ -173,7 +173,7 @@ const WashingPage = () => {
         kh_name_washing: user.kh_name,
         job_title_washing: user.job_title,
         dept_name_washing: user.dept_name,
-        sect_name_washing: user.sect_name
+        sect_name_washing: user.sect_name,
       };
       console.log("New Record to be saved:", newRecord);
 
@@ -181,7 +181,7 @@ const WashingPage = () => {
       const response = await fetch(`${API_BASE_URL}/api/save-washing`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRecord)
+        body: JSON.stringify(newRecord),
       });
       if (!response.ok) throw new Error("Failed to save washing record");
 
@@ -201,8 +201,8 @@ const WashingPage = () => {
           job_title: newRecord.job_title_washing,
           dept_name: newRecord.dept_name_washing,
           sect_name: newRecord.sect_name_washing,
-          ...(isDefectCard && { defect_print_id: scannedData.defect_print_id })
-        }
+          ...(isDefectCard && { defect_print_id: scannedData.defect_print_id }),
+        },
       };
 
       const updateResponse = await fetch(
@@ -210,7 +210,7 @@ const WashingPage = () => {
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updateData)
+          body: JSON.stringify(updateData),
         }
       );
       if (!updateResponse.ok) throw new Error("Failed to update qc2_orderdata");

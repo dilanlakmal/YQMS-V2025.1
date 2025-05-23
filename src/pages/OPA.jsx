@@ -119,7 +119,7 @@ const OPAPage = () => {
           sub_con: defectData.sub_con,
           sub_con_factory: defectData.sub_con_factory,
           bundle_id: defectData.bundle_id,
-          bundle_random_id: defectData.bundle_random_id
+          bundle_random_id: defectData.bundle_random_id,
         };
         setScannedData(formattedData);
         setPassQtyOPA(defectData.totalRejectGarmentCount);
@@ -153,13 +153,13 @@ const OPAPage = () => {
         opa_updated_date: now.toLocaleDateString("en-US", {
           month: "2-digit",
           day: "2-digit",
-          year: "numeric"
+          year: "numeric",
         }),
         opa_update_time: now.toLocaleTimeString("en-US", {
           hour12: false,
           hour: "2-digit",
           minute: "2-digit",
-          second: "2-digit"
+          second: "2-digit",
         }),
         package_no: scannedData.package_no,
         ...scannedData,
@@ -169,14 +169,14 @@ const OPAPage = () => {
         kh_name_opa: user.kh_name,
         job_title_opa: user.job_title,
         dept_name_opa: user.dept_name,
-        sect_name_opa: user.sect_name
+        sect_name_opa: user.sect_name,
       };
       console.log("New Record to be saved:", newRecord);
 
       const response = await fetch(`${API_BASE_URL}/api/save-opa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRecord)
+        body: JSON.stringify(newRecord),
       });
       if (!response.ok) throw new Error("Failed to save OPA record");
 
@@ -196,8 +196,8 @@ const OPAPage = () => {
           job_title: newRecord.job_title_opa,
           dept_name: newRecord.dept_name_opa,
           sect_name: newRecord.sect_name_opa,
-          ...(isDefectCard && { defect_print_id: scannedData.defect_print_id })
-        }
+          ...(isDefectCard && { defect_print_id: scannedData.defect_print_id }),
+        },
       };
 
       const updateResponse = await fetch(
@@ -205,7 +205,7 @@ const OPAPage = () => {
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updateData)
+          body: JSON.stringify(updateData),
         }
       );
       if (!updateResponse.ok) throw new Error("Failed to update qc2_orderdata");

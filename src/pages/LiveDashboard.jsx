@@ -20,6 +20,7 @@ import MOBarChart from "../components/inspection/liveDashboard/MOBarChart";
 import NavigationPanel from "../components/inspection/liveDashboard/NavigationPanel";
 import OPALive from "../components/inspection/liveDashboard/OPALive";
 import OrderData from "../components/inspection/liveDashboard/OrderData";
+import PackingLive from "../components/inspection/liveDashboard/PackingLive";
 import QCSunriseDashboard from "../components/inspection/liveDashboard/QCSunriseDashboard";
 import RovingReport from "../components/inspection/liveDashboard/RovingReport"; // Added import
 import SummaryCard from "../components/inspection/liveDashboard/SummaryCard";
@@ -455,6 +456,7 @@ const LiveDashboard = () => {
         {activeSection === "Washing" && <WashingLive />}
         {activeSection === "Ironing" && <IroningLive />}
         {activeSection === "OPA" && <OPALive />}
+        {activeSection === "Packing" && <PackingLive />}
         {activeSection === "Live Dashboard" && (
           <>
             {/* Summary Cards (Common for all tabs) */}
