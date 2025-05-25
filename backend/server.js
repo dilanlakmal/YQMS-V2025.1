@@ -43,10 +43,13 @@ import createCuttingIssueModel from "./models/CuttingIssues.js";
 import createCuttingMeasurementPointModel from "./models/CuttingMeasurementPoints.js"; // New model import
 import createInlineOrdersModel from "./models/InlineOrders.js"; // Import the new model
 
+import createDailyTestingFUQCModel from "./models/DailyTestingFUQCModel.js";
 import createDailyTestingHTFUtModel from "./models/dailyTestingHTFUModel.js";
 import createFUFirstOutputModel from "./models/FUFirstOutput.js";
 import createHTFirstOutputModel from "./models/HTFirstOutput.js";
+import createHTInspectionReportModel from "./models/HTInspectionReportModel.js";
 import createSCCDailyTestingModel from "./models/SCCDailyTesting.js";
+import createSCCDefectModel from "./models/SCCDefectModel.js";
 
 // Import the API_BASE_URL from our config file
 import { API_BASE_URL } from "./config.js";
@@ -169,6 +172,9 @@ const HTFirstOutput = createHTFirstOutputModel(ymProdConnection); // Add this
 const FUFirstOutput = createFUFirstOutputModel(ymProdConnection); // Add this
 const SCCDailyTesting = createSCCDailyTestingModel(ymProdConnection);
 const DailyTestingHTFU = createDailyTestingHTFUtModel(ymProdConnection);
+const DailyTestingFUQC = createDailyTestingFUQCModel(ymProdConnection);
+const SCCDefect = createSCCDefectModel(ymProdConnection);
+const HTInspectionReport = createHTInspectionReportModel(ymProdConnection);
 
 // Set UTF-8 encoding for responses
 app.use((req, res, next) => {
@@ -2086,75 +2092,256 @@ app.get("/api/user-batches", async (req, res) => {
    End Points - Reprint - qc2_orderdata
 ------------------------------ */
 
-// Combined search endpoint for MONo, Package No, and Emp ID from qc2_orderdata
-app.get("/api/reprint-search", async (req, res) => {
+// NEW ENDPOINT: Get distinct values for ReprintTab filters from qc2_orderdata
+app.get("/api/reprint-distinct-filters", async (req, res) => {
   try {
-    const { mono, packageNo, empId } = req.query;
+    const distinctMonos = await QC2OrderData.distinct("selectedMono");
+    const distinctPackageNos = await QC2OrderData.distinct("package_no"); // Might be many if not filtered first
+    const distinctEmpIds = await QC2OrderData.distinct("emp_id");
+    const distinctLineNos = await QC2OrderData.distinct("lineNo");
+    const distinctBuyers = await QC2OrderData.distinct("buyer");
 
-    // Build the query dynamically based on provided parameters
-    const query = {};
-    if (mono) {
-      query.selectedMono = { $regex: mono, $options: "i" }; // Case-insensitive partial match
-    }
-    if (packageNo) {
-      const packageNoInt = parseInt(packageNo);
-      if (!isNaN(packageNoInt)) {
-        query.package_no = packageNoInt; // Exact match for integer
-      }
-    }
-    if (empId) {
-      query.emp_id = { $regex: empId, $options: "i" }; // Case-insensitive partial match
-    }
-
-    // Fetch matching records from qc2_orderdata
-    const records = await QC2OrderData.find(query)
-      .sort({ package_no: 1 }) // Sort by package_no ascending
-      .limit(100); // Limit to prevent overload
-
-    res.json(records);
+    res.json({
+      monos: distinctMonos.sort(),
+      packageNos: distinctPackageNos
+        .map(String)
+        .sort((a, b) => parseInt(a) - parseInt(b)), // Ensure string for select, sort numerically
+      empIds: distinctEmpIds.sort(),
+      lineNos: distinctLineNos.sort((a, b) => {
+        const numA = parseInt(a);
+        const numB = parseInt(b);
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        if (!isNaN(numA)) return -1;
+        if (!isNaN(numB)) return 1;
+        return a.localeCompare(b);
+      }),
+      buyers: distinctBuyers.sort(),
+    });
   } catch (error) {
-    console.error("Error searching qc2_orderdata:", error);
-    res.status(500).json({ error: "Failed to search records" });
+    console.error("Error fetching distinct filter values for reprint:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch distinct filter values for reprint" });
   }
 });
 
-// Fetch colors and sizes for a specific MONo (unchanged)
+// MODIFIED ENDPOINT: /api/reprint-search to support new filters, pagination, and sorting
+app.get("/api/reprint-search", async (req, res) => {
+  try {
+    const {
+      date,
+      lineNo,
+      selectedMono,
+      packageNo,
+      buyer,
+      empId, // Renamed from selectedEmpId to empId for consistency
+      page = 1,
+      limit = 15,
+      sortBy = "updated_date_seperator", // Default sort for latest
+      sortOrder = "desc",
+    } = req.query;
+
+    let matchQuery = {};
+
+    if (date) {
+      const normalizedQueryDate = normalizeDateString(date);
+      if (normalizedQueryDate) {
+        matchQuery.updated_date_seperator = normalizedQueryDate;
+      }
+    }
+    if (lineNo) matchQuery.lineNo = lineNo;
+    if (selectedMono) matchQuery.selectedMono = selectedMono;
+    if (packageNo) {
+      const pkgNo = parseInt(packageNo);
+      if (!isNaN(pkgNo)) matchQuery.package_no = pkgNo;
+    }
+    if (buyer) matchQuery.buyer = buyer;
+    if (empId) matchQuery.emp_id = empId;
+
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+    let sortOptions = {};
+    if (sortBy === "updated_date_seperator") {
+      sortOptions = {
+        updated_date_seperator: sortDirection,
+        updated_time_seperator: sortDirection,
+      };
+    } else {
+      sortOptions[sortBy] = sortDirection;
+    }
+
+    const totalRecords = await QC2OrderData.countDocuments(matchQuery);
+    const records = await QC2OrderData.find(matchQuery)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limitNum);
+
+    // For reprint, we don't necessarily need global stats like in the other tab,
+    // but we do need pagination info.
+    res.json({
+      records,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalRecords / limitNum),
+        totalRecords,
+        limit: limitNum,
+      },
+    });
+  } catch (error) {
+    console.error("Error searching qc2_orderdata for reprint:", error);
+    res.status(500).json({ error: "Failed to search records for reprint" });
+  }
+});
+
+// The /api/reprint-colors-sizes/:mono endpoint might become less relevant
+// if filtering is primarily done via the new filter pane.
+// However, it could still be used if you want to populate color/size dropdowns
+// AFTER a MONo is selected in the filter pane for further refinement,
+// though the main table will already be filtered by MONo.
+// For now, I'll keep it, but its usage in the frontend might change.
 app.get("/api/reprint-colors-sizes/:mono", async (req, res) => {
   try {
     const mono = req.params.mono;
+    // This fetches distinct color/size combinations for a given MONO from qc2_orderdata
     const result = await QC2OrderData.aggregate([
       { $match: { selectedMono: mono } },
-      {
-        $group: {
-          _id: {
-            color: "$color",
-            size: "$size",
-          },
-          colorCode: { $first: "$colorCode" },
-          chnColor: { $first: "$chnColor" },
-          package_no: { $first: "$package_no" },
-        },
-      },
-      {
-        $group: {
-          _id: "$_id.color",
-          sizes: { $push: "$_id.size" },
-          colorCode: { $first: "$colorCode" },
-          chnColor: { $first: "$chnColor" },
-        },
-      },
+      { $group: { _id: { color: "$color", size: "$size" } } },
+      { $group: { _id: "$_id.color", sizes: { $addToSet: "$_id.size" } } }, // Use $addToSet for unique sizes
+      { $project: { color: "$_id", sizes: 1, _id: 0 } },
+      { $sort: { color: 1 } }, // Sort colors
     ]);
-
-    const colors = result.map((c) => ({
-      color: c._id,
-      sizes: c.sizes,
-      colorCode: c.colorCode,
-      chnColor: c.chnColor,
-    }));
-
-    res.json(colors);
+    // Further sort sizes within each color if needed client-side or here
+    result.forEach((item) => item.sizes.sort());
+    res.json(result);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch colors/sizes" });
+    console.error("Error fetching colors/sizes for reprint:", error);
+    res.status(500).json({ error: "Failed to fetch colors/sizes for reprint" });
+  }
+});
+
+// MODIFIED ENDPOINT: Fetch filtered bundle data with pagination and aggregated stats
+app.get("/api/filtered-bundle-data", async (req, res) => {
+  try {
+    const {
+      date,
+      lineNo,
+      selectedMono,
+      packageNo,
+      buyer,
+      emp_id,
+      page = 1,
+      limit = 15, // Pagination params, default to page 1, 10 items per page
+      sortBy = "updated_date_seperator", // Default sort field
+      sortOrder = "desc", // Default sort order (descending for latest first)
+    } = req.query;
+
+    let matchQuery = {};
+
+    if (date) {
+      const normalizedQueryDate = normalizeDateString(date);
+      if (normalizedQueryDate) {
+        matchQuery.updated_date_seperator = normalizedQueryDate;
+      }
+    }
+    if (lineNo) matchQuery.lineNo = lineNo;
+    if (selectedMono) matchQuery.selectedMono = selectedMono;
+    if (packageNo) {
+      const pkgNo = parseInt(packageNo);
+      if (!isNaN(pkgNo)) matchQuery.package_no = pkgNo;
+    }
+    if (buyer) matchQuery.buyer = buyer;
+    if (emp_id) matchQuery.emp_id = emp_id;
+
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Determine sort direction
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+    let sortOptions = {};
+    if (sortBy === "updated_date_seperator") {
+      // For date and time, sort by date then time if dates are equal
+      sortOptions = {
+        updated_date_seperator: sortDirection,
+        updated_time_seperator: sortDirection,
+      };
+    } else {
+      sortOptions[sortBy] = sortDirection;
+    }
+
+    // Fetch total count of matching documents for pagination
+    const totalRecords = await QC2OrderData.countDocuments(matchQuery);
+
+    // Fetch paginated and sorted records
+    const records = await QC2OrderData.find(matchQuery)
+      .sort(sortOptions) // Apply sorting
+      .skip(skip) // Apply skip for pagination
+      .limit(limitNum); // Apply limit for pagination
+
+    // Calculate aggregated stats based on ALL filtered records (not just the current page)
+    // This might be resource-intensive if the filtered set is very large.
+    // Consider if stats should also be paginated or if an approximation is okay for large sets.
+    // For now, calculating on the full filtered set.
+    const allFilteredRecordsForStats = await QC2OrderData.find(matchQuery); // Re-query without pagination for stats
+
+    let totalGarmentQty = 0;
+    let uniqueStyles = new Set();
+
+    allFilteredRecordsForStats.forEach((record) => {
+      totalGarmentQty += record.count || 0;
+      if (record.selectedMono) {
+        uniqueStyles.add(record.selectedMono);
+      }
+    });
+
+    const totalBundlesFromStats = allFilteredRecordsForStats.length; // This is the true total bundles for the filter
+    const totalStyles = uniqueStyles.size;
+
+    res.json({
+      records,
+      stats: {
+        totalGarmentQty,
+        totalBundles: totalBundlesFromStats, // Use count from all filtered records for stats
+        totalStyles,
+      },
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalRecords / limitNum),
+        totalRecords: totalRecords, // Total records matching the filter
+        limit: limitNum,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching filtered bundle data:", error);
+    res.status(500).json({ message: "Failed to fetch filtered bundle data" });
+  }
+});
+
+// Ensure your existing /api/user-batches is either removed or updated if it's now redundant
+// For simplicity, I'll assume the new /api/filtered-bundle-data replaces the primary need of /api/user-batches for this component.
+// If /api/user-batches is used elsewhere with just emp_id, keep it.
+// Otherwise, you can deprecate it in favor of the more flexible filtered endpoint.
+// For now, I'm keeping it as it might be used by the main BundleRegistration page for other purposes.
+app.get("/api/user-batches", async (req, res) => {
+  try {
+    const { emp_id } = req.query;
+    if (!emp_id) {
+      return res.status(400).json({ message: "emp_id is required" });
+    }
+    // If you want this to also use the normalized date string for 'date' field
+    // you'd need to adjust how 'date' is stored or queried here too.
+    // For now, assuming it matches as is or 'date' field is not used for filtering here.
+    const batches = await QC2OrderData.find({ emp_id }).sort({
+      updated_date_seperator: -1,
+      updated_time_seperator: -1,
+    });
+    res.json(batches);
+  } catch (error) {
+    console.error("Error fetching user batches:", error);
+    res.status(500).json({ message: "Failed to fetch user batches" });
   }
 });
 
@@ -11198,20 +11385,33 @@ const formatDateToMMDDYYYY = (dateInput) => {
 app.post("/api/scc/ht-first-output", async (req, res) => {
   try {
     const { _id, ...dataToSave } = req.body;
+    if (!dataToSave.machineNo) {
+      return res.status(400).json({ message: "Machine No is required." });
+    }
     dataToSave.inspectionDate = formatDateToMMDDYYYY(dataToSave.inspectionDate);
-
-    // Ensure remarks fields are "NA" if empty
     dataToSave.remarks = dataToSave.remarks?.trim() || "NA";
+
+    // Frontend now sends standardSpecification as an array of 1 or 2 objects
+    // Each object should already have tempOffsetPlus and tempOffsetMinus calculated by SCCPage
     if (
       dataToSave.standardSpecification &&
       dataToSave.standardSpecification.length > 0
     ) {
       dataToSave.standardSpecification = dataToSave.standardSpecification.map(
         (spec) => ({
-          ...spec,
+          ...spec, // type, method, timeSec, tempC, tempOffsetPlus, tempOffsetMinus, status
           remarks: spec.remarks?.trim() || "NA",
+          pressure:
+            spec.pressure !== null && spec.pressure !== undefined
+              ? Number(spec.pressure)
+              : null,
         })
       );
+    } else {
+      // It's required to have at least one spec
+      return res
+        .status(400)
+        .json({ message: "Standard Specification is required." });
     }
 
     let record;
@@ -11220,20 +11420,19 @@ app.post("/api/scc/ht-first-output", async (req, res) => {
         new: true,
         runValidators: true,
         upsert: false,
-      }); // Make sure upsert is false for explicit update
+      });
       if (!record)
         return res
           .status(404)
           .json({ message: "Record not found for update." });
     } else {
-      // Check for existing record by moNo, color, and inspectionDate before creating
       const existing = await HTFirstOutput.findOne({
         moNo: dataToSave.moNo,
         color: dataToSave.color,
         inspectionDate: dataToSave.inspectionDate,
+        machineNo: dataToSave.machineNo,
       });
       if (existing) {
-        // If it exists, update it
         record = await HTFirstOutput.findByIdAndUpdate(
           existing._id,
           dataToSave,
@@ -11250,10 +11449,9 @@ app.post("/api/scc/ht-first-output", async (req, res) => {
   } catch (error) {
     console.error("Error saving HT First Output:", error);
     if (error.code === 11000) {
-      // Mongoose duplicate key error
       return res.status(409).json({
         message:
-          "Duplicate entry. A record with this MO, Color, and Date already exists.",
+          "Duplicate entry. A record with this MO, Color, Date, and Machine No already exists.",
         error: error.message,
         errorCode: "DUPLICATE_KEY",
       });
@@ -11266,43 +11464,16 @@ app.post("/api/scc/ht-first-output", async (req, res) => {
   }
 });
 
-app.get("/api/scc/ht-first-output", async (req, res) => {
-  try {
-    const { moNo, color, inspectionDate } = req.query;
-    if (!moNo || !color || !inspectionDate) {
-      return res
-        .status(400)
-        .json({ message: "MO No, Color, and Inspection Date are required." });
-    }
-    const formattedDate = formatDateToMMDDYYYY(inspectionDate);
-    const record = await HTFirstOutput.findOne({
-      moNo,
-      color,
-      inspectionDate: formattedDate,
-    });
-    if (!record) {
-      // Return 200 with a specific message for "not found" so frontend can handle it as new record
-      return res
-        .status(200)
-        .json({ message: "HT_RECORD_NOT_FOUND", data: null });
-    }
-    res.json(record); // Existing record data will be in record directly, not record.data
-  } catch (error) {
-    console.error("Error fetching HT First Output:", error);
-    res.status(500).json({
-      message: "Failed to fetch HT First Output",
-      error: error.message,
-    });
-  }
-});
-
-// REVISED Endpoints for FUFirstOutput (similar changes as HT)
+// POST /api/scc/fu-first-output - Apply analogous changes as above for HTFirstOutput
 app.post("/api/scc/fu-first-output", async (req, res) => {
   try {
     const { _id, ...dataToSave } = req.body;
+    if (!dataToSave.machineNo) {
+      return res.status(400).json({ message: "Machine No is required." });
+    }
     dataToSave.inspectionDate = formatDateToMMDDYYYY(dataToSave.inspectionDate);
-
     dataToSave.remarks = dataToSave.remarks?.trim() || "NA";
+
     if (
       dataToSave.standardSpecification &&
       dataToSave.standardSpecification.length > 0
@@ -11311,8 +11482,16 @@ app.post("/api/scc/fu-first-output", async (req, res) => {
         (spec) => ({
           ...spec,
           remarks: spec.remarks?.trim() || "NA",
+          pressure:
+            spec.pressure !== null && spec.pressure !== undefined
+              ? Number(spec.pressure)
+              : null,
         })
       );
+    } else {
+      return res
+        .status(400)
+        .json({ message: "Standard Specification is required." });
     }
 
     let record;
@@ -11331,6 +11510,7 @@ app.post("/api/scc/fu-first-output", async (req, res) => {
         moNo: dataToSave.moNo,
         color: dataToSave.color,
         inspectionDate: dataToSave.inspectionDate,
+        machineNo: dataToSave.machineNo,
       });
       if (existing) {
         record = await FUFirstOutput.findByIdAndUpdate(
@@ -11351,7 +11531,7 @@ app.post("/api/scc/fu-first-output", async (req, res) => {
     if (error.code === 11000) {
       return res.status(409).json({
         message:
-          "Duplicate entry. A record with this MO, Color, and Date already exists.",
+          "Duplicate entry. A record with this MO, Color, Date, and Machine No already exists.",
         error: error.message,
         errorCode: "DUPLICATE_KEY",
       });
@@ -11364,26 +11544,59 @@ app.post("/api/scc/fu-first-output", async (req, res) => {
   }
 });
 
+app.get("/api/scc/ht-first-output", async (req, res) => {
+  try {
+    const { moNo, color, inspectionDate, machineNo } = req.query; // Added machineNo
+    if (!moNo || !color || !inspectionDate || !machineNo) {
+      // Added machineNo to validation
+      return res.status(400).json({
+        message: "MO No, Color, Inspection Date, and Machine No are required.",
+      }); // Updated message
+    }
+    const formattedDate = formatDateToMMDDYYYY(inspectionDate);
+    const record = await HTFirstOutput.findOne({
+      moNo,
+      color,
+      inspectionDate: formattedDate,
+      machineNo, // Added machineNo to query
+    });
+    if (!record) {
+      return res
+        .status(200)
+        .json({ message: "HT_RECORD_NOT_FOUND", data: null });
+    }
+    res.json(record); // Backend returns full object, not nested under 'data'
+  } catch (error) {
+    console.error("Error fetching HT First Output:", error);
+    res.status(500).json({
+      message: "Failed to fetch HT First Output",
+      error: error.message,
+    });
+  }
+});
+
 app.get("/api/scc/fu-first-output", async (req, res) => {
   try {
-    const { moNo, color, inspectionDate } = req.query;
-    if (!moNo || !color || !inspectionDate) {
-      return res
-        .status(400)
-        .json({ message: "MO No, Color, and Inspection Date are required." });
+    const { moNo, color, inspectionDate, machineNo } = req.query; // Added machineNo
+    if (!moNo || !color || !inspectionDate || !machineNo) {
+      // Added machineNo to validation
+      return res.status(400).json({
+        message: "MO No, Color, Inspection Date, and Machine No are required.",
+      }); // Updated message
     }
     const formattedDate = formatDateToMMDDYYYY(inspectionDate);
     const record = await FUFirstOutput.findOne({
       moNo,
       color,
       inspectionDate: formattedDate,
+      machineNo, // Added machineNo to query
     });
     if (!record) {
       return res
         .status(200)
         .json({ message: "FU_RECORD_NOT_FOUND", data: null });
     }
-    res.json(record);
+    res.json(record); // Backend returns full object
   } catch (error) {
     console.error("Error fetching FU First Output:", error);
     res.status(500).json({
@@ -11393,10 +11606,7 @@ app.get("/api/scc/fu-first-output", async (req, res) => {
   }
 });
 
-/* ------------------------------
-   End Points - SCC HT/FU - Daily Testing
------------------------------- */
-
+// 2. `GET /api/scc/get-first-output-specs` (Updated)
 app.get("/api/scc/get-first-output-specs", async (req, res) => {
   try {
     const { moNo, color, inspectionDate } = req.query;
@@ -11408,62 +11618,83 @@ app.get("/api/scc/get-first-output-specs", async (req, res) => {
     const formattedDate = formatDateToMMDDYYYY(inspectionDate);
 
     let specs = null;
+    const processRecord = (record) => {
+      if (record && record.standardSpecification) {
+        const secondHeatSpec = record.standardSpecification.find(
+          (s) =>
+            s.type === "2nd heat" &&
+            s.status === "Pass" &&
+            s.timeSec &&
+            s.tempC &&
+            s.pressure !== null
+        );
+        const firstSpec = record.standardSpecification.find(
+          (s) =>
+            s.type === "first" &&
+            s.status === "Pass" &&
+            s.timeSec &&
+            s.tempC &&
+            s.pressure !== null
+        );
+
+        // Prioritize 2nd heat spec if it's 'Pass' and valid
+        if (secondHeatSpec) {
+          return {
+            tempC: secondHeatSpec.tempC,
+            timeSec: secondHeatSpec.timeSec,
+            pressure: secondHeatSpec.pressure,
+          };
+        } else if (firstSpec) {
+          // Fallback to first spec if it's 'Pass' and valid
+          return {
+            tempC: firstSpec.tempC,
+            timeSec: firstSpec.timeSec,
+            pressure: firstSpec.pressure,
+          };
+        }
+        // If no 'Pass' specs, try any '2nd heat' then any 'first'
+        const anySecondHeatSpec = record.standardSpecification.find(
+          (s) =>
+            s.type === "2nd heat" && s.timeSec && s.tempC && s.pressure !== null
+        );
+        if (anySecondHeatSpec) {
+          return {
+            tempC: anySecondHeatSpec.tempC,
+            timeSec: anySecondHeatSpec.timeSec,
+            pressure: anySecondHeatSpec.pressure,
+          };
+        }
+        const anyFirstSpec = record.standardSpecification.find(
+          (s) =>
+            s.type === "first" && s.timeSec && s.tempC && s.pressure !== null
+        );
+        if (anyFirstSpec) {
+          return {
+            tempC: anyFirstSpec.tempC,
+            timeSec: anyFirstSpec.timeSec,
+            pressure: anyFirstSpec.pressure,
+          };
+        }
+      }
+      return null;
+    };
+
     // Try HT First Output
     const htRecord = await HTFirstOutput.findOne({
       moNo,
       color,
       inspectionDate: formattedDate,
     }).lean();
-    if (htRecord && htRecord.standardSpecification) {
-      const afterHatSpec = htRecord.standardSpecification.find(
-        (s) => s.type === "afterHat" && s.timeSec && s.tempC && s.pressure
-      );
-      const firstSpec = htRecord.standardSpecification.find(
-        (s) => s.type === "first"
-      );
-      if (afterHatSpec) {
-        specs = {
-          tempC: afterHatSpec.tempC,
-          timeSec: afterHatSpec.timeSec,
-          pressure: afterHatSpec.pressure,
-        };
-      } else if (firstSpec) {
-        specs = {
-          tempC: firstSpec.tempC,
-          timeSec: firstSpec.timeSec,
-          pressure: firstSpec.pressure,
-        };
-      }
-    }
+    specs = processRecord(htRecord);
 
-    // If not found in HT, try FU First Output (assuming similar logic might apply or distinct records)
+    // If not found in HT, try FU First Output
     if (!specs) {
       const fuRecord = await FUFirstOutput.findOne({
         moNo,
         color,
         inspectionDate: formattedDate,
       }).lean();
-      if (fuRecord && fuRecord.standardSpecification) {
-        const afterHatSpec = fuRecord.standardSpecification.find(
-          (s) => s.type === "afterHat" && s.timeSec && s.tempC && s.pressure
-        );
-        const firstSpec = fuRecord.standardSpecification.find(
-          (s) => s.type === "first"
-        );
-        if (afterHatSpec) {
-          specs = {
-            tempC: afterHatSpec.tempC,
-            timeSec: afterHatSpec.timeSec,
-            pressure: afterHatSpec.pressure,
-          };
-        } else if (firstSpec) {
-          specs = {
-            tempC: firstSpec.tempC,
-            timeSec: firstSpec.timeSec,
-            pressure: firstSpec.pressure,
-          };
-        }
-      }
+      specs = processRecord(fuRecord);
     }
 
     if (!specs) {
@@ -11479,12 +11710,58 @@ app.get("/api/scc/get-first-output-specs", async (req, res) => {
   }
 });
 
+/* ------------------------------
+   End Points - SCC HT/FU - Daily Testing
+------------------------------ */
+
 // Endpoints for SCCDailyTesting
 app.post("/api/scc/daily-testing", async (req, res) => {
   try {
     const { _id, ...dataToSave } = req.body;
     dataToSave.inspectionDate = formatDateToMMDDYYYY(dataToSave.inspectionDate);
     dataToSave.remarks = dataToSave.remarks?.trim() || "NA";
+
+    // Ensure pressure in standardSpecifications is a number
+    if (
+      dataToSave.standardSpecifications &&
+      dataToSave.standardSpecifications.pressure !== undefined
+    ) {
+      dataToSave.standardSpecifications.pressure =
+        dataToSave.standardSpecifications.pressure !== null &&
+        dataToSave.standardSpecifications.pressure !== ""
+          ? Number(dataToSave.standardSpecifications.pressure)
+          : null;
+    }
+
+    // Ensure pressures in parameterAdjustmentRecords are numbers
+    if (
+      dataToSave.parameterAdjustmentRecords &&
+      Array.isArray(dataToSave.parameterAdjustmentRecords)
+    ) {
+      dataToSave.parameterAdjustmentRecords =
+        dataToSave.parameterAdjustmentRecords.map((rec) => ({
+          ...rec,
+          adjustedTempC:
+            rec.adjustedTempC !== null && rec.adjustedTempC !== ""
+              ? Number(rec.adjustedTempC)
+              : null,
+          adjustedTimeSec:
+            rec.adjustedTimeSec !== null && rec.adjustedTimeSec !== ""
+              ? Number(rec.adjustedTimeSec)
+              : null,
+          adjustedPressure:
+            rec.adjustedPressure !== null && rec.adjustedPressure !== ""
+              ? Number(rec.adjustedPressure)
+              : null,
+        }));
+    } else {
+      // If user chose "No" for adjustment data, it might come as undefined or empty.
+      // The schema defaults to an empty array, so this should be fine.
+      // Or explicitly set to empty array if not provided or not an array.
+      dataToSave.parameterAdjustmentRecords = [];
+    }
+
+    // dataToSave.cycleWashingResults will no longer be present if removed from frontend payload
 
     let record;
     if (_id) {
@@ -11556,7 +11833,8 @@ app.get("/api/scc/daily-testing", async (req, res) => {
         .status(200)
         .json({ message: "DAILY_TESTING_RECORD_NOT_FOUND", data: null });
     }
-    res.json(record); // Returns the existing record
+    // No change needed here for GET, as it returns what's in DB. Frontend handles display.
+    res.json(record);
   } catch (error) {
     console.error("Error fetching Daily Testing report:", error);
     res.status(500).json({
@@ -11565,10 +11843,17 @@ app.get("/api/scc/daily-testing", async (req, res) => {
     });
   }
 });
-
 /* ------------------------------
    End Points - SCC Daily HT/FU QC Test
 ------------------------------ */
+
+// Helper to parse pressure string to number (if needed, but schema now enforces Number)
+const parsePressureToNumber = (pressureStr) => {
+  if (pressureStr === null || pressureStr === undefined || pressureStr === "")
+    return null;
+  const num = parseFloat(pressureStr);
+  return isNaN(num) ? null : num;
+};
 
 // GET Endpoint to fetch existing Daily HT/FU Test data or MO list
 app.get("/api/scc/daily-htfu-test", async (req, res) => {
@@ -11584,14 +11869,14 @@ app.get("/api/scc/daily-htfu-test", async (req, res) => {
         .json({ message: "Inspection Date and Machine No are required." });
     }
 
-    // Scenario 1: Fetch specific record if moNo and color are provided
     if (moNo && color) {
       const record = await DailyTestingHTFU.findOne({
         inspectionDate: formattedDate,
         machineNo,
         moNo,
         color,
-      });
+      }).lean(); // Use .lean() for faster queries if not modifying directly
+
       if (!record) {
         return res
           .status(200)
@@ -11599,14 +11884,6 @@ app.get("/api/scc/daily-htfu-test", async (req, res) => {
       }
       return res.json({ message: "RECORD_FOUND", data: record });
     } else {
-      // Scenario 2: Fetch distinct MO/Color combinations for a given Date/MachineNo
-      const records = await DailyTestingHTFU.find(
-        { inspectionDate: formattedDate, machineNo },
-        "moNo color buyer buyerStyle" // Select only necessary fields
-      ).distinct("moNo"); // Or more complex aggregation if needed to pair MO with Color
-
-      // For simplicity, let's return distinct MOs, client can then pick color
-      // A better approach might be to return {moNo, color, buyer, buyerStyle} tuples
       const distinctEntries = await DailyTestingHTFU.aggregate([
         { $match: { inspectionDate: formattedDate, machineNo } },
         {
@@ -11614,7 +11891,6 @@ app.get("/api/scc/daily-htfu-test", async (req, res) => {
             _id: { moNo: "$moNo", color: "$color" },
             buyer: { $first: "$buyer" },
             buyerStyle: { $first: "$buyerStyle" },
-            // If you need to know if a full record exists to load it directly
             docId: { $first: "$_id" },
           },
         },
@@ -11628,18 +11904,17 @@ app.get("/api/scc/daily-htfu-test", async (req, res) => {
             docId: "$docId",
           },
         },
+        { $sort: { moNo: 1, color: 1 } },
       ]);
 
       if (distinctEntries.length === 0) {
-        return res.status(200).json({
-          message: "NO_RECORDS_FOR_DATE_MACHINE",
-          data: [],
-        });
+        return res
+          .status(200)
+          .json({ message: "NO_RECORDS_FOR_DATE_MACHINE", data: [] });
       }
-      // If only one unique MO/Color combo, frontend might auto-load it fully later
       return res.json({
         message: "MULTIPLE_MO_COLOR_FOUND",
-        data: distinctEntries, // Array of {moNo, color, buyer, buyerStyle, docId}
+        data: distinctEntries,
       });
     }
   } catch (error) {
@@ -11655,7 +11930,7 @@ app.get("/api/scc/daily-htfu-test", async (req, res) => {
 app.post("/api/scc/daily-htfu-test", async (req, res) => {
   try {
     const {
-      _id, // ID of the main document if updating
+      _id,
       inspectionDate,
       machineNo,
       moNo,
@@ -11667,13 +11942,14 @@ app.post("/api/scc/daily-htfu-test", async (req, res) => {
       emp_eng_name,
       emp_dept_name,
       emp_sect_name,
-      emp_job_title, // User details
+      emp_job_title,
       baseReqTemp,
       baseReqTime,
-      baseReqPressure, // Base specs from first output
-      currentInspection, // The data for the specific slot being submitted
+      baseReqPressure, // Expecting number or null from frontend now due to schema change
+      currentInspection,
       stretchTestResult,
-      washingTestResult, // Overall tests
+      stretchTestRejectReasons, // New field
+      washingTestResult,
     } = req.body;
 
     const formattedDate = formatDateToMMDDYYYY(inspectionDate);
@@ -11691,12 +11967,25 @@ app.post("/api/scc/daily-htfu-test", async (req, res) => {
     const query = { inspectionDate: formattedDate, machineNo, moNo, color };
     let record = await DailyTestingHTFU.findOne(query);
 
+    // Prepare currentInspection with numeric pressures
+    const processedCurrentInspection = {
+      ...currentInspection,
+      pressure_req: parsePressureToNumber(currentInspection.pressure_req),
+      pressure_actual: parsePressureToNumber(currentInspection.pressure_actual),
+    };
+
     if (record) {
       // Update existing record
-      record.baseReqTemp = baseReqTemp ?? record.baseReqTemp;
-      record.baseReqTime = baseReqTime ?? record.baseReqTime;
-      record.baseReqPressure = baseReqPressure ?? record.baseReqPressure;
-      record.emp_id = emp_id; // Update user details on each submission if needed
+      record.baseReqTemp =
+        baseReqTemp !== undefined ? baseReqTemp : record.baseReqTemp;
+      record.baseReqTime =
+        baseReqTime !== undefined ? baseReqTime : record.baseReqTime;
+      record.baseReqPressure =
+        baseReqPressure !== undefined
+          ? baseReqPressure
+          : record.baseReqPressure; // Expecting number or null
+
+      record.emp_id = emp_id;
       record.emp_kh_name = emp_kh_name;
       record.emp_eng_name = emp_eng_name;
       record.emp_dept_name = emp_dept_name;
@@ -11704,47 +11993,42 @@ app.post("/api/scc/daily-htfu-test", async (req, res) => {
       record.emp_job_title = emp_job_title;
       record.inspectionTime = inspectionTime;
 
-      // Update or add the specific inspection slot
       const slotIndex = record.inspections.findIndex(
-        (insp) => insp.timeSlotKey === currentInspection.timeSlotKey
+        (insp) => insp.timeSlotKey === processedCurrentInspection.timeSlotKey
       );
       if (slotIndex > -1) {
-        // Update existing slot, ensuring not to overwrite with nulls if not intended
         record.inspections[slotIndex] = {
-          ...record.inspections[slotIndex], // keep old values not submitted
-          ...currentInspection, // new values for the slot
+          ...record.inspections[slotIndex],
+          ...processedCurrentInspection,
           inspectionTimestamp: new Date(),
         };
       } else {
         record.inspections.push({
-          ...currentInspection,
+          ...processedCurrentInspection,
           inspectionTimestamp: new Date(),
         });
       }
-      // Sort inspections by inspectionNo after modification
       record.inspections.sort(
         (a, b) => (a.inspectionNo || 0) - (b.inspectionNo || 0)
       );
 
-      // Update stretch/washing tests only if they are being set and not already "Done"
-      // Or if they are 'Pending' and now being set to 'Pass'/'Reject'
-      if (
-        !record.isStretchWashingTestDone ||
-        record.stretchTestResult === "Pending"
-      ) {
-        if (stretchTestResult && stretchTestResult !== "Pending") {
-          record.stretchTestResult = stretchTestResult;
+      if (stretchTestResult && stretchTestResult !== "Pending") {
+        record.stretchTestResult = stretchTestResult;
+        if (stretchTestResult === "Reject") {
+          record.stretchTestRejectReasons = Array.isArray(
+            stretchTestRejectReasons
+          )
+            ? stretchTestRejectReasons
+            : [];
+        } else {
+          record.stretchTestRejectReasons = []; // Clear reasons if not Reject
         }
       }
-      if (
-        !record.isStretchWashingTestDone ||
-        record.washingTestResult === "Pending"
-      ) {
-        if (washingTestResult && washingTestResult !== "Pending") {
-          record.washingTestResult = washingTestResult;
-        }
+
+      if (washingTestResult && washingTestResult !== "Pending") {
+        record.washingTestResult = washingTestResult;
       }
-      // Mark as done if both are now Pass/Reject
+
       if (
         (record.stretchTestResult === "Pass" ||
           record.stretchTestResult === "Reject") &&
@@ -11771,14 +12055,19 @@ app.post("/api/scc/daily-htfu-test", async (req, res) => {
         inspectionTime,
         baseReqTemp,
         baseReqTime,
-        baseReqPressure,
+        baseReqPressure, // Expecting number or null
         inspections: [
-          { ...currentInspection, inspectionTimestamp: new Date() },
+          { ...processedCurrentInspection, inspectionTimestamp: new Date() },
         ],
         stretchTestResult:
           stretchTestResult && stretchTestResult !== "Pending"
             ? stretchTestResult
             : "Pending",
+        stretchTestRejectReasons:
+          stretchTestResult === "Reject" &&
+          Array.isArray(stretchTestRejectReasons)
+            ? stretchTestRejectReasons
+            : [],
         washingTestResult:
           washingTestResult && washingTestResult !== "Pending"
             ? washingTestResult
@@ -11802,7 +12091,6 @@ app.post("/api/scc/daily-htfu-test", async (req, res) => {
   } catch (error) {
     console.error("Error saving Daily HT/FU QC Test:", error);
     if (error.code === 11000) {
-      // Duplicate key error
       return res.status(409).json({
         message:
           "A record with this Date, Machine No, MO No, and Color already exists. Submission failed.",
@@ -11813,7 +12101,449 @@ app.post("/api/scc/daily-htfu-test", async (req, res) => {
     res.status(500).json({
       message: "Failed to save Daily HT/FU QC Test",
       error: error.message,
-      details: error, // Mongoose validation errors might be here
+      details: error,
+    });
+  }
+});
+
+/* ------------------------------
+   End Point - SCC FU First Output - Specific Temp
+------------------------------ */
+app.get("/api/scc/fu-first-output-temp", async (req, res) => {
+  try {
+    const { moNo, color, inspectionDate } = req.query;
+    if (!moNo || !color || !inspectionDate) {
+      return res
+        .status(400)
+        .json({ message: "MO No, Color, and Inspection Date are required." });
+    }
+    const formattedDate = formatDateToMMDDYYYY(inspectionDate);
+
+    const fuRecord = await FUFirstOutput.findOne({
+      // Assuming FUFirstOutput is your model name
+      moNo,
+      color,
+      inspectionDate: formattedDate,
+    }).lean();
+
+    let tempC = null;
+    if (fuRecord && fuRecord.standardSpecification) {
+      // Prioritize 'afterHat' if available, otherwise 'first'
+      const afterHatSpec = fuRecord.standardSpecification.find(
+        (s) =>
+          s.type === "afterHat" && s.tempC !== null && s.tempC !== undefined
+      );
+      const firstSpec = fuRecord.standardSpecification.find(
+        (s) => s.type === "first" && s.tempC !== null && s.tempC !== undefined
+      );
+
+      if (afterHatSpec) {
+        tempC = afterHatSpec.tempC;
+      } else if (firstSpec) {
+        tempC = firstSpec.tempC;
+      }
+    }
+
+    if (tempC === null) {
+      return res
+        .status(200)
+        .json({ message: "FU_TEMP_SPEC_NOT_FOUND", tempC: null });
+    }
+    res.json({ tempC: tempC });
+  } catch (error) {
+    console.error("Error fetching FU first output temperature:", error);
+    res.status(500).json({
+      message: "Failed to fetch FU first output temperature",
+      error: error.message,
+    });
+  }
+});
+
+/* ------------------------------
+   End Points - SCC Daily FU QC Test
+------------------------------ */
+
+// GET Endpoint to fetch existing Daily FUQC Test data or MO list
+app.get("/api/scc/daily-fuqc-test", async (req, res) => {
+  try {
+    const { inspectionDate, machineNo, moNo, color } = req.query;
+    const formattedDate = inspectionDate
+      ? formatDateToMMDDYYYY(inspectionDate)
+      : null;
+
+    if (!formattedDate || !machineNo) {
+      return res
+        .status(400)
+        .json({ message: "Inspection Date and Machine No are required." });
+    }
+
+    if (moNo && color) {
+      const record = await DailyTestingFUQC.findOne({
+        inspectionDate: formattedDate,
+        machineNo,
+        moNo,
+        color,
+      }).lean(); // Use .lean() for faster queries
+
+      if (!record) {
+        return res
+          .status(200)
+          .json({ message: "DAILY_FUQC_RECORD_NOT_FOUND", data: null });
+      }
+      // Ensure temp_offset is included if it exists, or default
+      const dataToSend = { ...record, temp_offset: record.temp_offset ?? 5 };
+      return res.json({ message: "RECORD_FOUND", data: dataToSend });
+    } else {
+      const distinctEntries = await DailyTestingFUQC.aggregate([
+        { $match: { inspectionDate: formattedDate, machineNo } },
+        {
+          $group: {
+            _id: { moNo: "$moNo", color: "$color" },
+            buyer: { $first: "$buyer" },
+            buyerStyle: { $first: "$buyerStyle" },
+            docId: { $first: "$_id" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            moNo: "$_id.moNo",
+            color: "$_id.color",
+            buyer: "$buyer",
+            buyerStyle: "$buyerStyle",
+            docId: "$docId",
+          },
+        },
+        { $sort: { moNo: 1, color: 1 } },
+      ]);
+
+      if (distinctEntries.length === 0) {
+        return res
+          .status(200)
+          .json({ message: "NO_RECORDS_FOR_DATE_MACHINE", data: [] });
+      }
+      return res.json({
+        message: "MULTIPLE_MO_COLOR_FOUND",
+        data: distinctEntries,
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching Daily FUQC Test data:", error);
+    res.status(500).json({
+      message: "Failed to fetch Daily FUQC Test data",
+      error: error.message,
+    });
+  }
+});
+
+// POST Endpoint to save/update Daily FUQC Test data
+app.post("/api/scc/daily-fuqc-test", async (req, res) => {
+  try {
+    const {
+      _id,
+      inspectionDate,
+      machineNo,
+      moNo,
+      buyer,
+      buyerStyle,
+      color,
+      emp_id,
+      emp_kh_name,
+      emp_eng_name,
+      emp_dept_name,
+      emp_sect_name,
+      emp_job_title,
+      baseReqTemp,
+      temp_offset, // New field from frontend
+      currentInspection,
+      remarks,
+    } = req.body;
+
+    const formattedDate = formatDateToMMDDYYYY(inspectionDate);
+    if (!formattedDate || !machineNo || !moNo || !color || !currentInspection) {
+      return res
+        .status(400)
+        .json({ message: "Missing required fields for submission." });
+    }
+    if (
+      currentInspection.temp_req === undefined ||
+      currentInspection.temp_actual === undefined ||
+      typeof currentInspection.temp_isNA !== "boolean" ||
+      !currentInspection.result
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Invalid currentInspection data structure." });
+    }
+
+    const now = new Date();
+    const inspectionTime = `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes()
+    ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+    const query = { inspectionDate: formattedDate, machineNo, moNo, color };
+    let record = await DailyTestingFUQC.findOne(query);
+    const currentRemarks =
+      remarks?.trim() === "" ? "NA" : remarks?.trim() || "NA";
+
+    const inspectionDataToSave = {
+      ...currentInspection,
+      inspectionTimestamp: new Date(),
+    };
+    if (inspectionDataToSave.temp_isNA) {
+      inspectionDataToSave.result = "N/A";
+      inspectionDataToSave.temp_actual = null;
+    }
+
+    const effectiveTempOffset =
+      temp_offset !== undefined && temp_offset !== null
+        ? Number(temp_offset)
+        : 5;
+
+    if (record) {
+      // Update existing record
+      record.baseReqTemp = baseReqTemp ?? record.baseReqTemp;
+      record.temp_offset = effectiveTempOffset; // Update temp_offset
+      record.remarks = currentRemarks;
+      record.emp_id = emp_id;
+      record.emp_kh_name = emp_kh_name;
+      record.emp_eng_name = emp_eng_name;
+      record.emp_dept_name = emp_dept_name;
+      record.emp_sect_name = emp_sect_name;
+      record.emp_job_title = emp_job_title;
+      record.inspectionTime = inspectionTime;
+
+      const slotIndex = record.inspections.findIndex(
+        (insp) => insp.timeSlotKey === inspectionDataToSave.timeSlotKey
+      );
+      if (slotIndex > -1) {
+        record.inspections[slotIndex] = {
+          ...record.inspections[slotIndex],
+          ...inspectionDataToSave,
+        };
+      } else {
+        record.inspections.push(inspectionDataToSave);
+      }
+      record.inspections.sort(
+        (a, b) => (a.inspectionNo || 0) - (b.inspectionNo || 0)
+      );
+    } else {
+      // Create new record
+      record = new DailyTestingFUQC({
+        inspectionDate: formattedDate,
+        machineNo,
+        moNo,
+        buyer,
+        buyerStyle,
+        color,
+        emp_id,
+        emp_kh_name,
+        emp_eng_name,
+        emp_dept_name,
+        emp_sect_name,
+        emp_job_title,
+        inspectionTime,
+        baseReqTemp,
+        temp_offset: effectiveTempOffset, // Save temp_offset
+        remarks: currentRemarks,
+        inspections: [inspectionDataToSave],
+      });
+    }
+
+    await record.save();
+    res
+      .status(201)
+      .json({ message: "Daily FUQC Test saved successfully", data: record });
+  } catch (error) {
+    console.error("Error saving Daily FUQC Test:", error);
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message:
+          "A record with this Date, Machine No, MO No, and Color already exists.",
+        error: error.message,
+        errorCode: "DUPLICATE_KEY",
+      });
+    }
+    res.status(500).json({
+      message: "Failed to save Daily FUQC Test",
+      error: error.message,
+      details: error,
+    });
+  }
+});
+
+/* ------------------------------
+   End Points - SCC Defects
+------------------------------ */
+
+app.get("/api/scc/defects", async (req, res) => {
+  try {
+    const defects = await SCCDefect.find({}).sort({ no: 1 }).lean(); // Fetch all defects, sorted by 'no'
+    res.json(defects);
+  } catch (error) {
+    console.error("Error fetching SCC defects:", error);
+    res.status(500).json({ message: "Server error fetching defects" });
+  }
+});
+
+/* ------------------------------
+   End Points - SCC HT Inspection
+------------------------------ */
+
+app.post("/api/scc/ht-inspection-report", async (req, res) => {
+  try {
+    const {
+      _id,
+      inspectionDate,
+      machineNo,
+      moNo,
+      buyer,
+      buyerStyle,
+      color,
+      batchNo,
+      totalBundle,
+      totalPcs,
+      aqlData,
+      defectsQty,
+      result,
+      defects,
+      remarks,
+      // defectImageFile is handled by SCCPage, we expect defectImageUrl here if uploaded
+      defectImageUrl, // Expecting URL from client if image was uploaded/kept
+      emp_id,
+      emp_kh_name,
+      emp_eng_name,
+      emp_dept_name,
+      emp_sect_name,
+      emp_job_title,
+    } = req.body;
+
+    // Basic validation (more comprehensive on model)
+    if (
+      !inspectionDate ||
+      !machineNo ||
+      !moNo ||
+      !color ||
+      !batchNo ||
+      !totalPcs ||
+      !aqlData
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Missing required fields for HT Inspection Report." });
+    }
+
+    const now = new Date();
+    const inspectionTime = `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes()
+    ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+
+    const reportData = {
+      inspectionDate: new Date(inspectionDate),
+      machineNo,
+      moNo,
+      buyer,
+      buyerStyle,
+      color,
+      batchNo,
+      totalBundle: Number(totalBundle),
+      totalPcs: Number(totalPcs),
+      aqlData,
+      defectsQty: Number(defectsQty),
+      result,
+      defects,
+      remarks: remarks?.trim() || "NA",
+      defectImageUrl: defectImageUrl || null, // Use the URL passed from client
+      emp_id,
+      emp_kh_name,
+      emp_eng_name,
+      emp_dept_name,
+      emp_sect_name,
+      emp_job_title,
+      inspectionTime,
+    };
+
+    let savedReport;
+    if (_id) {
+      // Update existing
+      savedReport = await HTInspectionReport.findByIdAndUpdate(
+        _id,
+        reportData,
+        { new: true, runValidators: true }
+      );
+      if (!savedReport)
+        return res
+          .status(404)
+          .json({ message: "Report not found for update." });
+    } else {
+      // Create new
+      // Optional: Check for duplicates before creating, if unique index is not strictly enforced or for better user feedback
+      // const existing = await HTInspectionReport.findOne({ inspectionDate: reportData.inspectionDate, machineNo, moNo, color, batchNo });
+      // if (existing) return res.status(409).json({ message: "Duplicate report found for this date, machine, MO, color, and batch." });
+      savedReport = new HTInspectionReport(reportData);
+      await savedReport.save();
+    }
+
+    res.status(201).json({
+      message: "HT Inspection Report saved successfully.",
+      data: savedReport,
+    });
+  } catch (error) {
+    console.error("Error saving HT Inspection Report:", error);
+    if (error.code === 11000) {
+      // Mongoose duplicate key error
+      return res.status(409).json({
+        message: "Duplicate entry. This report might already exist.",
+        error: error.message,
+        errorCode: "DUPLICATE_KEY",
+      });
+    }
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        message: "Validation Error: " + error.message,
+        errors: error.errors,
+      });
+    }
+    res.status(500).json({
+      message: "Failed to save HT Inspection Report.",
+      error: error.message,
+      details: error,
+    });
+  }
+});
+
+// GET endpoint to load an existing HT Inspection Report (Optional - for editing/viewing later)
+app.get("/api/scc/ht-inspection-report", async (req, res) => {
+  try {
+    const { inspectionDate, machineNo, moNo, color, batchNo } = req.query;
+    if (!inspectionDate || !machineNo || !moNo || !color || !batchNo) {
+      return res.status(400).json({
+        message:
+          "Date, Machine, MO, Color, and Batch No are required to fetch report.",
+      });
+    }
+    // Ensure date is handled correctly if coming as string
+    const searchDate = new Date(inspectionDate);
+    // To match just the date part, you might need to query for a date range or format stored date as string
+    // For simplicity, assuming client sends date in a way that matches stored format or you adjust here
+    const report = await HTInspectionReport.findOne({
+      inspectionDate: searchDate, // This might need adjustment based on how dates are stored/queried
+      machineNo,
+      moNo,
+      color,
+      batchNo,
+    }).lean();
+
+    if (!report) {
+      return res
+        .status(200)
+        .json({ message: "HT_INSPECTION_REPORT_NOT_FOUND", data: null });
+    }
+    res.json({ message: "REPORT_FOUND", data: report });
+  } catch (error) {
+    console.error("Error fetching HT Inspection Report:", error);
+    res.status(500).json({
+      message: "Failed to fetch HT Inspection Report",
+      error: error.message,
     });
   }
 });

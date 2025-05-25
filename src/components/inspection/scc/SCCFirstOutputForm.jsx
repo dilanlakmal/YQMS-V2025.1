@@ -1,5 +1,6 @@
+// src/components/inspection/scc/SCCFirstOutputForm.jsx
 import axios from "axios";
-import { AlertCircle, Info, Loader2 } from "lucide-react"; // Added Info icon
+import { Info, Loader2, Search } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -10,18 +11,18 @@ import { useAuth } from "../../authentication/AuthContext";
 import SCCImageUpload from "./SCCImageUpload";
 
 const initialSpecState = {
-  type: "", // 'first' or 'afterHat'
-  method: "", // Will be set by formType
+  type: "first", // Default to 'first'
+  method: "",
   timeSec: "",
   tempC: "",
-  tempOffset: "0",
+  tempOffset: "5", // Default Temp Offset
   pressure: "",
   status: "Pass",
-  remarks: "", // Added remarks here
+  remarks: "",
 };
 
 const SCCFirstOutputForm = ({
-  formType,
+  formType, // "HT" or "FU"
   formData,
   onFormDataChange,
   onFormSubmit,
@@ -36,51 +37,95 @@ const SCCFirstOutputForm = ({
   const [availableColors, setAvailableColors] = useState([]);
   const [orderDetailsLoading, setOrderDetailsLoading] = useState(false);
   const [existingRecordLoading, setExistingRecordLoading] = useState(false);
-  const [recordStatusMessage, setRecordStatusMessage] = useState(""); // For "New record" message
+  const [recordStatusMessage, setRecordStatusMessage] = useState("");
 
   const moNoDropdownRef = useRef(null);
+  const moNoInputRef = useRef(null);
+
   const methodText =
     formType === "HT"
       ? t("scc.heatTransfer", "Heat Transfer")
       : t("scc.fusingMethod", "Fusing");
 
+  const formTitle =
+    formType === "HT"
+      ? t("scc.firstOutputHTTitle", "First Output - Heat Transfer")
+      : t("scc.firstOutputFUTitle", "First Output - Fusing");
+
+  const machineNoOptions =
+    formType === "HT"
+      ? Array.from({ length: 15 }, (_, i) => String(i + 1))
+      : Array.from({ length: 5 }, (_, i) => String(i + 1).padStart(3, "0"));
+
+  // Ensure standardSpecification is initialized correctly
   useEffect(() => {
-    if (
-      !formData.standardSpecification ||
-      formData.standardSpecification.length < 2
-    ) {
-      onFormDataChange({
-        ...formData,
-        standardSpecification: [
-          {
-            ...initialSpecState,
-            type: "first",
-            method: methodText,
-            remarks: "",
-          },
-          {
-            ...initialSpecState,
-            type: "afterHat",
-            method: methodText,
-            remarks: "",
-          },
-        ],
-      });
+    let currentSpecs = formData.standardSpecification;
+    let specsChanged = false;
+
+    // Ensure first spec exists and has correct method
+    if (!currentSpecs || currentSpecs.length === 0) {
+      currentSpecs = [
+        { ...initialSpecState, type: "first", method: methodText },
+      ];
+      specsChanged = true;
     } else {
-      const updatedSpecs = formData.standardSpecification.map((spec) => ({
-        ...spec,
-        method: methodText,
-        remarks: spec.remarks || "", // Ensure remarks field exists
-      }));
       if (
-        JSON.stringify(updatedSpecs) !==
-        JSON.stringify(formData.standardSpecification)
+        currentSpecs[0].method !== methodText ||
+        typeof currentSpecs[0].remarks === "undefined" ||
+        typeof currentSpecs[0].tempOffset === "undefined"
       ) {
-        onFormDataChange({ ...formData, standardSpecification: updatedSpecs });
+        currentSpecs[0] = {
+          ...initialSpecState, // ensure all fields from initialSpecState are there
+          ...currentSpecs[0], // then overlay existing data
+          type: "first",
+          method: methodText,
+          remarks: currentSpecs[0].remarks || "",
+          tempOffset: currentSpecs[0].tempOffset || "5",
+        };
+        specsChanged = true;
       }
     }
+
+    // Ensure second spec exists if showSecondHeatSpec is true, and has correct method
+    if (formData.showSecondHeatSpec) {
+      if (currentSpecs.length < 2) {
+        currentSpecs.push({
+          ...initialSpecState,
+          type: "2nd heat",
+          method: methodText,
+        });
+        specsChanged = true;
+      } else {
+        if (
+          currentSpecs[1].method !== methodText ||
+          typeof currentSpecs[1].remarks === "undefined" ||
+          typeof currentSpecs[1].tempOffset === "undefined"
+        ) {
+          currentSpecs[1] = {
+            ...initialSpecState,
+            ...currentSpecs[1],
+            type: "2nd heat",
+            method: methodText,
+            remarks: currentSpecs[1].remarks || "",
+            tempOffset: currentSpecs[1].tempOffset || "5",
+          };
+          specsChanged = true;
+        }
+      }
+    } else if (!formData.showSecondHeatSpec && currentSpecs.length > 1) {
+      // Remove second spec if showSecondHeatSpec is false
+      currentSpecs = [currentSpecs[0]];
+      specsChanged = true;
+    }
+
+    if (specsChanged) {
+      onFormDataChange({
+        ...formData,
+        standardSpecification: currentSpecs,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formType, methodText, t]); // formData and onFormDataChange removed to prevent loops, methodText depends on t
+  }, [formType, methodText, t, formData.showSecondHeatSpec]); // formData and onFormDataChange removed to prevent deep comparison loops
 
   const fetchMoNumbers = useCallback(async () => {
     if (moNoSearch.trim() === "") {
@@ -95,10 +140,7 @@ const SCCFirstOutputForm = ({
       setMoNoOptions(response.data || []);
       setShowMoNoDropdown(response.data.length > 0);
     } catch (error) {
-      console.error(
-        t("scc.errorFetchingMoLog", "Error fetching MO numbers:"),
-        error
-      );
+      console.error(t("scc.errorFetchingMoLog"), error);
       setMoNoOptions([]);
       setShowMoNoDropdown(false);
     }
@@ -106,44 +148,40 @@ const SCCFirstOutputForm = ({
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      fetchMoNumbers();
+      if (moNoSearch !== formData.moNo || !formData.moNo) {
+        fetchMoNumbers();
+      }
     }, 300);
     return () => clearTimeout(delayDebounceFn);
-  }, [moNoSearch, fetchMoNumbers]);
+  }, [moNoSearch, formData.moNo, fetchMoNumbers]);
 
   const handleMoSelect = (selectedMo) => {
     setMoNoSearch(selectedMo);
     onFormDataChange({
-      ...formData,
+      ...formData, // Preserve existing specs, images, remarks, showSecondHeatSpec
       moNo: selectedMo,
       buyer: "",
       buyerStyle: "",
       color: "",
-      _id: null,
-      standardSpecification: [
-        { ...initialSpecState, type: "first", method: methodText, remarks: "" },
-        {
-          ...initialSpecState,
-          type: "afterHat",
-          method: methodText,
-          remarks: "",
-        },
-      ],
-      referenceSampleImageFile: null,
-      referenceSampleImageUrl: null,
-      afterWashImageFile: null,
-      afterWashImageUrl: null,
-      remarks: "",
+      _id: null, // Reset ID
+      // Do NOT reset standardSpecification, referenceSampleImageFile, etc. here
     });
     setShowMoNoDropdown(false);
-    setRecordStatusMessage(""); // Clear message on new MO
+    setRecordStatusMessage("");
   };
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
       if (!formData.moNo) {
+        if (formData.buyer || formData.buyerStyle || formData.color) {
+          onFormDataChange((prev) => ({
+            ...prev,
+            buyer: "",
+            buyerStyle: "",
+            color: "",
+          }));
+        }
         setAvailableColors([]);
-        onFormDataChange({ ...formData, buyer: "", buyerStyle: "" });
         return;
       }
       setOrderDetailsLoading(true);
@@ -153,41 +191,54 @@ const SCCFirstOutputForm = ({
         );
         const details = response.data;
         onFormDataChange((prev) => ({
-          // Use functional update to avoid stale state
           ...prev,
           buyer: details.engName || "N/A",
           buyerStyle: details.custStyle || "N/A",
         }));
         setAvailableColors(details.colors || []);
       } catch (error) {
-        console.error(
-          t(
-            "scc.errorFetchingOrderDetailsLog",
-            "Error fetching order details:"
-          ),
-          error
-        );
-        Swal.fire(
-          t("scc.error"),
-          t("scc.errorFetchingOrderDetails", "Failed to fetch order details."),
-          "error"
-        );
-        onFormDataChange((prev) => ({ ...prev, buyer: "", buyerStyle: "" }));
+        console.error(t("scc.errorFetchingOrderDetailsLog"), error);
+        Swal.fire(t("scc.error"), t("scc.errorFetchingOrderDetails"), "error");
+        onFormDataChange((prev) => ({
+          ...prev,
+          buyer: "",
+          buyerStyle: "",
+          color: "",
+        }));
         setAvailableColors([]);
       } finally {
         setOrderDetailsLoading(false);
       }
     };
-    if (formData.moNo) fetchOrderDetails();
+
+    if (formData.moNo) {
+      fetchOrderDetails();
+    } else {
+      if (formData.buyer || formData.buyerStyle || formData.color) {
+        onFormDataChange((prev) => ({
+          ...prev,
+          buyer: "",
+          buyerStyle: "",
+          color: "",
+        }));
+      }
+      setAvailableColors([]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.moNo, t]); // Added t
+  }, [formData.moNo, t]);
 
   useEffect(() => {
     const fetchExistingRecord = async () => {
-      if (!formData.moNo || !formData.color || !formData.inspectionDate) return;
+      if (
+        !formData.moNo ||
+        !formData.color ||
+        !formData.inspectionDate ||
+        !formData.machineNo
+      )
+        return;
 
       setExistingRecordLoading(true);
-      setRecordStatusMessage(""); // Clear previous message
+      setRecordStatusMessage("");
       try {
         const endpoint =
           formType === "HT"
@@ -198,80 +249,60 @@ const SCCFirstOutputForm = ({
             moNo: formData.moNo,
             color: formData.color,
             inspectionDate: formData.inspectionDate.toISOString(),
+            machineNo: formData.machineNo,
           },
         });
 
-        const recordData = response.data; // Backend now returns full response
+        const recordData = response.data;
 
         if (
           recordData.message === "HT_RECORD_NOT_FOUND" ||
           recordData.message === "FU_RECORD_NOT_FOUND" ||
           !recordData.data
         ) {
-          setRecordStatusMessage(
-            t(
-              "scc.newRecordMessage",
-              "This is a new record. Please proceed with data entry."
-            )
-          );
+          setRecordStatusMessage(t("scc.newRecordMessage"));
+          // When a new record is identified, preserve existing form data (specs, images, remarks)
+          // but ensure _id is null.
           onFormDataChange((prev) => ({
-            ...prev,
-            _id: null,
-            standardSpecification: [
-              {
-                ...initialSpecState,
-                type: "first",
-                method: methodText,
-                remarks: prev.standardSpecification?.[0]?.remarks || "",
-              }, // Preserve remarks if user typed
-              {
-                ...initialSpecState,
-                type: "afterHat",
-                method: methodText,
-                remarks: prev.standardSpecification?.[1]?.remarks || "",
-              },
-            ],
-            referenceSampleImageUrl: null, // Reset images for new record
-            afterWashImageUrl: null,
-            remarks: prev.remarks || "", // Preserve main remarks
+            ...prev, // This keeps existing date, machineNo, moNo, color, buyer, buyerStyle, specs, images, remarks
+            _id: null, // Ensure it's treated as new
           }));
         } else {
-          // Existing record found
+          const loadedRecord = recordData.data || recordData;
           const mapSpecsForDisplay = (specs) =>
             specs.map((spec) => ({
               ...spec,
+              type: spec.type, // 'first' or '2nd heat'
+              method: spec.method || methodText,
               tempOffset:
                 spec.tempOffsetPlus !== 0
                   ? String(spec.tempOffsetPlus)
                   : spec.tempOffsetMinus !== 0
                   ? String(spec.tempOffsetMinus)
-                  : "0",
-              remarks: spec.remarks || "", // Ensure remarks is always a string
+                  : "5", // Default to 5 if not set
+              remarks: spec.remarks || "",
+              pressure: spec.pressure !== null ? String(spec.pressure) : "",
+              status: spec.status || "Pass",
+              timeSec: spec.timeSec !== null ? String(spec.timeSec) : "",
+              tempC: spec.tempC !== null ? String(spec.tempC) : "",
             }));
-          setRecordStatusMessage(
-            t("scc.existingRecordLoadedShort", "Existing record loaded.")
-          );
+
+          setRecordStatusMessage(t("scc.existingRecordLoadedShort"));
           onFormDataChange((prev) => ({
-            ...prev,
-            _id: recordData._id || recordData.data._id, // Handle both direct object and nested
+            ...prev, // Keeps current date, machineNo, moNo, color, buyer, buyerStyle
+            _id: loadedRecord._id,
             standardSpecification: mapSpecsForDisplay(
-              recordData.standardSpecification ||
-                recordData.data.standardSpecification
+              loadedRecord.standardSpecification
             ),
-            referenceSampleImageUrl:
-              recordData.referenceSampleImage ||
-              recordData.data.referenceSampleImage,
-            afterWashImageUrl:
-              recordData.afterWashImage || recordData.data.afterWashImage,
-            remarks: recordData.remarks || recordData.data.remarks || "",
+            referenceSampleImageUrl: loadedRecord.referenceSampleImage,
+            afterWashImageUrl: loadedRecord.afterWashImage,
+            remarks:
+              loadedRecord.remarks === "NA" ? "" : loadedRecord.remarks || "",
+            showSecondHeatSpec: loadedRecord.standardSpecification?.length > 1,
           }));
         }
       } catch (error) {
-        console.error(
-          t("scc.errorFetchingExistingLog", "Error fetching existing record:"),
-          error
-        );
-        // Avoid Swal for "not found" like errors handled by message above
+        console.error(t("scc.errorFetchingExistingLog"), error);
         if (
           !(
             error.response &&
@@ -279,40 +310,26 @@ const SCCFirstOutputForm = ({
               error.response.data.message === "FU_RECORD_NOT_FOUND")
           )
         ) {
-          Swal.fire(
-            t("scc.error"),
-            t("scc.errorFetchingExisting", "Failed to fetch existing record."),
-            "error"
-          );
+          Swal.fire(t("scc.error"), t("scc.errorFetchingExisting"), "error");
         }
+        // Preserve current form data, but ensure _id is null
         onFormDataChange((prev) => ({
-          // Reset to new record state on other errors
           ...prev,
           _id: null,
-          standardSpecification: [
-            {
-              ...initialSpecState,
-              type: "first",
-              method: methodText,
-              remarks: "",
-            },
-            {
-              ...initialSpecState,
-              type: "afterHat",
-              method: methodText,
-              remarks: "",
-            },
-          ],
-          referenceSampleImageUrl: null,
-          afterWashImageUrl: null,
-          remarks: "",
+          // standardSpecification array is preserved by not resetting it here.
+          // referenceSampleImageUrl etc are also preserved.
         }));
       } finally {
         setExistingRecordLoading(false);
       }
     };
 
-    if (formData.moNo && formData.color && formData.inspectionDate) {
+    if (
+      formData.moNo &&
+      formData.color &&
+      formData.inspectionDate &&
+      formData.machineNo
+    ) {
       fetchExistingRecord();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -320,6 +337,7 @@ const SCCFirstOutputForm = ({
     formData.moNo,
     formData.color,
     formData.inspectionDate,
+    formData.machineNo,
     formType,
     methodText,
     t,
@@ -327,27 +345,87 @@ const SCCFirstOutputForm = ({
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    onFormDataChange({ ...formData, [name]: value });
+    let newFormData = { ...formData, [name]: value };
+    if (
+      name === "moNo" ||
+      name === "machineNo" ||
+      name === "color"
+      // inspectionDate change handled by handleDateChange
+    ) {
+      newFormData._id = null; // Reset _id, but keep spec data
+      setRecordStatusMessage("");
+      if (name === "moNo") {
+        setMoNoSearch(value);
+        newFormData.color = ""; // MO change should clear color selection
+        newFormData.buyer = "";
+        newFormData.buyerStyle = "";
+        setAvailableColors([]);
+      }
+    }
+    onFormDataChange(newFormData);
   };
 
   const handleDateChange = (date) => {
-    onFormDataChange({ ...formData, inspectionDate: date });
-  };
-
-  const handleColorChange = (e) => {
-    onFormDataChange({ ...formData, color: e.target.value, _id: null }); // Reset _id on color change
+    onFormDataChange({
+      ...formData, // Preserve existing spec data
+      inspectionDate: date,
+      _id: null,
+    });
     setRecordStatusMessage("");
   };
 
+  const handleMachineNoChange = (e) => {
+    onFormDataChange({
+      ...formData, // Preserve existing spec data
+      machineNo: e.target.value,
+      _id: null,
+    });
+    setRecordStatusMessage("");
+  };
+
+  const handleColorChange = (e) => {
+    onFormDataChange({
+      ...formData, // Preserve existing spec data
+      color: e.target.value,
+      _id: null,
+    });
+    setRecordStatusMessage("");
+  };
+
+  const handleShowSecondHeatChange = (e) => {
+    const show = e.target.value === "yes";
+    let newSpecs = [...(formData.standardSpecification || [])];
+
+    if (show) {
+      if (newSpecs.length < 2) {
+        newSpecs.push({
+          ...initialSpecState,
+          type: "2nd heat",
+          method: methodText,
+        });
+      } else {
+        // Ensure the second spec is correctly typed if it exists
+        newSpecs[1] = { ...newSpecs[1], type: "2nd heat", method: methodText };
+      }
+    } else {
+      if (newSpecs.length > 1) {
+        newSpecs = [newSpecs[0]]; // Keep only the first spec
+      }
+    }
+    onFormDataChange({
+      ...formData,
+      showSecondHeatSpec: show,
+      standardSpecification: newSpecs,
+    });
+  };
+
   const handleSpecChange = (specIndex, field, value) => {
-    const newSpecs = formData.standardSpecification
-      ? [...formData.standardSpecification]
-      : [initialSpecState, initialSpecState];
+    const newSpecs = [...formData.standardSpecification];
     if (!newSpecs[specIndex]) {
-      // Initialize if spec doesn't exist (e.g. on first load)
+      // Should ideally not happen
       newSpecs[specIndex] = {
         ...initialSpecState,
-        type: specIndex === 0 ? "first" : "afterHat",
+        type: specIndex === 0 ? "first" : "2nd heat",
         method: methodText,
       };
     }
@@ -387,14 +465,16 @@ const SCCFirstOutputForm = ({
     }
   };
 
-  const firstSpecStatus = formData.standardSpecification?.[0]?.status;
-  const isAfterHatDisabled = firstSpecStatus === "Pass";
+  const isSpecTableDisabled =
+    !formData.machineNo || !formData.moNo || !formData.color;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         moNoDropdownRef.current &&
-        !moNoDropdownRef.current.contains(event.target)
+        !moNoDropdownRef.current.contains(event.target) &&
+        moNoInputRef.current &&
+        !moNoInputRef.current.contains(event.target)
       ) {
         setShowMoNoDropdown(false);
       }
@@ -404,179 +484,56 @@ const SCCFirstOutputForm = ({
   }, []);
 
   if (!user) {
-    return <div>{t("scc.loadingUser", "Loading user data...")}</div>;
+    return (
+      <div className="p-6 text-center">
+        {t("scc.loadingUser", "Loading user data...")}
+      </div>
+    );
   }
 
-  const specs =
+  // Ensure specs array exists and has at least one item for the first table
+  const firstSpec = (formData.standardSpecification &&
+    formData.standardSpecification[0]) || {
+    ...initialSpecState,
+    type: "first",
+    method: methodText,
+  };
+  const secondSpec = (formData.showSecondHeatSpec &&
     formData.standardSpecification &&
-    formData.standardSpecification.length === 2
-      ? formData.standardSpecification
-      : [
-          {
-            ...initialSpecState,
-            type: "first",
-            method: methodText,
-            remarks: "",
-          },
-          {
-            ...initialSpecState,
-            type: "afterHat",
-            method: methodText,
-            remarks: "",
-          },
-        ];
+    formData.standardSpecification[1]) || {
+    ...initialSpecState,
+    type: "2nd heat",
+    method: methodText,
+  };
 
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onFormSubmit(formType);
-      }}
-      className="space-y-6"
-    >
-      {(orderDetailsLoading || existingRecordLoading) && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <Loader2 className="animate-spin h-12 w-12 text-white" />
-        </div>
-      )}
-      {recordStatusMessage && (
-        <div
-          className={`p-3 mb-4 rounded-md text-sm flex items-center ${
-            recordStatusMessage.includes(
-              t("scc.newRecordMessageKey", "new record")
-            )
-              ? "bg-blue-100 text-blue-700"
-              : "bg-green-100 text-green-700"
-          }`}
-        >
-          <Info size={18} className="mr-2" />
-          {recordStatusMessage}
-        </div>
-      )}
-      {/* Row 1: Date, MO No */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label
-            htmlFor="inspectionDate"
-            className="block text-sm font-medium text-gray-700"
-          >
-            {t("scc.date", "Date")}
-          </label>
-          <DatePicker
-            selected={
-              formData.inspectionDate
-                ? new Date(formData.inspectionDate)
-                : new Date()
-            }
-            onChange={handleDateChange}
-            dateFormat="MM/dd/yyyy"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            required
-          />
-        </div>
-        <div className="relative" ref={moNoDropdownRef}>
-          <label
-            htmlFor="moNoSearch"
-            className="block text-sm font-medium text-gray-700"
-          >
-            {t("scc.moNo", "MO No")}
-          </label>
-          <input
-            type="text"
-            id="moNoSearch"
-            value={moNoSearch}
-            onChange={(e) => setMoNoSearch(e.target.value)}
-            placeholder={t("scc.searchMoNo", "Search MO No...")}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            required
-          />
-          {showMoNoDropdown && moNoOptions.length > 0 && (
-            <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
-              {moNoOptions.map((mo) => (
-                <li
-                  key={mo}
-                  onClick={() => handleMoSelect(mo)}
-                  className="px-3 py-2 cursor-pointer hover:bg-gray-100"
-                >
-                  {mo}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-
-      {/* Row 2: Buyer, Buyer Style, Color */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("scc.buyer", "Buyer")}
-          </label>
-          <input
-            type="text"
-            value={formData.buyer || ""}
-            readOnly
-            className="mt-1 block w-full bg-gray-100 px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {t("scc.buyerStyle", "Buyer Style")}
-          </label>
-          <input
-            type="text"
-            value={formData.buyerStyle || ""}
-            readOnly
-            className="mt-1 block w-full bg-gray-100 px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="color"
-            className="block text-sm font-medium text-gray-700"
-          >
-            {t("scc.color", "Color")}
-          </label>
-          <select
-            id="color"
-            name="color"
-            value={formData.color || ""}
-            onChange={handleColorChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            disabled={!formData.moNo || availableColors.length === 0}
-            required
-          >
-            <option value="">{t("scc.selectColor", "Select Color...")}</option>
-            {availableColors.map((c) => (
-              <option key={c.key || c.original} value={c.original}>
-                {c.original} {c.chn ? `(${c.chn})` : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Standard Specifications Table */}
-      <div className="mt-6">
-        <h3 className="text-lg font-medium leading-6 text-gray-900">
-          {t("scc.standardSpecifications", "Standard Specifications")}
-        </h3>
+  const renderSpecTable = (specData, specIndex, title, isDisabled) => {
+    const specType = specIndex === 0 ? "first" : "2nd heat";
+    return (
+      <div
+        className={`mt-6 ${isDisabled ? "opacity-50 pointer-events-none" : ""}`}
+      >
+        <h3 className="text-lg font-medium leading-6 text-gray-900">{title}</h3>
+        {isDisabled && (
+          <p className="mt-2 text-sm text-blue-600 flex items-center">
+            <Info size={16} className="mr-1" />
+            {t(
+              "scc.fillMachineMoColorToEnableSpecs",
+              "Please fill Machine No, MO No, and Color to enable specification entry."
+            )}
+          </p>
+        )}
         <div className="mt-2 overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 border">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r w-1/3">
                   {t("scc.parameter", "Parameter")}
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
-                  {t("scc.first", "First")}
-                </th>
-                <th
-                  className={`px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                    isAfterHatDisabled ? "text-gray-400" : ""
-                  }`}
-                >
-                  {t("scc.afterHat", "After Hat")}
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/3">
+                  {t(
+                    `scc.${specType}`,
+                    specType.charAt(0).toUpperCase() + specType.slice(1)
+                  )}
                 </th>
               </tr>
             </thead>
@@ -609,7 +566,8 @@ const SCCFirstOutputForm = ({
                 {
                   key: "pressure",
                   label: t("scc.pressure", "Pressure"),
-                  type: "text",
+                  type: "number",
+                  inputMode: "numeric",
                 },
                 {
                   key: "status",
@@ -621,23 +579,23 @@ const SCCFirstOutputForm = ({
                   key: "remarks",
                   label: t("scc.specRemarks", "Remarks"),
                   type: "textarea",
-                }, // New Row
+                },
               ].map(({ key, label, type, inputMode, readOnly, options }) => (
-                <tr key={key}>
+                <tr key={`${specType}-${key}`}>
                   <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-r">
                     {label}
                   </td>
-                  {/* "First" column */}
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 border-r">
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                     {type === "select" ? (
                       <select
                         value={
-                          specs[0]?.[key] || (key === "status" ? "Pass" : "")
+                          specData?.[key] || (key === "status" ? "Pass" : "")
                         }
                         onChange={(e) =>
-                          handleSpecChange(0, key, e.target.value)
+                          handleSpecChange(specIndex, key, e.target.value)
                         }
                         className="w-full p-1 border-gray-300 rounded-md text-sm"
+                        disabled={isDisabled}
                       >
                         {options.map((opt) => (
                           <option key={opt} value={opt}>
@@ -647,151 +605,260 @@ const SCCFirstOutputForm = ({
                       </select>
                     ) : type === "textarea" ? (
                       <textarea
-                        value={specs[0]?.[key] || ""}
+                        value={specData?.[key] || ""}
                         onChange={(e) =>
-                          handleSpecChange(0, key, e.target.value)
+                          handleSpecChange(specIndex, key, e.target.value)
                         }
                         rows="2"
                         className={`w-full p-1 border-gray-300 rounded-md text-sm ${
                           readOnly ? "bg-gray-100" : ""
                         }`}
                         readOnly={readOnly}
+                        disabled={isDisabled}
                       />
                     ) : (
                       <input
                         type={type}
                         inputMode={inputMode || "text"}
-                        value={specs[0]?.[key] || ""}
+                        value={
+                          specData?.[key] ||
+                          (key === "tempOffset" && !specData?.[key] ? "5" : "")
+                        } // Default tempOffset to 5 if empty
                         readOnly={readOnly}
                         onChange={(e) =>
-                          handleSpecChange(0, key, e.target.value)
+                          handleSpecChange(specIndex, key, e.target.value)
                         }
                         className={`w-full p-1 border-gray-300 rounded-md text-sm ${
                           readOnly ? "bg-gray-100" : ""
                         }`}
+                        disabled={isDisabled}
                       />
                     )}
-                  </td>
-                  {/* "After Hat" column */}
-                  <td
-                    className={`px-4 py-2 whitespace-nowrap text-sm text-gray-500 ${
-                      isAfterHatDisabled &&
-                      key !== "method" &&
-                      key !== "remarks"
-                        ? "bg-gray-100"
-                        : ""
-                    }`}
-                  >
-                    {key === "method" ||
-                    (key === "status" && specs[1]) ||
-                    (key === "remarks" && specs[1]) ? (
-                      type === "select" ? (
-                        <select
-                          value={
-                            specs[1]?.[key] || (key === "status" ? "Pass" : "")
-                          }
-                          onChange={(e) =>
-                            handleSpecChange(1, key, e.target.value)
-                          }
-                          className="w-full p-1 border-gray-300 rounded-md text-sm"
-                          disabled={
-                            isAfterHatDisabled &&
-                            key !== "method" &&
-                            key !== "remarks"
-                          }
-                        >
-                          {options.map((opt) => (
-                            <option key={opt} value={opt}>
-                              {t(`scc.${opt.toLowerCase()}`, opt)}
-                            </option>
-                          ))}
-                        </select>
-                      ) : type === "textarea" ? (
-                        <textarea
-                          value={specs[1]?.[key] || ""}
-                          onChange={(e) =>
-                            handleSpecChange(1, key, e.target.value)
-                          }
-                          rows="2"
-                          className={`w-full p-1 border-gray-300 rounded-md text-sm ${
-                            readOnly ||
-                            (isAfterHatDisabled &&
-                              key !== "method" &&
-                              key !== "remarks")
-                              ? "bg-gray-100"
-                              : ""
-                          }`}
-                          readOnly={
-                            readOnly ||
-                            (isAfterHatDisabled &&
-                              key !== "method" &&
-                              key !== "remarks")
-                          }
-                          disabled={
-                            isAfterHatDisabled &&
-                            key !== "method" &&
-                            key !== "remarks"
-                          }
-                        />
-                      ) : (
-                        <input
-                          type={type}
-                          inputMode={inputMode || "text"}
-                          value={specs[1]?.[key] || ""}
-                          readOnly={
-                            readOnly ||
-                            (isAfterHatDisabled &&
-                              key !== "method" &&
-                              key !== "remarks")
-                          }
-                          onChange={(e) =>
-                            handleSpecChange(1, key, e.target.value)
-                          }
-                          className={`w-full p-1 border-gray-300 rounded-md text-sm ${
-                            readOnly ||
-                            (isAfterHatDisabled &&
-                              key !== "method" &&
-                              key !== "remarks")
-                              ? "bg-gray-100"
-                              : ""
-                          }`}
-                          disabled={
-                            isAfterHatDisabled &&
-                            key !== "method" &&
-                            key !== "remarks"
-                          }
-                        />
-                      )
-                    ) : specs[1] ? (
-                      <input
-                        type={type}
-                        inputMode={inputMode || "text"}
-                        value={specs[1]?.[key] || ""}
-                        readOnly={isAfterHatDisabled}
-                        onChange={(e) =>
-                          handleSpecChange(1, key, e.target.value)
-                        }
-                        className={`w-full p-1 border-gray-300 rounded-md text-sm ${
-                          isAfterHatDisabled ? "bg-gray-100" : ""
-                        }`}
-                        disabled={isAfterHatDisabled}
-                      />
-                    ) : null}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {firstSpecStatus === "Reject" && (
-            <p className="mt-2 text-sm text-red-600 flex items-center">
-              <AlertCircle size={16} className="mr-1" />
-              {t("scc.hatIsRequired", "After Hat details are required.")}
-            </p>
-          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onFormSubmit(formType);
+      }}
+      className="space-y-6"
+    >
+      <h2 className="text-xl font-semibold text-gray-700 mb-4">{formTitle}</h2>
+
+      {(orderDetailsLoading || existingRecordLoading) && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <Loader2 className="animate-spin h-12 w-12 text-white" />
+        </div>
+      )}
+      {recordStatusMessage && (
+        <div
+          className={`p-3 mb-4 rounded-md text-sm flex items-center ${
+            recordStatusMessage.includes(
+              t("scc.newRecordMessageKey", "new record")
+            )
+              ? "bg-blue-100 text-blue-700"
+              : "bg-green-100 text-green-700"
+          }`}
+        >
+          <Info size={18} className="mr-2" />
+          {recordStatusMessage}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label
+            htmlFor={`${formType}-inspectionDate`}
+            className="block text-sm font-medium text-gray-700"
+          >
+            {t("scc.date", "Date")}
+          </label>
+          <DatePicker
+            selected={
+              formData.inspectionDate
+                ? new Date(formData.inspectionDate)
+                : new Date()
+            }
+            onChange={handleDateChange}
+            dateFormat="MM/dd/yyyy"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            required
+            id={`${formType}-inspectionDate`}
+          />
+        </div>
+        <div>
+          <label
+            htmlFor={`${formType}-machineNo`}
+            className="block text-sm font-medium text-gray-700"
+          >
+            {t("scc.machineNo", "Machine No")}
+          </label>
+          <select
+            id={`${formType}-machineNo`}
+            name="machineNo"
+            value={formData.machineNo || ""}
+            onChange={handleMachineNoChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            required
+          >
+            <option value="">
+              {t("scc.selectMachine", "Select Machine...")}
+            </option>
+            {machineNoOptions.map((num) => (
+              <option key={num} value={num}>
+                {num}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="relative">
+          <label
+            htmlFor={`${formType}-moNoSearch`}
+            className="block text-sm font-medium text-gray-700"
+          >
+            {t("scc.moNo", "MO No")}
+          </label>
+          <div className="relative mt-1" ref={moNoDropdownRef}>
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            </div>
+            <input
+              type="text"
+              id={`${formType}-moNoSearch`}
+              ref={moNoInputRef}
+              value={moNoSearch}
+              onChange={(e) => setMoNoSearch(e.target.value)}
+              onFocus={() => setShowMoNoDropdown(true)}
+              placeholder={t("scc.searchMoNo", "Search MO No...")}
+              className="block w-full px-3 py-2 pl-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              required
+            />
+            {showMoNoDropdown && moNoOptions.length > 0 && (
+              <ul className="absolute z-20 w-full bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
+                {moNoOptions.map((mo) => (
+                  <li
+                    key={mo}
+                    onClick={() => handleMoSelect(mo)}
+                    className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                  >
+                    {mo}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Image Uploads */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            {t("scc.buyer", "Buyer")}
+          </label>
+          <input
+            type="text"
+            value={formData.buyer || ""}
+            readOnly
+            className="mt-1 block w-full bg-gray-100 px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            {t("scc.buyerStyle", "Buyer Style")}
+          </label>
+          <input
+            type="text"
+            value={formData.buyerStyle || ""}
+            readOnly
+            className="mt-1 block w-full bg-gray-100 px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor={`${formType}-color`}
+            className="block text-sm font-medium text-gray-700"
+          >
+            {t("scc.color", "Color")}
+          </label>
+          <select
+            id={`${formType}-color`}
+            name="color"
+            value={formData.color || ""}
+            onChange={handleColorChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            disabled={!formData.moNo || availableColors.length === 0}
+            required
+          >
+            <option value="">{t("scc.selectColor", "Select Color...")}</option>
+            {availableColors.map((c) => (
+              <option key={c.key || c.original} value={c.original}>
+                {c.original} {c.chn ? `(${c.chn})` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {renderSpecTable(
+        firstSpec,
+        0,
+        t("scc.standardSpecifications", "Standard Specifications"),
+        isSpecTableDisabled
+      )}
+
+      <div className="mt-6">
+        <label className="block text-sm font-medium text-gray-700">
+          {t("scc.secondHeatSpecificationQuestion", "2nd Heat Specification?")}
+        </label>
+        <div className="mt-1 flex items-center space-x-4">
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="showSecondHeatSpec"
+              value="yes"
+              checked={formData.showSecondHeatSpec === true}
+              onChange={handleShowSecondHeatChange}
+              className="form-radio h-4 w-4 text-indigo-600"
+              disabled={isSpecTableDisabled}
+            />
+            <span className="ml-2 text-sm text-gray-700">
+              {t("scc.yes", "Yes")}
+            </span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="showSecondHeatSpec"
+              value="no"
+              checked={formData.showSecondHeatSpec === false}
+              onChange={handleShowSecondHeatChange}
+              className="form-radio h-4 w-4 text-indigo-600"
+              disabled={isSpecTableDisabled}
+            />
+            <span className="ml-2 text-sm text-gray-700">
+              {t("scc.no", "No")}
+            </span>
+          </label>
+        </div>
+      </div>
+
+      {formData.showSecondHeatSpec &&
+        renderSpecTable(
+          secondSpec,
+          1,
+          t("scc.specsAfterSecondHeat", "Specifications after 2nd Heat"),
+          isSpecTableDisabled
+        )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <SCCImageUpload
           label={t("scc.referenceSample", "Reference Sample")}
@@ -813,7 +880,6 @@ const SCCFirstOutputForm = ({
         />
       </div>
 
-      {/* Main Remarks */}
       <div className="mt-6">
         <label
           htmlFor="remarks"
@@ -837,12 +903,11 @@ const SCCFirstOutputForm = ({
         </p>
       </div>
 
-      {/* Submit Button */}
       <div className="pt-5">
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isSpecTableDisabled}
             className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
           >
             {isSubmitting ? (
