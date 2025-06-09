@@ -5,47 +5,47 @@ const aqlChartSchema = new mongoose.Schema(
     Type: {
       type: String,
       enum: ["General", "Special"],
-      required: true,
+      required: true
     },
     Level: {
       type: String,
       enum: ["I", "II", "III", "S1", "S2", "S3", "S4"],
-      required: true,
+      required: true
     },
     LotSize: {
       min: {
         type: Number,
-        required: true,
+        required: true
       },
       max: {
         type: Number,
-        default: null,
-      },
+        default: null
+      }
     },
     SampleSizeLetterCode: {
       type: String,
-      required: true,
+      required: true
     },
     SampleSize: {
       type: Number,
-      required: true,
+      required: true
     },
     AQL: [
       {
         level: {
           type: Number,
-          required: true,
+          required: true
         },
         AcceptDefect: {
           type: Number,
-          required: true,
+          required: true
         },
         RejectDefect: {
           type: Number,
-          required: true,
-        },
-      },
-    ],
+          required: true
+        }
+      }
+    ]
   },
   { collection: "aqlcharts" }
 );

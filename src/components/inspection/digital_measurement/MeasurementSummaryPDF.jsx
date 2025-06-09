@@ -248,7 +248,6 @@
 // export default MeasurementSummaryPDF;
 
 //New code
-import React from "react";
 import autoTable from "jspdf-autotable";
 
 const MeasurementSummaryPDF = ({ doc, startY, measurementSummary }) => {
@@ -273,7 +272,7 @@ const MeasurementSummaryPDF = ({ doc, startY, measurementSummary }) => {
     { header: "Inspected Qty", dataKey: "inspectedQty", width: 20 },
     { header: "Total Pass", dataKey: "totalPass", width: 20 },
     { header: "Total Reject", dataKey: "totalReject", width: 20 },
-    { header: "Pass Rate", dataKey: "passRate", width: 20 }
+    { header: "Pass Rate", dataKey: "passRate", width: 20 },
   ];
 
   const data =
@@ -289,7 +288,7 @@ const MeasurementSummaryPDF = ({ doc, startY, measurementSummary }) => {
           inspectedQty: item.inspectedQty,
           totalPass: item.totalPass,
           totalReject: item.totalReject,
-          passRate: `${item.passRate}%`
+          passRate: `${item.passRate}%`,
         }))
       : [
           {
@@ -303,8 +302,8 @@ const MeasurementSummaryPDF = ({ doc, startY, measurementSummary }) => {
             inspectedQty: "",
             totalPass: "",
             totalReject: "",
-            passRate: ""
-          }
+            passRate: "",
+          },
         ];
 
   doc.setFontSize(12);
@@ -319,7 +318,7 @@ const MeasurementSummaryPDF = ({ doc, startY, measurementSummary }) => {
     columnStyles: columns.reduce(
       (acc, col, idx) => ({
         ...acc,
-        [idx]: { cellWidth: col.width, halign: "center", valign: "middle" }
+        [idx]: { cellWidth: col.width, halign: "center", valign: "middle" },
       }),
       {}
     ),
@@ -330,7 +329,7 @@ const MeasurementSummaryPDF = ({ doc, startY, measurementSummary }) => {
       overflow: "linebreak",
       textColor: [0, 0, 0],
       lineColor: [150, 150, 150],
-      lineWidth: 0.1
+      lineWidth: 0.1,
     },
     headStyles: {
       fillColor: [229, 231, 235],
@@ -338,16 +337,16 @@ const MeasurementSummaryPDF = ({ doc, startY, measurementSummary }) => {
       fontSize: 8,
       fontStyle: "bold",
       halign: "center",
-      valign: "middle"
+      valign: "middle",
     },
     bodyStyles: {
       fillColor: [255, 255, 255],
       textColor: [0, 0, 0],
-      fontSize: 8
+      fontSize: 8,
     },
     alternateRowStyles: {
-      fillColor: [245, 245, 245]
-    }
+      fillColor: [245, 245, 245],
+    },
   });
 
   return doc.lastAutoTable.finalY + 10;

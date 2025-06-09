@@ -8,6 +8,7 @@ import CuttingReport from "../components/inspection/liveDashboard/CuttingReport"
 import DailySummary from "../components/inspection/liveDashboard/DailySummary";
 import DefectBarChart from "../components/inspection/liveDashboard/DefectBarChart";
 import DigitalMeasurement from "../components/inspection/liveDashboard/DigitalMeasurement";
+import DigitalMeasurementCPK from "../components/inspection/liveDashboard/DigitalMeasurement-CPK";
 import FilterPane from "../components/inspection/liveDashboard/FilterPane";
 import HomeMenu from "../components/inspection/liveDashboard/HomeMenu";
 import InspectorCard from "../components/inspection/liveDashboard/InspectorCard";
@@ -443,13 +444,17 @@ const LiveDashboard = () => {
           <HomeMenu setActiveSection={setActiveSection} />
         )}
 
-        {activeSection === "QC Inline Roving" && <RovingReport />}
+        {activeSection === "Roving Report" && <RovingReport />}
         {activeSection === "Cutting Reports" && <CuttingReport />}
         {activeSection === "Cutting Trend" && (
           <CuttingGarmentTypeTrendAnalysis />
         )}
         {activeSection === "Buyer Specs" && <DigitalMeasurementBuyerSpec />}
         {activeSection === "Measurement Summary" && <DigitalMeasurement />}
+        {activeSection === "Measurement Summary - CPK" && (
+          <DigitalMeasurementCPK />
+        )}
+
         {activeSection === "Daily Analysis" && <QCSunriseDashboard />}
         {activeSection === "Order Data" && <OrderData />}
 

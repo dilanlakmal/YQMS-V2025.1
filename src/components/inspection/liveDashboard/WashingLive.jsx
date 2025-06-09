@@ -734,7 +734,7 @@ const WashingLive = () => {
   };
 
   return (
-    <div className="p-2 md:p-4 bg-gray-50 min-h-screen">
+    <div className="p-2 md:p-4 bg-gray-50 min-h-screen max-w-[2350px]">
       <header className="mb-4 md:mb-6">
         {" "}
         <h1 className="text-lg md:text-2xl font-semibold text-gray-800 text-center">

@@ -70,13 +70,22 @@ const SCCDailyTesting = ({
   const moNoDropdownRef = useRef(null);
   const machineNoDropdownRef = useRef(null);
 
-  // Initialize machine options (same as before)
+  // Initialize machine options for 1-15
   useEffect(() => {
     const machines = [];
-    for (let i = 1; i <= 15; i++) machines.push(String(i));
-    for (let i = 1; i <= 5; i++) machines.push(String(i).padStart(3, "0"));
+    for (let i = 1; i <= 15; i++) {
+      machines.push(String(i)); // Just the numbers 1 to 15
+    }
     setMachineNoOptionsInternal(machines);
-  }, []);
+  }, []); // Empty dependency array, runs once on mount
+
+  // // Initialize machine options (same as before)
+  // useEffect(() => {
+  //   const machines = [];
+  //   for (let i = 1; i <= 15; i++) machines.push(String(i));
+  //   for (let i = 1; i <= 5; i++) machines.push(String(i).padStart(3, "0"));
+  //   setMachineNoOptionsInternal(machines);
+  // }, []);
 
   const filteredMachineOptions = machineNoOptionsInternal.filter((machine) =>
     machine.toLowerCase().includes(machineNoSearch.toLowerCase())

@@ -18,38 +18,41 @@ import { fileURLToPath } from "url";
 import createIroningModel from "./models/Ironing.js";
 import createRoleModel from "./models/Role.js";
 //import createRoleManagmentModel from "./models/RoleManagment.js";
+import createCutPanelOrdersModel from "./models/CutPanelOrders.js"; // New model import
 import createCuttingOrdersModel from "./models/CuttingOrders.js"; // New model import
 import createOPAModel from "./models/OPA.js";
 import createPackingModel from "./models/Packing.js";
-import createQCDataModel from "./models/qc1_data.js";
 import createQC1SunriseModel from "./models/QC1Sunrise.js"; // New model import
-import createQC2InspectionPassBundleModel from "./models/qc2_inspection.js";
-import createQc2OrderDataModel from "./models/qc2_orderdata.js";
-import createQC2RepairTrackingModel from "./models/qc2_repair_tracking.js";
-import createQC2ReworksModel from "./models/qc2_rework.js";
 import createQC2DefectPrintModel from "./models/QC2DefectPrint.js";
 import createQCInlineRovingModel from "./models/QC_Inline_Roving.js";
 import createRoleManagmentModel from "./models/RoleManagment.js";
 import createUserModel from "./models/User.js";
 import createWashingModel from "./models/Washing.js";
+import createQCDataModel from "./models/qc1_data.js";
+import createQC2InspectionPassBundleModel from "./models/qc2_inspection.js";
+import createQc2OrderDataModel from "./models/qc2_orderdata.js";
+import createQC2RepairTrackingModel from "./models/qc2_repair_tracking.js";
+import createQC2ReworksModel from "./models/qc2_rework.js";
 
 import createAQLChartModel from "./models/AQLChart.js";
-import createChatModel from "./models/Chat.js"; // New model import
-import createCutPanelOrdersModel from "./models/CutPanelOrders.js"; // New model import
-import createCuttingInspectionModel from "./models/cutting_inspection.js"; // New model import
-import createCuttingAdditionalPointModel from "./models/CuttingAdditionalPoint.js"; // Import the new model
 import createCuttingFabricDefectModel from "./models/CuttingFabricDefects.js";
 import createCuttingIssueModel from "./models/CuttingIssues.js";
 import createCuttingMeasurementPointModel from "./models/CuttingMeasurementPoints.js"; // New model import
 import createInlineOrdersModel from "./models/InlineOrders.js"; // Import the new model
+import createLineSewingWorkerModel from "./models/LineSewingWorkers.js";
+import createSewingDefectsModel from "./models/SewingDefects.js";
+import createCuttingInspectionModel from "./models/cutting_inspection.js"; // New model import
 
 import createDailyTestingFUQCModel from "./models/DailyTestingFUQCModel.js";
-import createDailyTestingHTFUtModel from "./models/dailyTestingHTFUModel.js";
+import createElasticReportModel from "./models/ElasticReport.js";
 import createFUFirstOutputModel from "./models/FUFirstOutput.js";
 import createHTFirstOutputModel from "./models/HTFirstOutput.js";
 import createHTInspectionReportModel from "./models/HTInspectionReportModel.js";
 import createSCCDailyTestingModel from "./models/SCCDailyTesting.js";
 import createSCCDefectModel from "./models/SCCDefectModel.js";
+import createDailyTestingHTFUtModel from "./models/dailyTestingHTFUModel.js";
+
+import createAuditCheckPointModel from "./models/AuditCheckPoint.js";
 
 // Import the API_BASE_URL from our config file
 import { API_BASE_URL } from "./config.js";
@@ -91,17 +94,18 @@ const server = https.createServer(credentials, app);
 // Initialize Socket.io
 const io = new Server(server, {
   cors: {
-    origin: "https://192.165.2.175:3001", //"https://192.167.14.32:3001",  //"https://localhost:3001"
+    origin: "https://192.167.14.32:3001", //"https://192.165.2.175:3001", //"https://localhost:3001"
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   },
 });
 
+app.use("/storage", express.static(path.join(__dirname, "public/storage")));
+app.use("/public", express.static(path.join(__dirname, "../public")));
+
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-app.use("/public", express.static(path.join(__dirname, "../public")));
-app.use("/storage", express.static(path.join(__dirname, "public/storage")));
 
 //app.use(cors());
 app.use(bodyParser.json());
@@ -127,12 +131,12 @@ const ymEcoConnection = mongoose.createConnection(
 );
 
 ymProdConnection.on("connected", () =>
-  console.log("Connected to ym_prod database in localhost...")
+  console.log("Connected to ym_prod database in 192.167.1.10:29000...")
 );
 ymProdConnection.on("error", (err) => console.error("unexpected error:", err));
 
 ymEcoConnection.on("connected", () =>
-  console.log("Connected to ym_eco_board database in localhost...")
+  console.log("Connected to ym_eco_board database in 192.167.1.10:29000...")
 );
 ymEcoConnection.on("error", (err) => console.error("unexpected error:", err));
 
@@ -157,24 +161,26 @@ const QCInlineRoving = createQCInlineRovingModel(ymProdConnection);
 const InlineOrders = createInlineOrdersModel(ymProdConnection); // Define the new model
 const CuttingOrders = createCuttingOrdersModel(ymProdConnection); // New model
 const CuttingInspection = createCuttingInspectionModel(ymProdConnection); // New model
-const QC1Sunrise = createQC1SunriseModel(ymProdConnection); // Define the new model
-const Chat = createChatModel(ymProdConnection); // New model
-const CutPanelOrders = createCutPanelOrdersModel(ymProdConnection); // New model instance
-const CuttingAdditionalPoint =
-  createCuttingAdditionalPointModel(ymProdConnection); // New model
 const CuttingMeasurementPoint =
   createCuttingMeasurementPointModel(ymProdConnection); // New model instance
+const QC1Sunrise = createQC1SunriseModel(ymProdConnection); // Define the new model
+const CutPanelOrders = createCutPanelOrdersModel(ymProdConnection); // New model instance
 const CuttingFabricDefect = createCuttingFabricDefectModel(ymProdConnection);
 const CuttingIssue = createCuttingIssueModel(ymProdConnection);
 const AQLChart = createAQLChartModel(ymProdConnection);
+const SewingDefects = createSewingDefectsModel(ymProdConnection);
+const LineSewingWorker = createLineSewingWorkerModel(ymProdConnection);
 
-const HTFirstOutput = createHTFirstOutputModel(ymProdConnection); // Add this
-const FUFirstOutput = createFUFirstOutputModel(ymProdConnection); // Add this
+const HTFirstOutput = createHTFirstOutputModel(ymProdConnection);
+const FUFirstOutput = createFUFirstOutputModel(ymProdConnection);
 const SCCDailyTesting = createSCCDailyTestingModel(ymProdConnection);
 const DailyTestingHTFU = createDailyTestingHTFUtModel(ymProdConnection);
 const DailyTestingFUQC = createDailyTestingFUQCModel(ymProdConnection);
 const SCCDefect = createSCCDefectModel(ymProdConnection);
 const HTInspectionReport = createHTInspectionReportModel(ymProdConnection);
+const ElasticReport = createElasticReportModel(ymProdConnection);
+
+const AuditCheckPoint = createAuditCheckPointModel(ymProdConnection);
 
 // Set UTF-8 encoding for responses
 app.use((req, res, next) => {
@@ -328,6 +334,9 @@ app.use((req, res, next) => {
 //       );
 //       syncCuttingOrders().then(() =>
 //         console.log("Initial cuttingOrders sync completed.")
+//       );
+//       syncCutPanelOrders().then(() =>
+//         console.log("Initial cutpanelorders sync completed.")
 //       );
 //       syncQC1SunriseData().then(() =>
 //         console.log("Initial QC1 Sunrise sync completed.")
@@ -714,16 +723,16 @@ app.use((req, res, next) => {
 //   }
 // };
 
-// Helper function to determine Buyer based on MONo
-const determineBuyer = (MONo) => {
-  if (!MONo) return "Other";
-  if (MONo.includes("CO")) return "Costco";
-  if (MONo.includes("AR")) return "Aritzia";
-  if (MONo.includes("RT")) return "Reitmans";
-  if (MONo.includes("AF")) return "ANF";
-  if (MONo.includes("NT")) return "STORI";
-  return "Other";
-};
+// // Helper function to determine Buyer based on MONo
+// const determineBuyer = (MONo) => {
+//   if (!MONo) return "Other";
+//   if (MONo.includes("CO")) return "Costco";
+//   if (MONo.includes("AR")) return "Aritzia";
+//   if (MONo.includes("RT")) return "Reitmans";
+//   if (MONo.includes("AF")) return "ANF";
+//   if (MONo.includes("NT")) return "STORI";
+//   return "Other";
+// };
 
 // // Function to sync data to MongoDB - Only process last 7 days and update if modified
 // const syncQC1SunriseData = async () => {
@@ -907,9 +916,9 @@ const determineBuyer = (MONo) => {
 //   }
 // });
 
-// /* ------------------------------
-//    API to fetch inline data from SQL to ym_prod
-// ------------------------------ */
+/* ------------------------------
+   API to fetch inline data from SQL to ym_prod
+------------------------------ */
 
 // async function syncInlineOrders() {
 //   try {
@@ -1060,63 +1069,63 @@ const determineBuyer = (MONo) => {
 //   );
 // });
 
-// // Updated Endpoint to Search MO Numbers (St_No) from inline_orders in MongoDB with partial matching
-// app.get("/api/inline-orders-mo-numbers", async (req, res) => {
-//   try {
-//     const searchTerm = req.query.search; // Get the search term from query params
-//     if (!searchTerm) {
-//       return res.status(400).json({ error: "Search term is required" });
-//     }
+// Updated Endpoint to Search MO Numbers (St_No) from inline_orders in MongoDB with partial matching
+app.get("/api/inline-orders-mo-numbers", async (req, res) => {
+  try {
+    const searchTerm = req.query.search; // Get the search term from query params
+    if (!searchTerm) {
+      return res.status(400).json({ error: "Search term is required" });
+    }
 
-//     // Use a case-insensitive regex to match the term anywhere in St_No
-//     const regexPattern = new RegExp(searchTerm, "i");
+    // Use a case-insensitive regex to match the term anywhere in St_No
+    const regexPattern = new RegExp(searchTerm, "i");
 
-//     // Query the inline_orders collection
-//     const results = await InlineOrders.find({
-//       St_No: { $regex: regexPattern },
-//     })
-//       .select("St_No") // Only return the St_No field (equivalent to .project({ St_No: 1, _id: 0 }))
-//       .limit(100) // Limit results to prevent overwhelming the UI
-//       .sort({ St_No: 1 }) // Sort alphabetically
-//       .exec();
+    // Query the inline_orders collection
+    const results = await InlineOrders.find({
+      St_No: { $regex: regexPattern },
+    })
+      .select("St_No") // Only return the St_No field (equivalent to .project({ St_No: 1, _id: 0 }))
+      .limit(100) // Limit results to prevent overwhelming the UI
+      .sort({ St_No: 1 }) // Sort alphabetically
+      .exec();
 
-//     // Extract unique St_No values
-//     const uniqueMONos = [...new Set(results.map((r) => r.St_No))];
+    // Extract unique St_No values
+    const uniqueMONos = [...new Set(results.map((r) => r.St_No))];
 
-//     res.json(uniqueMONos);
-//   } catch (err) {
-//     console.error("Error fetching MO numbers from inline_orders:", err);
-//     res.status(500).json({
-//       message: "Failed to fetch MO numbers from inline_orders",
-//       error: err.message,
-//     });
-//   }
-// });
+    res.json(uniqueMONos);
+  } catch (err) {
+    console.error("Error fetching MO numbers from inline_orders:", err);
+    res.status(500).json({
+      message: "Failed to fetch MO numbers from inline_orders",
+      error: err.message,
+    });
+  }
+});
 
-// // New Endpoint to Fetch Inline Order Details for a given MO No (St_No)
-// app.get("/api/inline-orders-details", async (req, res) => {
-//   try {
-//     const stNo = req.query.stNo;
-//     if (!stNo) {
-//       return res.status(400).json({ error: "St_No is required" });
-//     }
+// New Endpoint to Fetch Inline Order Details for a given MO No (St_No)
+app.get("/api/inline-orders-details", async (req, res) => {
+  try {
+    const stNo = req.query.stNo;
+    if (!stNo) {
+      return res.status(400).json({ error: "St_No is required" });
+    }
 
-//     // Find the document where St_No matches
-//     const document = await InlineOrders.findOne({ St_No: stNo }).exec();
+    // Find the document where St_No matches
+    const document = await InlineOrders.findOne({ St_No: stNo }).exec();
 
-//     if (!document) {
-//       return res.status(404).json({ error: "MO No not found" });
-//     }
+    if (!document) {
+      return res.status(404).json({ error: "MO No not found" });
+    }
 
-//     res.json(document);
-//   } catch (err) {
-//     console.error("Error fetching Inline Order details:", err);
-//     res.status(500).json({
-//       message: "Failed to fetch Inline Order details",
-//       error: err.message,
-//     });
-//   }
-// });
+    res.json(document);
+  } catch (err) {
+    console.error("Error fetching Inline Order details:", err);
+    res.status(500).json({
+      message: "Failed to fetch Inline Order details",
+      error: err.message,
+    });
+  }
+});
 
 // // New Endpoint for YMCE_SYSTEM Data
 // app.get("/api/ymce-system-data", async (req, res) => {
@@ -1439,6 +1448,340 @@ const determineBuyer = (MONo) => {
 // }
 
 // /* ------------------------------
+//    New Cut Panel Orders Endpoint
+// ------------------------------ */
+
+// async function syncCutPanelOrders() {
+//   try {
+//     console.log("Starting cutpanelorders sync at", new Date().toISOString());
+//     await ensurePoolConnected(poolYMWHSYS2, "YMWHSYS2");
+
+//     const query = `
+//     WITH AggregatedQty AS (
+//     SELECT
+//         StyleNo,
+//         SUM(ISNULL(Qty1, 0) + ISNULL(Qty2, 0) + ISNULL(Qty3, 0) + ISNULL(Qty4, 0) +
+//             ISNULL(Qty5, 0) + ISNULL(Qty6, 0) + ISNULL(Qty7, 0) + ISNULL(Qty8, 0) +
+//             ISNULL(Qty9, 0) + ISNULL(Qty10, 0)) AS TotalOrderQtyStyle
+//     FROM
+//         [YMWHSYS2].[dbo].[tbOrderQty]
+//     WHERE
+//         Dept = 'YMCUTTING' AND FabricType = 'A'
+//     GROUP BY
+//         StyleNo
+// ),
+// OrderAggregates AS (
+//     SELECT
+//         StyleNo,
+//         EngColor,
+//         SUM(TTLRoll) AS TotalTTLRoll,
+//         SUM(TTLQty) AS TotalTTLQty,
+//         SUM(BiddingQty) AS TotalBiddingQty,
+//         SUM(BiddingRollQty) AS TotalBiddingRollQty,
+//         COALESCE(SUM(Qty1), 0) AS OrderQty1,
+//         COALESCE(SUM(Qty2), 0) AS OrderQty2,
+//         COALESCE(SUM(Qty3), 0) AS OrderQty3,
+//         COALESCE(SUM(Qty4), 0) AS OrderQty4,
+//         COALESCE(SUM(Qty5), 0) AS OrderQty5,
+//         COALESCE(SUM(Qty6), 0) AS OrderQty6,
+//         COALESCE(SUM(Qty7), 0) AS OrderQty7,
+//         COALESCE(SUM(Qty8), 0) AS OrderQty8,
+//         COALESCE(SUM(Qty9), 0) AS OrderQty9,
+//         COALESCE(SUM(Qty10), 0) AS OrderQty10,
+//         COALESCE(SUM(Qty1), 0) + COALESCE(SUM(Qty2), 0) + COALESCE(SUM(Qty3), 0) +
+//         COALESCE(SUM(Qty4), 0) + COALESCE(SUM(Qty5), 0) + COALESCE(SUM(Qty6), 0) +
+//         COALESCE(SUM(Qty7), 0) + COALESCE(SUM(Qty8), 0) + COALESCE(SUM(Qty9), 0) +
+//         COALESCE(SUM(Qty10), 0) AS TotalOrderQty
+//     FROM
+//         [YMWHSYS2].[dbo].[ViewCuttingOrderReport]
+//     WHERE
+//         StyleNo IS NOT NULL AND EngColor IS NOT NULL
+//     GROUP BY
+//         StyleNo,
+//         EngColor
+// )
+// SELECT
+//     v.StyleNo,
+//     v.TxnDate,
+//     v.TxnNo,
+//     CASE WHEN v.Buyer = 'ABC' THEN 'ANF' ELSE v.Buyer END AS Buyer,
+//     v.EngColor AS Color,
+//     REPLACE(v.PreparedBy, 'SPREAD ', '') AS SpreadTable,
+//     v.TableNo,
+//     v.BuyerStyle,
+//     v.ChColor,
+//     v.ColorCode,
+//     v.FabricType,
+//     v.Material,
+//     v.RollQty,
+//     ROUND(v.SpreadYds, 3) AS SpreadYds,
+//     v.Unit,
+//     ROUND(v.GrossKgs, 3) AS GrossKgs,
+//     ROUND(v.NetKgs, 3) AS NetKgs,
+//     v.AMackerNo AS MackerNo,
+//     ROUND(v.MackerLength, 3) AS MackerLength,
+//     v.SendFactory,
+//     v.SendTxnDate,
+//     v.SendTxnNo,
+//     v.SendTotalQty,
+//     v.Ratio1 AS CuttingRatio1,
+//     v.Ratio2 AS CuttingRatio2,
+//     v.Ratio3 AS CuttingRatio3,
+//     v.Ratio4 AS CuttingRatio4,
+//     v.Ratio5 AS CuttingRatio5,
+//     v.Ratio6 AS CuttingRatio6,
+//     v.Ratio7 AS CuttingRatio7,
+//     v.Ratio8 AS CuttingRatio8,
+//     v.Ratio9 AS CuttingRatio9,
+//     v.Ratio10 AS CuttingRatio10,
+//     MAX(v.PlanLayer) AS PlanLayer,
+//     MAX(v.ActualLayer) AS ActualLayer,
+//     MAX(v.PlanPcs) AS TotalPcs,
+//     STUFF((
+//         SELECT DISTINCT ', ' + CAST(s2.Batch AS VARCHAR)
+//         FROM [YMWHSYS2].[dbo].[tbSpreading] s2
+//         WHERE s2.StyleNo = v.StyleNo
+//           AND s2.PreparedBy = v.PreparedBy
+//           AND s2.Batch IS NOT NULL
+//         FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS LotNos,
+//     t.Size1,
+//     t.Size2,
+//     t.Size3,
+//     t.Size4,
+//     t.Size5,
+//     t.Size6,
+//     t.Size7,
+//     t.Size8,
+//     t.Size9,
+//     t.Size10,
+//     t.OrderQty1,
+//     t.OrderQty2,
+//     t.OrderQty3,
+//     t.OrderQty4,
+//     t.OrderQty5,
+//     t.OrderQty6,
+//     t.OrderQty7,
+//     t.OrderQty8,
+//     t.OrderQty9,
+//     t.OrderQty10,
+//     t.TotalOrderQty,
+//     t.TotalTTLRoll,
+//     t.TotalTTLQty,
+//     t.TotalBiddingQty,
+//     t.TotalBiddingRollQty,
+//     agg.TotalOrderQtyStyle
+// FROM
+//     [YMWHSYS2].[dbo].[ViewCuttingDetailReport] v
+//     LEFT JOIN [YMWHSYS2].[dbo].[tbSpreading] s
+//         ON v.StyleNo = s.StyleNo
+//         AND v.PreparedBy = s.PreparedBy
+//     LEFT JOIN (
+//         SELECT DISTINCT
+//             t.StyleNo,
+//             t.EngColor AS Color,
+//             t.Size1,
+//             t.Size2,
+//             t.Size3,
+//             t.Size4,
+//             t.Size5,
+//             t.Size6,
+//             t.Size7,
+//             t.Size8,
+//             t.Size9,
+//             t.Size10,
+//             agg.OrderQty1,
+//             agg.OrderQty2,
+//             agg.OrderQty3,
+//             agg.OrderQty4,
+//             agg.OrderQty5,
+//             agg.OrderQty6,
+//             agg.OrderQty7,
+//             agg.OrderQty8,
+//             agg.OrderQty9,
+//             agg.OrderQty10,
+//             agg.TotalOrderQty,
+//             agg.TotalTTLRoll,
+//             agg.TotalTTLQty,
+//             agg.TotalBiddingQty,
+//             agg.TotalBiddingRollQty
+//         FROM
+//             [YMWHSYS2].[dbo].[ViewCuttingOrderReport] t
+//             LEFT JOIN OrderAggregates agg
+//                 ON t.StyleNo = agg.StyleNo
+//                 AND t.EngColor = agg.EngColor
+//         WHERE
+//             t.StyleNo IS NOT NULL
+//             AND t.EngColor IS NOT NULL
+//     ) t
+//         ON v.StyleNo = t.StyleNo
+//         AND v.EngColor = t.Color
+//     LEFT JOIN AggregatedQty agg
+//         ON v.StyleNo = agg.StyleNo
+// WHERE
+//     v.TableNo IS NOT NULL
+//     AND v.TableNo <> ''
+//     AND v.TxnDate >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+// GROUP BY
+//     v.StyleNo,
+//     v.TxnDate,
+//     v.TxnNo,
+//     v.Buyer,
+//     v.EngColor,
+//     v.PreparedBy,
+//     v.TableNo,
+//     v.BuyerStyle,
+//     v.ChColor,
+//     v.ColorCode,
+//     v.FabricType,
+//     v.Material,
+//     v.RollQty,
+//     v.SpreadYds,
+//     v.Unit,
+//     v.GrossKgs,
+//     v.NetKgs,
+//     v.AMackerNo,
+//     v.MackerLength,
+//     v.SendFactory,
+//     v.SendTxnDate,
+//     v.SendTxnNo,
+//     v.SendTotalQty,
+//     v.Ratio1,
+//     v.Ratio2,
+//     v.Ratio3,
+//     v.Ratio4,
+//     v.Ratio5,
+//     v.Ratio6,
+//     v.Ratio7,
+//     v.Ratio8,
+//     v.Ratio9,
+//     v.Ratio10,
+//     t.Size1,
+//     t.Size2,
+//     t.Size3,
+//     t.Size4,
+//     t.Size5,
+//     t.Size6,
+//     t.Size7,
+//     t.Size8,
+//     t.Size9,
+//     t.Size10,
+//     t.OrderQty1,
+//     t.OrderQty2,
+//     t.OrderQty3,
+//     t.OrderQty4,
+//     t.OrderQty5,
+//     t.OrderQty6,
+//     t.OrderQty7,
+//     t.OrderQty8,
+//     t.OrderQty9,
+//     t.OrderQty10,
+//     t.TotalOrderQty,
+//     t.TotalTTLRoll,
+//     t.TotalTTLQty,
+//     t.TotalBiddingQty,
+//     t.TotalBiddingRollQty,
+//     agg.TotalOrderQtyStyle
+// ORDER BY
+//     v.TxnDate DESC;
+//     `;
+
+//     const result = await poolYMWHSYS2.request().query(query);
+
+//     const bulkOps = result.recordset.map((row) => {
+//       const markerRatio = [];
+
+//       for (let i = 1; i <= 10; i++) {
+//         markerRatio.push({
+//           no: i,
+//           size: row[`Size${i}`],
+//           cuttingRatio: row[`CuttingRatio${i}`],
+//           orderQty: row[`OrderQty${i}`],
+//         });
+//       }
+
+//       // const documents = result.recordset.map((row) => {
+//       //   const markerRatio = [];
+//       //   for (let i = 1; i <= 10; i++) {
+//       //     markerRatio.push({
+//       //       no: i,
+//       //       size: row[`Size${i}`],
+//       //       cuttingRatio: row[`CuttingRatio${i}`],
+//       //       orderQty: row[`OrderQty${i}`]
+//       //     });
+//       //   }
+
+//       const lotNos = row.LotNos
+//         ? row.LotNos.split(",").map((lot) => lot.trim())
+//         : [];
+
+//       return {
+//         updateOne: {
+//           filter: { StyleNo: row.StyleNo, TxnNo: row.TxnNo },
+//           update: {
+//             $set: {
+//               StyleNo: row.StyleNo,
+//               TxnDate: row.TxnDate ? new Date(row.TxnDate) : null,
+//               TxnNo: row.TxnNo,
+//               Buyer: row.Buyer,
+//               Color: row.Color,
+//               SpreadTable: row.SpreadTable,
+//               TableNo: row.TableNo,
+//               BuyerStyle: row.BuyerStyle,
+//               ChColor: row.ChColor,
+//               ColorCode: row.ColorCode,
+//               FabricType: row.FabricType,
+//               Material: row.Material,
+//               RollQty: row.RollQty,
+//               SpreadYds: row.SpreadYds,
+//               Unit: row.Unit,
+//               GrossKgs: row.GrossKgs,
+//               NetKgs: row.NetKgs,
+//               MackerNo: row.MackerNo,
+//               MackerLength: row.MackerLength,
+//               SendFactory: row.SendFactory,
+//               SendTxnDate: row.SendTxnDate ? new Date(row.SendTxnDate) : null,
+//               SendTxnNo: row.SendTxnNo,
+//               SendTotalQty: row.SendTotalQty,
+//               PlanLayer: row.PlanLayer,
+//               ActualLayer: row.ActualLayer,
+//               TotalPcs: row.TotalPcs,
+//               LotNos: lotNos,
+//               TotalOrderQty: row.TotalOrderQty,
+//               TotalTTLRoll: row.TotalTTLRoll,
+//               TotalTTLQty: row.TotalTTLQty,
+//               TotalBiddingQty: row.TotalBiddingQty,
+//               TotalBiddingRollQty: row.TotalBiddingRollQty,
+//               TotalOrderQtyStyle: row.TotalOrderQtyStyle,
+//               MarkerRatio: markerRatio,
+//             },
+//           },
+//           upsert: true,
+//         },
+//       };
+//     });
+
+//     await CutPanelOrders.bulkWrite(bulkOps);
+//     console.log(
+//       `Successfully synced ${bulkOps.length} documents to cutpanelorders.`
+//     );
+
+//     //await CutPanelOrders.deleteMany({});
+//     // await CutPanelOrders.insertMany(documents);
+//     // console.log(
+//     //   `Successfully synced ${documents.length} documents to cutpanelorders.`
+//     // );
+//   } catch (err) {
+//     console.error("Error during cutpanelorders sync:", err);
+//     throw err;
+//   }
+// }
+
+// // Schedule the syncCutPanelOrders function to run every 5 minutes
+// cron.schedule("*/5 * * * *", syncCutPanelOrders);
+
+// //console.log("Scheduled cutpanelorders sync every 5 minutes.");
+
+// /* ------------------------------
 //    Manual Sync Endpoint
 // ------------------------------ */
 
@@ -1457,6 +1800,21 @@ const determineBuyer = (MONo) => {
 //   }
 // });
 
+// app.post("/api/sync-cutpanel-orders", async (req, res) => {
+//   try {
+//     await syncCutPanelOrders();
+//     res
+//       .status(200)
+//       .json({ message: "Cut panel orders sync completed successfully." });
+//   } catch (err) {
+//     console.error("Error in /api/sync-cutpanel-orders endpoint:", err);
+//     res.status(500).json({
+//       message: "Failed to sync cut panel orders",
+//       error: err.message,
+//     });
+//   }
+// });
+
 // /* ------------------------------
 //    Schedule Daily Sync
 // ------------------------------ */
@@ -1467,6 +1825,230 @@ const determineBuyer = (MONo) => {
 //     await syncCuttingOrders();
 //   } catch (err) {
 //     console.error("Scheduled cuttingOrders sync failed:", err);
+//   }
+// });
+
+// cron.schedule("0 8 * * *", async () => {
+//   console.log("Running scheduled cutpanelorders sync at 8 AM...");
+//   try {
+//     await syncCutPanelOrders();
+//   } catch (err) {
+//     console.error("Scheduled cutpanelorders sync failed:", err);
+//   }
+// });
+
+/* ------------------------------
+   New Endpoints for CutPanelOrders
+------------------------------ */
+
+// Endpoint to Search MO Numbers (StyleNo) from cutpanelorders with partial matching
+app.get("/api/cutpanel-orders-mo-numbers", async (req, res) => {
+  try {
+    const searchTerm = req.query.search;
+    if (!searchTerm) {
+      return res.status(400).json({ error: "Search term is required" });
+    }
+
+    const regexPattern = new RegExp(searchTerm, "i");
+
+    const results = await CutPanelOrders.find({
+      StyleNo: { $regex: regexPattern },
+    })
+      .select("StyleNo")
+      .limit(100)
+      .sort({ StyleNo: 1 })
+      .exec();
+
+    const uniqueMONos = [...new Set(results.map((r) => r.StyleNo))];
+
+    res.json(uniqueMONos);
+  } catch (err) {
+    console.error("Error fetching MO numbers from cutpanelorders:", err);
+    res.status(500).json({
+      message: "Failed to fetch MO numbers from cutpanelorders",
+      error: err.message,
+    });
+  }
+});
+
+// Endpoint to Fetch Table Nos for a given MO No (StyleNo)
+app.get("/api/cutpanel-orders-table-nos", async (req, res) => {
+  try {
+    const { styleNo } = req.query;
+    if (!styleNo) {
+      return res.status(400).json({ error: "StyleNo is required" });
+    }
+
+    const results = await CutPanelOrders.find({ StyleNo: styleNo })
+      .select("TableNo")
+      .exec();
+
+    const uniqueTableNos = [...new Set(results.map((r) => r.TableNo))].filter(
+      (table) => table
+    );
+
+    res.json(uniqueTableNos);
+  } catch (err) {
+    console.error("Error fetching Table Nos from cutpanelorders:", err);
+    res.status(500).json({
+      message: "Failed to fetch Table Nos from cutpanelorders",
+      error: err.message,
+    });
+  }
+});
+
+// Endpoint to Fetch Cut Panel Order Details for a given MO No (StyleNo) and TableNo
+app.get("/api/cutpanel-orders-details", async (req, res) => {
+  try {
+    const { styleNo, tableNo } = req.query;
+    if (!styleNo || !tableNo) {
+      return res
+        .status(400)
+        .json({ error: "StyleNo and TableNo are required" });
+    }
+
+    const document = await CutPanelOrders.findOne({
+      StyleNo: styleNo,
+      TableNo: tableNo,
+    }).exec();
+
+    if (!document) {
+      return res.status(404).json({ error: "Document not found" });
+    }
+
+    res.json(document);
+  } catch (err) {
+    console.error("Error fetching Cut Panel Orders details:", err);
+    res.status(500).json({
+      message: "Failed to fetch Cut Panel Orders details",
+      error: err.message,
+    });
+  }
+});
+
+// Endpoint to Fetch Total Order Quantity for unique StyleNo and Color combinations
+app.get("/api/cutpanel-orders-total-order-qty", async (req, res) => {
+  try {
+    const { styleNo } = req.query;
+    if (!styleNo) {
+      return res.status(400).json({ error: "StyleNo is required" });
+    }
+
+    const results = await CutPanelOrders.aggregate([
+      // Match documents for the given StyleNo
+      { $match: { StyleNo: styleNo } },
+      // Group by StyleNo and Color to deduplicate and sum TotalOrderQty
+      {
+        $group: {
+          _id: { StyleNo: "$StyleNo", Color: "$Color" },
+          totalOrderQty: { $sum: "$TotalOrderQty" },
+        },
+      },
+      // Group all results to get the overall sum
+      {
+        $group: {
+          _id: null,
+          overallTotalOrderQty: { $sum: "$totalOrderQty" },
+        },
+      },
+      // Project only the overallTotalOrderQty field
+      {
+        $project: {
+          _id: 0,
+          overallTotalOrderQty: 1,
+        },
+      },
+    ]).exec();
+
+    if (results.length === 0) {
+      return res.json({ overallTotalOrderQty: 0 });
+    }
+
+    res.json(results[0]);
+  } catch (err) {
+    console.error(
+      "Error fetching total order quantity from cutpanelorders:",
+      err
+    );
+    res.status(500).json({
+      message: "Failed to fetch total order quantity from cutpanelorders",
+      error: err.message,
+    });
+  }
+});
+
+// Endpoint to get aggregated TotalOrderQty for a given StyleNo (MO No)
+// This sums the TotalOrderQty for each unique color associated with the StyleNo.
+app.get("/api/cutpanel-orders/aggregated-total-order-qty", async (req, res) => {
+  try {
+    const { styleNo } = req.query;
+    if (!styleNo) {
+      return res.status(400).json({ error: "StyleNo (MO No) is required" });
+    }
+
+    // Find one document matching the StyleNo and project only TotalOrderQtyStyle
+    const result = await CutPanelOrders.findOne(
+      { StyleNo: styleNo },
+      { TotalOrderQtyStyle: 1 }
+    );
+
+    if (result && result.TotalOrderQtyStyle !== undefined) {
+      res.json({ aggregatedTotalOrderQty: result.TotalOrderQtyStyle });
+    } else {
+      // If no matching StyleNo or TotalOrderQtyStyle is undefined, return 0
+      res.json({ aggregatedTotalOrderQty: 0 });
+    }
+  } catch (err) {
+    console.error("Error fetching aggregated total order quantity:", err);
+    res.status(500).json({
+      message: "Failed to fetch aggregated total order quantity",
+      error: err.message,
+    });
+  }
+});
+
+// app.get("/api/cutpanel-orders/aggregated-total-order-qty", async (req, res) => {
+//   try {
+//     const { styleNo } = req.query;
+//     if (!styleNo) {
+//       return res.status(400).json({ error: "StyleNo (MO No) is required" });
+//     }
+
+//     const aggregationPipeline = [
+//       {
+//         $match: { StyleNo: styleNo } // Filter by the specific StyleNo
+//       },
+//       {
+//         $group: {
+//           _id: { styleNo: "$StyleNo", color: "$Color" }, // Group by StyleNo and Color
+//           // Assuming TotalOrderQty is the same for all records of a given StyleNo+Color.
+//           // If not, and you want the sum per StyleNo+Color, use $sum: '$TotalOrderQty' here.
+//           // But for the final sum across colors, we need one value per color.
+//           uniqueTotalOrderQtyForColor: { $first: "$TotalOrderQty" }
+//         }
+//       },
+//       {
+//         $group: {
+//           _id: "$_id.styleNo", // Group again by StyleNo (effectively just one group now)
+//           aggregatedTotal: { $sum: "$uniqueTotalOrderQtyForColor" } // Sum the unique TotalOrderQty for each color
+//         }
+//       }
+//     ];
+
+//     const result = await CutPanelOrders.aggregate(aggregationPipeline);
+
+//     if (result.length > 0) {
+//       res.json({ aggregatedTotalOrderQty: result[0].aggregatedTotal });
+//     } else {
+//       // If no matching StyleNo, or no orders, return 0 or an appropriate message
+//       res.json({ aggregatedTotalOrderQty: 0 });
+//     }
+//   } catch (err) {
+//     console.error("Error fetching aggregated total order quantity:", err);
+//     res.status(500).json({
+//       message: "Failed to fetch aggregated total order quantity",
+//       error: err.message
+//     });
 //   }
 // });
 
@@ -1586,9 +2168,9 @@ const determineBuyer = (MONo) => {
 //   }
 // });
 
-// /* ------------------------------
-//    Graceful Shutdown
-// ------------------------------ */
+/* ------------------------------
+   Graceful Shutdown
+------------------------------ */
 
 // process.on("SIGINT", async () => {
 //   try {
@@ -1603,143 +2185,59 @@ const determineBuyer = (MONo) => {
 //   }
 // });
 
-// app.get("/api/health", (req, res) => {
-//   res.json({ status: "ok" });
-// });
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
 /* ------------------------------
-   New Endpoints for CutPanelOrders
+   Helper Function to Convert Date to MM/DD/YYYY
 ------------------------------ */
 
-// Endpoint to Search MO Numbers (StyleNo) from cutpanelorders with partial matching
-app.get("/api/cutpanel-orders-mo-numbers", async (req, res) => {
+// Helper function to normalize date strings (ensure MM/DD/YYYY format)
+const normalizeDateString = (dateStr) => {
+  if (!dateStr) return null;
   try {
-    const searchTerm = req.query.search;
-    if (!searchTerm) {
-      return res.status(400).json({ error: "Search term is required" });
+    const date = new Date(dateStr);
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  } catch (e) {
+    console.error("Error normalizing date string:", dateStr, e);
+    // If parsing fails, try to return as is or handle error appropriately
+    // For this use case, if it's already MM/DD/YYYY, it might be fine
+    const parts = dateStr.split(/[-/]/);
+    if (parts.length === 3) {
+      // Attempt to reformat if it looks like YYYY-MM-DD or DD-MM-YYYY
+      if (parts[0].length === 4) return `${parts[1]}/${parts[2]}/${parts[0]}`; // YYYY/MM/DD -> MM/DD/YYYY
+      if (parts[2].length === 4) return `${parts[0]}/${parts[1]}/${parts[2]}`; // DD/MM/YYYY -> MM/DD/YYYY
     }
-
-    const regexPattern = new RegExp(searchTerm, "i");
-
-    const results = await CutPanelOrders.find({
-      StyleNo: { $regex: regexPattern },
-    })
-      .select("StyleNo")
-      .limit(100)
-      .sort({ StyleNo: 1 })
-      .exec();
-
-    const uniqueMONos = [...new Set(results.map((r) => r.StyleNo))];
-
-    res.json(uniqueMONos);
-  } catch (err) {
-    console.error("Error fetching MO numbers from cutpanelorders:", err);
-    res.status(500).json({
-      message: "Failed to fetch MO numbers from cutpanelorders",
-      error: err.message,
-    });
+    return dateStr; // Fallback
   }
-});
+};
 
-// Endpoint to Fetch Table Nos for a given MO No (StyleNo)
-app.get("/api/cutpanel-orders-table-nos", async (req, res) => {
+/* ------------------------------
+   End Points - SewingDefects
+------------------------------ */
+app.get("/api/sewing-defects", async (req, res) => {
   try {
-    const { styleNo } = req.query;
-    if (!styleNo) {
-      return res.status(400).json({ error: "StyleNo is required" });
-    }
+    // Extract query parameters
+    const { categoryEnglish, type, isCommon } = req.query;
 
-    const results = await CutPanelOrders.find({ StyleNo: styleNo })
-      .select("TableNo")
-      .exec();
+    // Build filter object based on provided query parameters
+    const filter = {};
+    if (categoryEnglish) filter.categoryEnglish = categoryEnglish;
+    if (type) filter.type = type;
+    if (isCommon) filter.isCommon = isCommon;
 
-    const uniqueTableNos = [...new Set(results.map((r) => r.TableNo))].filter(
-      (table) => table
-    );
+    // Fetch defects from the database
+    const defects = await SewingDefects.find(filter);
 
-    res.json(uniqueTableNos);
-  } catch (err) {
-    console.error("Error fetching Table Nos from cutpanelorders:", err);
-    res.status(500).json({
-      message: "Failed to fetch Table Nos from cutpanelorders",
-      error: err.message,
-    });
-  }
-});
-
-// Endpoint to Fetch Cut Panel Order Details for a given MO No (StyleNo) and TableNo
-app.get("/api/cutpanel-orders-details", async (req, res) => {
-  try {
-    const { styleNo, tableNo } = req.query;
-    if (!styleNo || !tableNo) {
-      return res
-        .status(400)
-        .json({ error: "StyleNo and TableNo are required" });
-    }
-
-    const document = await CutPanelOrders.findOne({
-      StyleNo: styleNo,
-      TableNo: tableNo,
-    }).exec();
-
-    if (!document) {
-      return res.status(404).json({ error: "Document not found" });
-    }
-
-    res.json(document);
-  } catch (err) {
-    console.error("Error fetching Cut Panel Orders details:", err);
-    res.status(500).json({
-      message: "Failed to fetch Cut Panel Orders details",
-      error: err.message,
-    });
-  }
-});
-
-// Endpoint to get aggregated TotalOrderQty for a given StyleNo (MO No)
-// This sums the TotalOrderQty for each unique color associated with the StyleNo.
-app.get("/api/cutpanel-orders/aggregated-total-order-qty", async (req, res) => {
-  try {
-    const { styleNo } = req.query;
-    if (!styleNo) {
-      return res.status(400).json({ error: "StyleNo (MO No) is required" });
-    }
-
-    const aggregationPipeline = [
-      {
-        $match: { StyleNo: styleNo }, // Filter by the specific StyleNo
-      },
-      {
-        $group: {
-          _id: { styleNo: "$StyleNo", color: "$Color" }, // Group by StyleNo and Color
-          // Assuming TotalOrderQty is the same for all records of a given StyleNo+Color.
-          // If not, and you want the sum per StyleNo+Color, use $sum: '$TotalOrderQty' here.
-          // But for the final sum across colors, we need one value per color.
-          uniqueTotalOrderQtyForColor: { $first: "$TotalOrderQty" },
-        },
-      },
-      {
-        $group: {
-          _id: "$_id.styleNo", // Group again by StyleNo (effectively just one group now)
-          aggregatedTotal: { $sum: "$uniqueTotalOrderQtyForColor" }, // Sum the unique TotalOrderQty for each color
-        },
-      },
-    ];
-
-    const result = await CutPanelOrders.aggregate(aggregationPipeline);
-
-    if (result.length > 0) {
-      res.json({ aggregatedTotalOrderQty: result[0].aggregatedTotal });
-    } else {
-      // If no matching StyleNo, or no orders, return 0 or an appropriate message
-      res.json({ aggregatedTotalOrderQty: 0 });
-    }
-  } catch (err) {
-    console.error("Error fetching aggregated total order quantity:", err);
-    res.status(500).json({
-      message: "Failed to fetch aggregated total order quantity",
-      error: err.message,
-    });
+    // Send the response with fetched defects
+    res.json(defects);
+  } catch (error) {
+    // Handle errors
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -2074,19 +2572,170 @@ app.put("/api/update-bundle-data/:id", async (req, res) => {
   }
 });
 
-//For Data tab display records in a table
+// NEW ENDPOINT: Get distinct values for filters
+app.get("/api/bundle-data/distinct-filters", async (req, res) => {
+  try {
+    const distinctMonos = await QC2OrderData.distinct("selectedMono");
+    const distinctBuyers = await QC2OrderData.distinct("buyer");
+    const distinctQcIds = await QC2OrderData.distinct("emp_id"); // Assuming emp_id is QC ID
+    const distinctLineNos = await QC2OrderData.distinct("lineNo");
+
+    res.json({
+      monos: distinctMonos.sort(),
+      buyers: distinctBuyers.sort(),
+      qcIds: distinctQcIds.sort(),
+      lineNos: distinctLineNos.sort((a, b) => {
+        // Custom sort for alphanumeric line numbers
+        const numA = parseInt(a);
+        const numB = parseInt(b);
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        if (!isNaN(numA)) return -1; // Numbers first
+        if (!isNaN(numB)) return 1;
+        return a.localeCompare(b); // Then string compare
+      }),
+    });
+  } catch (error) {
+    console.error("Error fetching distinct filter values:", error);
+    res.status(500).json({ message: "Failed to fetch distinct filter values" });
+  }
+});
+
+// MODIFIED ENDPOINT: Fetch filtered bundle data with pagination and aggregated stats
+app.get("/api/filtered-bundle-data", async (req, res) => {
+  try {
+    const {
+      date,
+      lineNo,
+      selectedMono,
+      packageNo,
+      buyer,
+      emp_id,
+      page = 1,
+      limit = 15, // Pagination params, default to page 1, 10 items per page
+      sortBy = "updated_date_seperator", // Default sort field
+      sortOrder = "desc", // Default sort order (descending for latest first)
+    } = req.query;
+
+    let matchQuery = {};
+
+    if (date) {
+      const normalizedQueryDate = normalizeDateString(date);
+      if (normalizedQueryDate) {
+        matchQuery.updated_date_seperator = normalizedQueryDate;
+      }
+    }
+    if (lineNo) matchQuery.lineNo = lineNo;
+    if (selectedMono) matchQuery.selectedMono = selectedMono;
+    if (packageNo) {
+      const pkgNo = parseInt(packageNo);
+      if (!isNaN(pkgNo)) matchQuery.package_no = pkgNo;
+    }
+    if (buyer) matchQuery.buyer = buyer;
+    if (emp_id) matchQuery.emp_id = emp_id;
+
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Determine sort direction
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+    let sortOptions = {};
+    if (sortBy === "updated_date_seperator") {
+      // For date and time, sort by date then time if dates are equal
+      sortOptions = {
+        updated_date_seperator: sortDirection,
+        updated_time_seperator: sortDirection,
+      };
+    } else {
+      sortOptions[sortBy] = sortDirection;
+    }
+
+    // Fetch total count of matching documents for pagination
+    const totalRecords = await QC2OrderData.countDocuments(matchQuery);
+
+    // Fetch paginated and sorted records
+    const records = await QC2OrderData.find(matchQuery)
+      .sort(sortOptions) // Apply sorting
+      .skip(skip) // Apply skip for pagination
+      .limit(limitNum); // Apply limit for pagination
+
+    // Calculate aggregated stats based on ALL filtered records (not just the current page)
+    // This might be resource-intensive if the filtered set is very large.
+    // Consider if stats should also be paginated or if an approximation is okay for large sets.
+    // For now, calculating on the full filtered set.
+    const allFilteredRecordsForStats = await QC2OrderData.find(matchQuery); // Re-query without pagination for stats
+
+    let totalGarmentQty = 0;
+    let uniqueStyles = new Set();
+
+    allFilteredRecordsForStats.forEach((record) => {
+      totalGarmentQty += record.count || 0;
+      if (record.selectedMono) {
+        uniqueStyles.add(record.selectedMono);
+      }
+    });
+
+    const totalBundlesFromStats = allFilteredRecordsForStats.length; // This is the true total bundles for the filter
+    const totalStyles = uniqueStyles.size;
+
+    res.json({
+      records,
+      stats: {
+        totalGarmentQty,
+        totalBundles: totalBundlesFromStats, // Use count from all filtered records for stats
+        totalStyles,
+      },
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalRecords / limitNum),
+        totalRecords: totalRecords, // Total records matching the filter
+        limit: limitNum,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching filtered bundle data:", error);
+    res.status(500).json({ message: "Failed to fetch filtered bundle data" });
+  }
+});
+
+// Ensure your existing /api/user-batches is either removed or updated if it's now redundant
+// For simplicity, I'll assume the new /api/filtered-bundle-data replaces the primary need of /api/user-batches for this component.
+// If /api/user-batches is used elsewhere with just emp_id, keep it.
+// Otherwise, you can deprecate it in favor of the more flexible filtered endpoint.
+// For now, I'm keeping it as it might be used by the main BundleRegistration page for other purposes.
 app.get("/api/user-batches", async (req, res) => {
   try {
     const { emp_id } = req.query;
     if (!emp_id) {
       return res.status(400).json({ message: "emp_id is required" });
     }
-    const batches = await QC2OrderData.find({ emp_id });
+    // If you want this to also use the normalized date string for 'date' field
+    // you'd need to adjust how 'date' is stored or queried here too.
+    // For now, assuming it matches as is or 'date' field is not used for filtering here.
+    const batches = await QC2OrderData.find({ emp_id }).sort({
+      updated_date_seperator: -1,
+      updated_time_seperator: -1,
+    });
     res.json(batches);
   } catch (error) {
+    console.error("Error fetching user batches:", error);
     res.status(500).json({ message: "Failed to fetch user batches" });
   }
 });
+
+// //For Data tab display records in a table
+// app.get("/api/user-batches", async (req, res) => {
+//   try {
+//     const { emp_id } = req.query;
+//     if (!emp_id) {
+//       return res.status(400).json({ message: "emp_id is required" });
+//     }
+//     const batches = await QC2OrderData.find({ emp_id });
+//     res.json(batches);
+//   } catch (error) {
+//     res.status(500).json({ message: "Failed to fetch user batches" });
+//   }
+// });
 
 /* ------------------------------
    End Points - Reprint - qc2_orderdata
@@ -2219,129 +2868,6 @@ app.get("/api/reprint-colors-sizes/:mono", async (req, res) => {
   } catch (error) {
     console.error("Error fetching colors/sizes for reprint:", error);
     res.status(500).json({ error: "Failed to fetch colors/sizes for reprint" });
-  }
-});
-
-// MODIFIED ENDPOINT: Fetch filtered bundle data with pagination and aggregated stats
-app.get("/api/filtered-bundle-data", async (req, res) => {
-  try {
-    const {
-      date,
-      lineNo,
-      selectedMono,
-      packageNo,
-      buyer,
-      emp_id,
-      page = 1,
-      limit = 15, // Pagination params, default to page 1, 10 items per page
-      sortBy = "updated_date_seperator", // Default sort field
-      sortOrder = "desc", // Default sort order (descending for latest first)
-    } = req.query;
-
-    let matchQuery = {};
-
-    if (date) {
-      const normalizedQueryDate = normalizeDateString(date);
-      if (normalizedQueryDate) {
-        matchQuery.updated_date_seperator = normalizedQueryDate;
-      }
-    }
-    if (lineNo) matchQuery.lineNo = lineNo;
-    if (selectedMono) matchQuery.selectedMono = selectedMono;
-    if (packageNo) {
-      const pkgNo = parseInt(packageNo);
-      if (!isNaN(pkgNo)) matchQuery.package_no = pkgNo;
-    }
-    if (buyer) matchQuery.buyer = buyer;
-    if (emp_id) matchQuery.emp_id = emp_id;
-
-    const pageNum = parseInt(page, 10);
-    const limitNum = parseInt(limit, 10);
-    const skip = (pageNum - 1) * limitNum;
-
-    // Determine sort direction
-    const sortDirection = sortOrder === "asc" ? 1 : -1;
-    let sortOptions = {};
-    if (sortBy === "updated_date_seperator") {
-      // For date and time, sort by date then time if dates are equal
-      sortOptions = {
-        updated_date_seperator: sortDirection,
-        updated_time_seperator: sortDirection,
-      };
-    } else {
-      sortOptions[sortBy] = sortDirection;
-    }
-
-    // Fetch total count of matching documents for pagination
-    const totalRecords = await QC2OrderData.countDocuments(matchQuery);
-
-    // Fetch paginated and sorted records
-    const records = await QC2OrderData.find(matchQuery)
-      .sort(sortOptions) // Apply sorting
-      .skip(skip) // Apply skip for pagination
-      .limit(limitNum); // Apply limit for pagination
-
-    // Calculate aggregated stats based on ALL filtered records (not just the current page)
-    // This might be resource-intensive if the filtered set is very large.
-    // Consider if stats should also be paginated or if an approximation is okay for large sets.
-    // For now, calculating on the full filtered set.
-    const allFilteredRecordsForStats = await QC2OrderData.find(matchQuery); // Re-query without pagination for stats
-
-    let totalGarmentQty = 0;
-    let uniqueStyles = new Set();
-
-    allFilteredRecordsForStats.forEach((record) => {
-      totalGarmentQty += record.count || 0;
-      if (record.selectedMono) {
-        uniqueStyles.add(record.selectedMono);
-      }
-    });
-
-    const totalBundlesFromStats = allFilteredRecordsForStats.length; // This is the true total bundles for the filter
-    const totalStyles = uniqueStyles.size;
-
-    res.json({
-      records,
-      stats: {
-        totalGarmentQty,
-        totalBundles: totalBundlesFromStats, // Use count from all filtered records for stats
-        totalStyles,
-      },
-      pagination: {
-        currentPage: pageNum,
-        totalPages: Math.ceil(totalRecords / limitNum),
-        totalRecords: totalRecords, // Total records matching the filter
-        limit: limitNum,
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching filtered bundle data:", error);
-    res.status(500).json({ message: "Failed to fetch filtered bundle data" });
-  }
-});
-
-// Ensure your existing /api/user-batches is either removed or updated if it's now redundant
-// For simplicity, I'll assume the new /api/filtered-bundle-data replaces the primary need of /api/user-batches for this component.
-// If /api/user-batches is used elsewhere with just emp_id, keep it.
-// Otherwise, you can deprecate it in favor of the more flexible filtered endpoint.
-// For now, I'm keeping it as it might be used by the main BundleRegistration page for other purposes.
-app.get("/api/user-batches", async (req, res) => {
-  try {
-    const { emp_id } = req.query;
-    if (!emp_id) {
-      return res.status(400).json({ message: "emp_id is required" });
-    }
-    // If you want this to also use the normalized date string for 'date' field
-    // you'd need to adjust how 'date' is stored or queried here too.
-    // For now, assuming it matches as is or 'date' field is not used for filtering here.
-    const batches = await QC2OrderData.find({ emp_id }).sort({
-      updated_date_seperator: -1,
-      updated_time_seperator: -1,
-    });
-    res.json(batches);
-  } catch (error) {
-    console.error("Error fetching user batches:", error);
-    res.status(500).json({ message: "Failed to fetch user batches" });
   }
 });
 
@@ -6676,106 +7202,870 @@ app.get("/api/opa-autocomplete", async (req, res) => {
    QC Inline Roving ENDPOINTS
 ------------------------------ */
 
-// ------------------------
-// Multer Storage Setup for QC Inline Roving
-// ------------------------
-const qcStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, "../public/storage/qcinline");
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const { date, type, emp_id } = req.body;
-    // Validate the inputs to prevent 'undefined' in the filename
-    const currentDate = date || new Date().toISOString().split("T")[0]; // Fallback to current date if not provided
-    const imageType = type || "spi-measurement"; // Fallback to 'unknown' if type is not provided
-    const userEmpId = emp_id || "emp"; // Fallback to 'guest' if emp_id is not provided
-    const randomId = Math.random().toString(36).substring(2, 15);
-    const fileName = `${currentDate}-${imageType}-${userEmpId}-${randomId}.jpg`;
-    cb(null, fileName);
-  },
-});
+/* ------------------------------
+   QC Inline Roving New
+------------------------------ */
 
-const qcUpload = multer({
-  storage: qcStorage,
-  limits: { fileSize: 5000000 }, // Limit file size to 5MB
-  fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png|gif/;
-    const extname = filetypes.test(
-      path.extname(file.originalname).toLowerCase()
+//get the each line related working worker count
+app.get("/api/line-summary", async (req, res) => {
+  try {
+    const lineSummaries = await UserMain.aggregate([
+      {
+        $match: {
+          sect_name: { $ne: null, $ne: "" },
+          working_status: "Working",
+          job_title: "Sewing Worker",
+        },
+      },
+      {
+        $group: {
+          _id: "$sect_name",
+          worker_count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          line_no: "$_id",
+          real_worker_count: "$worker_count",
+        },
+      },
+      { $sort: { line_no: 1 } },
+    ]);
+
+    const editedCountsDocs = await LineSewingWorker.find(
+      {},
+      "line_no edited_worker_count"
+    ).lean();
+
+    const editedCountsMap = new Map(
+      editedCountsDocs.map((doc) => [doc.line_no, doc.edited_worker_count])
     );
-    const mimetype = filetypes.test(file.mimetype);
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb("Error: Images Only (jpeg, jpg, png, gif)!");
-    }
-  },
-}).single("image");
 
-// Serve static files (for accessing uploaded images)
-app.use("/storage", express.static(path.join(__dirname, "../public/storage")));
+    const mergedSummaries = lineSummaries.map((realSummary) => ({
+      ...realSummary,
+      edited_worker_count: editedCountsMap.get(realSummary.line_no),
+    }));
 
-// Endpoint to upload images for QC Inline Roving
-app.post("/api/upload-qc-image", qcUpload, (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No image uploaded" });
-    }
-    const imagePath = `/storage/qcinline/${req.file.filename}`;
-    res.status(200).json({ imagePath });
+    res.json(mergedSummaries);
   } catch (error) {
-    console.error("Error uploading image:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to upload image", error: error.message });
-  }
-});
-
-// Updated endpoint to save or update QC Inline Roving data
-app.post("/api/save-qc-inline-roving", async (req, res) => {
-  try {
-    const qcInlineRovingData = req.body;
-
-    const { inspection_date, line_no, mo_no } = qcInlineRovingData;
-
-    // Check if a record exists with the same emp_id and inspection_date
-    let existingRecord = await QCInlineRoving.findOne({
-      inspection_date,
-      line_no,
-      mo_no,
-    });
-
-    if (existingRecord) {
-      // If a matching record exists, append the new inlineData to the existing record
-      existingRecord.inlineData.push(qcInlineRovingData.inlineData[0]);
-      await existingRecord.save();
-      res.status(200).json({
-        message: "QC Inline Roving data updated successfully",
-        data: existingRecord,
-      });
-    } else {
-      // If no matching record exists, create a new one
-      const newQCInlineRoving = new QCInlineRoving(qcInlineRovingData);
-      await newQCInlineRoving.save();
-      res.status(201).json({
-        message: "QC Inline Roving data saved successfully",
-        data: newQCInlineRoving,
-      });
-    }
-  } catch (error) {
-    console.error("Error saving QC Inline Roving data:", error);
+    console.error("Error fetching line summary:", error);
     res.status(500).json({
-      message: "Failed to save QC Inline Roving data",
+      message: "Failed to fetch line summary data.",
       error: error.message,
     });
   }
 });
 
+//Edit the line worker count
+app.put("/api/line-sewing-workers/:lineNo", async (req, res) => {
+  const { lineNo } = req.params;
+  const { edited_worker_count } = req.body;
+
+  if (
+    typeof edited_worker_count !== "number" ||
+    edited_worker_count < 0 ||
+    !Number.isInteger(edited_worker_count)
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Edited worker count must be a non-negative integer." });
+  }
+  try {
+    const now = new Date();
+    const realCountResult = await UserMain.aggregate([
+      {
+        $match: {
+          sect_name: lineNo,
+          working_status: "Working",
+          job_title: "Sewing Worker",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const current_real_worker_count =
+      realCountResult.length > 0 ? realCountResult[0].count : 0;
+
+    const historyEntry = {
+      edited_worker_count,
+      updated_at: now,
+    };
+
+    const updatedLineWorker = await LineSewingWorker.findOneAndUpdate(
+      { line_no: lineNo },
+      {
+        $set: {
+          real_worker_count: current_real_worker_count,
+          edited_worker_count,
+          updated_at: now,
+        },
+        $push: { history: historyEntry },
+      },
+      { new: true, upsert: true, runValidators: true }
+    );
+
+    res.json({
+      message: "Line worker count updated successfully.",
+      data: updatedLineWorker,
+    });
+  } catch (error) {
+    console.error(
+      `Error updating line worker count for line ${lineNo}:`,
+      error
+    );
+    res.status(500).json({
+      message: "Failed to update line worker count.",
+      error: error.message,
+    });
+  }
+});
+//Save the inline Roving data
+app.post("/api/save-qc-inline-roving", async (req, res) => {
+  try {
+    const {
+      inspection_date,
+      mo_no,
+      line_no,
+      report_name,
+      inspection_rep_item,
+    } = req.body;
+
+    if (!inspection_date || !mo_no || !line_no || !inspection_rep_item) {
+      return res.status(400).json({
+        message:
+          "Missing required fields: inspection_date, mo_no, line_no, or inspection_rep_item.",
+      });
+    }
+
+    if (
+      typeof inspection_rep_item !== "object" ||
+      inspection_rep_item === null
+    ) {
+      return res
+        .status(400)
+        .json({ message: "inspection_rep_item must be a valid object." });
+    }
+
+    if (
+      !inspection_rep_item.inspection_rep_name ||
+      !inspection_rep_item.emp_id ||
+      !inspection_rep_item.eng_name
+    ) {
+      return res.status(400).json({
+        message:
+          "inspection_rep_item is missing required fields like inspection_rep_name, emp_id, or eng_name.",
+      });
+    }
+
+    let doc = await QCInlineRoving.findOne({ inspection_date, mo_no, line_no });
+
+    if (doc) {
+      const existingRepIndex = doc.inspection_rep.findIndex(
+        (rep) =>
+          rep.inspection_rep_name === inspection_rep_item.inspection_rep_name
+      );
+
+      if (existingRepIndex !== -1) {
+        const repToUpdate = doc.inspection_rep[existingRepIndex];
+
+        if (!Array.isArray(repToUpdate.inlineData)) {
+          repToUpdate.inlineData = [];
+        }
+
+        if (
+          inspection_rep_item.inlineData &&
+          inspection_rep_item.inlineData.length > 0
+        ) {
+          repToUpdate.inlineData.push(inspection_rep_item.inlineData[0]);
+        }
+
+        repToUpdate.inspection_rep_name =
+          inspection_rep_item.inspection_rep_name;
+        repToUpdate.emp_id = inspection_rep_item.emp_id;
+        repToUpdate.eng_name = inspection_rep_item.eng_name;
+        repToUpdate.complete_inspect_operators = repToUpdate.inlineData.length;
+        repToUpdate.Inspect_status =
+          repToUpdate.total_operators > 0 &&
+          repToUpdate.complete_inspect_operators >= repToUpdate.total_operators
+            ? "Completed"
+            : "Not Complete";
+      } else {
+        if (doc.inspection_rep.length < 5) {
+          const newRepItem = { ...inspection_rep_item };
+          if (!Array.isArray(newRepItem.inlineData)) {
+            newRepItem.inlineData = [];
+          }
+
+          newRepItem.complete_inspect_operators = newRepItem.inlineData.length;
+          newRepItem.Inspect_status =
+            newRepItem.total_operators > 0 &&
+            newRepItem.complete_inspect_operators >= newRepItem.total_operators
+              ? "Completed"
+              : "Not Complete";
+
+          doc.inspection_rep.push(newRepItem);
+        } else {
+          return res.status(400).json({
+            message:
+              "Maximum number of 5 inspection reports already recorded for this combination.",
+          });
+        }
+      }
+
+      if (report_name && doc.report_name !== report_name) {
+        doc.report_name = report_name;
+      }
+
+      await doc.save();
+      res.status(200).json({
+        message: "QC Inline Roving data updated successfully.",
+        data: doc,
+      });
+    } else {
+      const lastDoc = await QCInlineRoving.findOne()
+        .sort({ inline_roving_id: -1 })
+        .select("inline_roving_id");
+
+      const newId =
+        lastDoc && typeof lastDoc.inline_roving_id === "number"
+          ? lastDoc.inline_roving_id + 1
+          : 1;
+
+      const initialRepItem = { ...inspection_rep_item };
+      if (!Array.isArray(initialRepItem.inlineData)) {
+        initialRepItem.inlineData = [];
+      }
+
+      initialRepItem.complete_inspect_operators =
+        initialRepItem.inlineData.length;
+      initialRepItem.Inspect_status =
+        initialRepItem.total_operators > 0 &&
+        initialRepItem.complete_inspect_operators >=
+          initialRepItem.total_operators
+          ? "Completed"
+          : "Not Complete";
+
+      const newQCInlineRovingDoc = new QCInlineRoving({
+        inline_roving_id: newId,
+        report_name:
+          report_name ||
+          `Report for ${inspection_date} - ${line_no} - ${mo_no}`,
+        inspection_date,
+        mo_no,
+        line_no,
+        inspection_rep: [initialRepItem],
+      });
+
+      await newQCInlineRovingDoc.save();
+      res.status(201).json({
+        message:
+          "QC Inline Roving data saved successfully (new record created).",
+        data: newQCInlineRovingDoc,
+      });
+    }
+  } catch (error) {
+    console.error("Error saving/updating QC Inline Roving data:", error);
+    res.status(500).json({
+      message: "Failed to save/update QC Inline Roving data",
+      error: error.message,
+    });
+  }
+});
+
+function getOrdinal(n) {
+  if (n <= 0) return String(n);
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0] || "th");
+}
+
+//Get the inspection Number
+app.get("/api/qc-inline-roving/inspection-time-info", async (req, res) => {
+  try {
+    const { line_no, inspection_date } = req.query;
+    if (!line_no || !inspection_date) {
+      return res
+        .status(400)
+        .json({ message: "Line number and inspection date are required." });
+    }
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(inspection_date)) {
+      return res.status(400).json({
+        message: "Invalid inspection date format. Expected MM/DD/YYYY.",
+      });
+    }
+
+    const lineWorkerInfo = await LineSewingWorker.findOne({ line_no });
+
+    if (!lineWorkerInfo) {
+      return res.json({ inspectionTimeOrdinal: "N/A (Line not configured)" });
+    }
+
+    const target_worker_count = lineWorkerInfo.edited_worker_count;
+
+    if (target_worker_count === 0) {
+      return res.json({ inspectionTimeOrdinal: "N/A (Target 0 workers)" });
+    }
+
+    const rovingRecords = await QCInlineRoving.find({
+      line_no: line_no,
+      inspection_date: inspection_date,
+    });
+
+    if (rovingRecords.length === 0) {
+      return res.json({ inspectionTimeOrdinal: getOrdinal(1) });
+    }
+
+    const operatorInspectionCounts = {};
+
+    rovingRecords.forEach((record) => {
+      record.inlineData.forEach((entry) => {
+        const operatorId = entry.operator_emp_id;
+        if (operatorId) {
+          operatorInspectionCounts[operatorId] =
+            (operatorInspectionCounts[operatorId] || 0) + 1;
+        }
+      });
+    });
+
+    if (Object.keys(operatorInspectionCounts).length === 0) {
+      return res.json({ inspectionTimeOrdinal: getOrdinal(1) });
+    }
+
+    let completed_rounds = 0;
+
+    for (let round_num = 1; round_num <= 5; round_num++) {
+      let operators_finished_this_round = 0;
+
+      for (const operator_id in operatorInspectionCounts) {
+        if (operatorInspectionCounts[operator_id] >= round_num) {
+          operators_finished_this_round++;
+        }
+      }
+
+      if (operators_finished_this_round >= target_worker_count) {
+        completed_rounds = round_num;
+      } else {
+        break;
+      }
+    }
+
+    const current_inspection_time_number = completed_rounds + 1;
+
+    const ordinal =
+      current_inspection_time_number > 5
+        ? `${getOrdinal(5)} (Completed)`
+        : getOrdinal(current_inspection_time_number);
+
+    res.json({ inspectionTimeOrdinal: ordinal });
+  } catch (error) {
+    console.error("Error fetching inspection time info:", error);
+    res.status(500).json({
+      message: "Failed to fetch inspection time info.",
+      error: error.message,
+    });
+  }
+});
+
+//Get the completed inspect operators
+app.get("/api/inspections-completed", async (req, res) => {
+  const { line_no, inspection_date, mo_no, operation_id, inspection_rep_name } =
+    req.query;
+
+  try {
+    const findQuery = {
+      line_no,
+      inspection_date,
+    };
+
+    if (mo_no) {
+      findQuery.mo_no = mo_no;
+    }
+
+    const elemMatchConditions = { inspection_rep_name };
+
+    if (operation_id) {
+      elemMatchConditions["inlineData.tg_no"] = operation_id;
+    }
+
+    findQuery.inspection_rep = { $elemMatch: elemMatchConditions };
+
+    const inspection = await QCInlineRoving.findOne(findQuery);
+
+    if (!inspection) {
+      return res.json({ completeInspectOperators: 0 });
+    }
+
+    const specificRep = inspection.inspection_rep.find(
+      (rep) => rep.inspection_rep_name === inspection_rep_name
+    );
+
+    if (!specificRep) {
+      return res.json({ completeInspectOperators: 0 });
+    }
+
+    const completeInspectOperators =
+      specificRep.complete_inspect_operators || 0;
+
+    res.json({ completeInspectOperators });
+  } catch (error) {
+    console.error("Error fetching inspections completed:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Roving data filter function
+app.get("/api/qc-inline-roving-reports/filtered", async (req, res) => {
+  try {
+    const { inspection_date, qcId, operatorId, lineNo, moNo } = req.query;
+
+    let queryConditions = {};
+
+    if (inspection_date) {
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(inspection_date)) {
+        const parts = inspection_date.split("/");
+
+        const month = parseInt(parts[0], 10);
+        const day = parseInt(parts[1], 10);
+        const year = parseInt(parts[2], 10);
+
+        const monthRegexPart = month < 10 ? `0?${month}` : `${month}`;
+        const dayRegexPart = day < 10 ? `0?${day}` : `${day}`;
+
+        const dateRegex = new RegExp(
+          `^${monthRegexPart}\\/${dayRegexPart}\\/${year}$`
+        );
+        queryConditions.inspection_date = { $regex: dateRegex };
+      } else {
+        console.warn(
+          "Received date for filtering is not in MM/DD/YYYY format:",
+          inspection_date,
+          "- Date filter will not be applied effectively."
+        );
+      }
+    }
+
+    if (qcId) {
+      queryConditions.emp_id = qcId;
+    }
+
+    if (lineNo) {
+      queryConditions.line_no = lineNo;
+    }
+
+    if (moNo) {
+      queryConditions.mo_no = moNo;
+    }
+
+    if (operatorId) {
+      const orConditions = [{ operator_emp_id: operatorId }];
+      if (/^\d+$/.test(operatorId)) {
+        orConditions.push({ operator_emp_id: parseInt(operatorId, 10) });
+      }
+      queryConditions.inlineData = { $elemMatch: { $or: orConditions } };
+    }
+
+    const reports = await QCInlineRoving.find(queryConditions);
+
+    res.json(reports);
+  } catch (error) {
+    console.error("Error fetching filtered QC inline roving reports:", error);
+    res.status(500).json({
+      message: "Failed to fetch filtered reports",
+      error: error.message,
+    });
+  }
+});
+
+const sanitize = (input) => {
+  if (typeof input !== "string") input = String(input);
+  let sane = input.replace(/[^a-zA-Z0-9-_]/g, "_");
+  if (sane === "." || sane === "..") return "_";
+  return sane;
+};
+
+const rovingStorage = multer.memoryStorage();
+
+const rovingUpload = multer({
+  storage: rovingStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedExtensions = /^(jpeg|jpg|png|gif)$/i;
+    const allowedMimeTypes = /^image\/(jpeg|pjpeg|png|gif)$/i;
+    const fileExt = path.extname(file.originalname).toLowerCase().substring(1);
+    const isExtAllowed = allowedExtensions.test(fileExt);
+    const isMimeAllowed = allowedMimeTypes.test(file.mimetype.toLowerCase());
+    if (isMimeAllowed && isExtAllowed) {
+      cb(null, true);
+    } else {
+      console.error(
+        `File rejected by filter: name='${file.originalname}', mime='${file.mimetype}', ext='${fileExt}'. IsMimeAllowed: ${isMimeAllowed}, IsExtAllowed: ${isExtAllowed}`
+      );
+      cb(new Error("Error: Images Only! (jpeg, jpg, png, gif)"));
+    }
+  },
+});
+
+//Roving image upload
+app.post(
+  "/api/roving/upload-roving-image",
+  rovingUpload.single("imageFile"),
+  async (req, res) => {
+    try {
+      const { imageType, date, lineNo, moNo, operationId } = req.body;
+      const imageFile = req.file;
+      if (!imageFile) {
+        const errorMessage =
+          req.fileValidationError ||
+          (req.multerError && req.multerError.message) ||
+          "No image file provided or file rejected by filter.";
+        return res.status(400).json({ success: false, message: errorMessage });
+      }
+
+      if (
+        !date ||
+        !lineNo ||
+        lineNo === "NA_Line" ||
+        !moNo ||
+        moNo === "NA_MO" ||
+        !operationId ||
+        operationId === "NA_Op"
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Missing or invalid required metadata: date, lineNo, moNo, operationId must be actual values.",
+        });
+      }
+
+      if (
+        !imageType ||
+        !["spi", "measurement"].includes(imageType.toLowerCase())
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid image type. Must be "spi" or "measurement".',
+        });
+      }
+
+      const sanitizedDate = sanitize(date);
+      const sanitizedLineNo = sanitize(lineNo);
+      const sanitizedMoNo = sanitize(moNo);
+      const sanitizedOperationId = sanitize(operationId);
+      const upperImageType = imageType.toUpperCase();
+
+      const targetDir = path.resolve(
+        __dirname,
+        "..",
+        "public",
+        "storage",
+        "roving",
+        upperImageType
+      );
+      await fsPromises.mkdir(targetDir, { recursive: true });
+
+      const imagePrefix = `${sanitizedDate}_${sanitizedLineNo}_${sanitizedMoNo}_${sanitizedOperationId}_`;
+      let existingImageCount = 0;
+      try {
+        const filesInDir = await fsPromises.readdir(targetDir);
+        filesInDir.forEach((file) => {
+          if (file.startsWith(imagePrefix)) {
+            existingImageCount++;
+          }
+        });
+      } catch (readDirError) {
+        if (readDirError.code !== "ENOENT") {
+          console.error(
+            "Error reading directory for indexing:",
+            targetDir,
+            readDirError
+          );
+        }
+      }
+
+      const imageIndex = existingImageCount + 1;
+      const fileExtension = path.extname(imageFile.originalname);
+      const newFilename = `${imagePrefix}${imageIndex}${fileExtension}`;
+      const filePathInPublic = path.join(targetDir, newFilename);
+      await fsPromises.writeFile(filePathInPublic, imageFile.buffer);
+      const publicUrl = `/storage/roving/${upperImageType}/${newFilename}`;
+      res.json({ success: true, filePath: publicUrl, filename: newFilename });
+    } catch (error) {
+      console.error("Error uploading roving image:", error);
+      if (error.message && error.message.startsWith("Error: Images Only!")) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      if (error instanceof multer.MulterError) {
+        return res
+          .status(400)
+          .json({ success: false, message: `Multer error: ${error.message}` });
+      }
+      res
+        .status(500)
+        .json({ success: false, message: "Server error during image upload." });
+    }
+  }
+);
+
+// Endpoint for get the buyer status
+app.get("/api/buyer-by-mo", (req, res) => {
+  const { moNo } = req.query;
+  if (!moNo) {
+    return res.status(400).json({ message: "MO number is required" });
+  }
+  const buyerName = determineBuyer(moNo);
+  res.json({ buyerName });
+});
+
+/* ------------------------------
+   Defect Buyer Status ENDPOINTS
+------------------------------ */
+
+// Endpoint for /api/defects/all-details
+app.get("/api/defects/all-details", async (req, res) => {
+  try {
+    const defects = await SewingDefects.find({}).lean();
+    const transformedDefects = defects.map((defect) => ({
+      code: defect.code.toString(),
+      name_en: defect.english,
+      name_kh: defect.khmer,
+      name_ch: defect.chinese,
+      categoryEnglish: defect.categoryEnglish,
+      type: defect.type,
+      repair: defect.repair,
+      statusByBuyer: defect.statusByBuyer || [],
+    }));
+    res.json(transformedDefects);
+  } catch (error) {
+    console.error("Error fetching all defect details:", error);
+    res.status(500).json({
+      message: "Failed to fetch defect details",
+      error: error.message,
+    });
+  }
+});
+
+// Endpoint for /api/buyers
+app.get("/api/buyers", (req, res) => {
+  const buyers = ["Costco", "Aritzia", "Reitmans", "ANF", "MWW"];
+  res.json(buyers);
+});
+
+// New Endpoint for updating buyer statuses in SewingDefects
+app.post("/api/sewing-defects/buyer-statuses", async (req, res) => {
+  try {
+    const statusesPayload = req.body;
+    if (!Array.isArray(statusesPayload)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid payload: Expected an array of statuses." });
+    }
+    const updatesByDefect = statusesPayload.reduce((acc, status) => {
+      const defectCode = status.defectCode;
+      if (!acc[defectCode]) {
+        acc[defectCode] = [];
+      }
+      acc[defectCode].push({
+        buyerName: status.buyerName,
+        defectStatus: Array.isArray(status.defectStatus)
+          ? status.defectStatus
+          : [],
+        isCommon: ["Critical", "Major", "Minor"].includes(status.isCommon)
+          ? status.isCommon
+          : "Minor",
+      });
+      return acc;
+    }, {});
+
+    const bulkOps = [];
+    for (const defectCodeStr in updatesByDefect) {
+      const defectCodeNum = parseInt(defectCodeStr, 10);
+      if (isNaN(defectCodeNum)) {
+        console.warn(
+          `Invalid defectCode received: ${defectCodeStr}, skipping.`
+        );
+        continue;
+      }
+      const newStatusByBuyerArray = updatesByDefect[defectCodeStr];
+      bulkOps.push({
+        updateOne: {
+          filter: { code: defectCodeNum },
+          update: {
+            $set: {
+              statusByBuyer: newStatusByBuyerArray,
+              updatedAt: new Date(),
+            },
+          },
+        },
+      });
+    }
+    if (bulkOps.length > 0) {
+      await SewingDefects.bulkWrite(bulkOps);
+    }
+    res.status(200).json({
+      message: "Defect buyer statuses updated successfully in SewingDefects.",
+    });
+  } catch (error) {
+    console.error("Error updating defect buyer statuses:", error);
+    res.status(500).json({
+      message: "Failed to update defect buyer statuses",
+      error: error.message,
+    });
+  }
+});
+
+/* ------------------------------
+   End Points - SewingDefects
+------------------------------ */
+app.get("/api/sewing-defects", async (req, res) => {
+  try {
+    // Extract query parameters
+    const { categoryEnglish, type, isCommon } = req.query;
+
+    // Build filter object based on provided query parameters
+    const filter = {};
+    if (categoryEnglish) filter.categoryEnglish = categoryEnglish;
+    if (type) filter.type = type;
+    if (isCommon) filter.isCommon = isCommon;
+
+    // Fetch defects from the database
+    const defects = await SewingDefects.find(filter);
+
+    // Send the response with fetched defects
+    res.json(defects);
+  } catch (error) {
+    // Handle errors
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// DELETE a defect by code
+app.delete("/api/sewing-defects/:defectCode", async (req, res) => {
+  try {
+    const { defectCode } = req.params;
+    const result = await SewingDefects.findOneAndDelete({ code: defectCode });
+
+    if (!result) {
+      return res.status(404).json({ message: "Defect not found" });
+    }
+
+    res.status(200).json({ message: "Defect deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting defect:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to delete defect", error: error.message });
+  }
+});
+
+//Old end points
+
+// // ------------------------
+// // Multer Storage Setup for QC Inline Roving
+// // ------------------------
+// const qcStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     const uploadPath = path.join(__dirname, "../public/storage/qcinline");
+//     // Create directory if it doesn't exist
+//     if (!fs.existsSync(uploadPath)) {
+//       fs.mkdirSync(uploadPath, { recursive: true });
+//     }
+//     cb(null, uploadPath);
+//   },
+//   filename: (req, file, cb) => {
+//     const { date, type, emp_id } = req.body;
+//     // Validate the inputs to prevent 'undefined' in the filename
+//     const currentDate = date || new Date().toISOString().split("T")[0]; // Fallback to current date if not provided
+//     const imageType = type || "spi-measurement"; // Fallback to 'unknown' if type is not provided
+//     const userEmpId = emp_id || "emp"; // Fallback to 'guest' if emp_id is not provided
+//     const randomId = Math.random().toString(36).substring(2, 15);
+//     const fileName = `${currentDate}-${imageType}-${userEmpId}-${randomId}.jpg`;
+//     cb(null, fileName);
+//   }
+// });
+
+// const qcUpload = multer({
+//   storage: qcStorage,
+//   limits: { fileSize: 5000000 }, // Limit file size to 5MB
+//   fileFilter: (req, file, cb) => {
+//     const filetypes = /jpeg|jpg|png|gif/;
+//     const extname = filetypes.test(
+//       path.extname(file.originalname).toLowerCase()
+//     );
+//     const mimetype = filetypes.test(file.mimetype);
+//     if (mimetype && extname) {
+//       return cb(null, true);
+//     } else {
+//       cb("Error: Images Only (jpeg, jpg, png, gif)!");
+//     }
+//   }
+// }).single("image");
+
+// // Serve static files (for accessing uploaded images)
+// app.use("/storage", express.static(path.join(__dirname, "../public/storage")));
+
+// // Endpoint to upload images for QC Inline Roving
+// app.post("/api/upload-qc-image", qcUpload, (req, res) => {
+//   try {
+//     if (!req.file) {
+//       return res.status(400).json({ message: "No image uploaded" });
+//     }
+//     const imagePath = `/storage/qcinline/${req.file.filename}`;
+//     res.status(200).json({ imagePath });
+//   } catch (error) {
+//     console.error("Error uploading image:", error);
+//     res
+//       .status(500)
+//       .json({ message: "Failed to upload image", error: error.message });
+//   }
+// });
+
+// // Updated endpoint to save or update QC Inline Roving data
+// app.post("/api/save-qc-inline-roving", async (req, res) => {
+//   try {
+//     const qcInlineRovingData = req.body;
+
+//     const { inspection_date, line_no, mo_no } = qcInlineRovingData;
+
+//     // Check if a record exists with the same emp_id and inspection_date
+//     let existingRecord = await QCInlineRoving.findOne({
+//       inspection_date,
+//       line_no,
+//       mo_no
+//     });
+
+//     if (existingRecord) {
+//       // If a matching record exists, append the new inlineData to the existing record
+//       existingRecord.inlineData.push(qcInlineRovingData.inlineData[0]);
+//       await existingRecord.save();
+//       res.status(200).json({
+//         message: "QC Inline Roving data updated successfully",
+//         data: existingRecord
+//       });
+//     } else {
+//       // If no matching record exists, create a new one
+//       const newQCInlineRoving = new QCInlineRoving(qcInlineRovingData);
+//       await newQCInlineRoving.save();
+//       res.status(201).json({
+//         message: "QC Inline Roving data saved successfully",
+//         data: newQCInlineRoving
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Error saving QC Inline Roving data:", error);
+//     res.status(500).json({
+//       message: "Failed to save QC Inline Roving data",
+//       error: error.message
+//     });
+//   }
+// });
+
+//Dashboard Old Endpoints
 // Endpoint to fetch QC Inline Roving reports
 app.get("/api/qc-inline-roving-reports", async (req, res) => {
   try {
@@ -7551,30 +8841,9 @@ app.put("/api/cutting-inspection-update", async (req, res) => {
   }
 });
 
-// server.js (additions)
-
-// Helper function to normalize date strings (ensure MM/DD/YYYY format)
-const normalizeDateString = (dateStr) => {
-  if (!dateStr) return null;
-  try {
-    const date = new Date(dateStr);
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
-  } catch (e) {
-    console.error("Error normalizing date string:", dateStr, e);
-    // If parsing fails, try to return as is or handle error appropriately
-    // For this use case, if it's already MM/DD/YYYY, it might be fine
-    const parts = dateStr.split(/[-/]/);
-    if (parts.length === 3) {
-      // Attempt to reformat if it looks like YYYY-MM-DD or DD-MM-YYYY
-      if (parts[0].length === 4) return `${parts[1]}/${parts[2]}/${parts[0]}`; // YYYY/MM/DD -> MM/DD/YYYY
-      if (parts[2].length === 4) return `${parts[0]}/${parts[1]}/${parts[2]}`; // DD/MM/YYYY -> MM/DD/YYYY
-    }
-    return dateStr; // Fallback
-  }
-};
+/* ------------------------------
+   Cutting Report ENDPOINTS
+------------------------------ */
 
 // GET QC IDs (cutting_emp_id and names) from cuttinginspections
 app.get("/api/cutting-inspections/qc-inspectors", async (req, res) => {
@@ -7723,7 +8992,6 @@ app.get("/api/cutting-inspections-report", async (req, res) => {
           sumTotalRejectMeasurement: {
             $sum: "$inspectionData.rejectMeasurementSize.total",
           },
-
           sumTotalRejectDefects: {
             $sum: {
               $map: {
@@ -7793,92 +9061,11 @@ app.get("/api/cutting-inspection-report-detail/:id", async (req, res) => {
   }
 });
 
-// // Add these endpoints to your existing server.js after the existing Cutting Inspection endpoints
+/* ------------------------------
+   Cutting Old ENDPOINTS - START
+------------------------------ */
 
-// app.get("/api/cutting-inspections-mo-numbers", async (req, res) => {
-//   try {
-//     const { search } = req.query;
-//     const query = search ? { moNo: { $regex: search, $options: "i" } } : {};
-//     const moNos = await CuttingInspection.distinct("moNo", query);
-//     res.status(200).json(moNos);
-//   } catch (error) {
-//     console.error("Error fetching MO numbers:", error);
-//     res.status(500).json({ message: "Failed to fetch MO numbers" });
-//   }
-// });
-
-// app.get("/api/cutting-inspections-table-nos", async (req, res) => {
-//   try {
-//     const { moNo } = req.query;
-//     if (!moNo) return res.status(400).json({ message: "MO No is required" });
-//     const tableNos = await CuttingInspection.distinct("tableNo", { moNo });
-//     res.status(200).json(tableNos);
-//   } catch (error) {
-//     console.error("Error fetching Table Nos:", error);
-//     res.status(500).json({ message: "Failed to fetch Table Nos" });
-//   }
-// });
-
-// app.get("/api/cutting-inspections-garment-types", async (req, res) => {
-//   try {
-//     const { moNo, tableNo } = req.query;
-//     if (!moNo || !tableNo)
-//       return res
-//         .status(400)
-//         .json({ message: "MO No and Table No are required" });
-//     const garmentTypes = await CuttingInspection.distinct("garmentType", {
-//       moNo,
-//       tableNo,
-//     });
-//     res.status(200).json(garmentTypes);
-//   } catch (error) {
-//     console.error("Error fetching garment types:", error);
-//     res.status(500).json({ message: "Failed to fetch garment types" });
-//   }
-// });
-
-// app.get("/api/cutting-inspection", async (req, res) => {
-//   try {
-//     const { moNo, tableNo, garmentType } = req.query;
-//     if (!moNo || !tableNo || !garmentType) {
-//       return res
-//         .status(400)
-//         .json({ message: "MO No, Table No, and garmentType are required" });
-//     }
-//     const inspection = await CuttingInspection.findOne({
-//       moNo,
-//       tableNo,
-//       garmentType,
-//     });
-//     if (!inspection)
-//       return res.status(404).json({ message: "Inspection record not found" });
-//     res.status(200).json(inspection);
-//   } catch (error) {
-//     console.error("Error fetching inspection record:", error);
-//     res.status(500).json({ message: "Failed to fetch inspection record" });
-//   }
-// });
-
-// app.put("/api/update-cutting-inspection", async (req, res) => {
-//   try {
-//     const { _id, ...updateData } = req.body;
-//     if (!_id)
-//       return res.status(400).json({ message: "Document ID is required" });
-//     const updatedDoc = await CuttingInspection.findByIdAndUpdate(
-//       _id,
-//       updateData,
-//       { new: true }
-//     );
-//     if (!updatedDoc)
-//       return res.status(404).json({ message: "Inspection record not found" });
-//     res.status(200).json({ message: "Data updated successfully", updatedDoc });
-//   } catch (error) {
-//     console.error("Error updating cutting inspection data:", error);
-//     res
-//       .status(500)
-//       .json({ message: "Failed to update data", error: error.message });
-//   }
-// });
+//Old endpoint remove later
 
 app.get("/api/cutting-inspection-detailed-report", async (req, res) => {
   try {
@@ -8041,6 +9228,10 @@ app.get("/api/cutting-inspection-filter-options", async (req, res) => {
 });
 
 /* ------------------------------
+   Cutting Old ENDPOINTS - END
+------------------------------ */
+
+/* ------------------------------
    Cutting Measurement Points
 ------------------------------ */
 
@@ -8139,27 +9330,64 @@ app.get("/api/cutting-measurement-max-panel-index", async (req, res) => {
 // Endpoint to save a new measurement point
 app.post("/api/save-measurement-point", async (req, res) => {
   try {
-    const measurementPoint = req.body;
+    const measurementPoint = req.body; // This will include moNo, which can be "Common" or a specific MO
     // Find the maximum 'no' in the collection
-    const maxNo = await CuttingMeasurementPoint.findOne()
+    const maxNoDoc = await CuttingMeasurementPoint.findOne() // Changed variable name
       .sort({ no: -1 })
-      .select("no");
-    const newNo = maxNo ? maxNo.no + 1 : 1;
+      .select("no")
+      .lean(); // Use lean for performance if only 'no' is needed
+    const newNo = maxNoDoc ? maxNoDoc.no + 1 : 1;
     // Create new document
     const newDoc = new CuttingMeasurementPoint({
       ...measurementPoint,
-      no: newNo,
+      no: newNo, // Assign the new auto-incremented 'no'
     });
     await newDoc.save();
-    res.status(200).json({ message: "Measurement point saved successfully" });
+    res
+      .status(200)
+      .json({ message: "Measurement point saved successfully", point: newDoc }); // Send back the new point
   } catch (error) {
     console.error("Error saving measurement point:", error);
+    if (error.code === 11000) {
+      // Handle duplicate key errors more gracefully
+      // You might need to check which field caused the duplicate error
+      // For now, a generic message. Your schema should have unique indexes defined.
+      return res.status(409).json({
+        message:
+          "Failed to save: Duplicate entry for a unique field (e.g., MO + Panel + Point Name + Index).",
+        error: error.message,
+      });
+    }
     res.status(500).json({
       message: "Failed to save measurement point",
       error: error.message,
     });
   }
 });
+
+// app.post("/api/save-measurement-point", async (req, res) => {
+//   try {
+//     const measurementPoint = req.body;
+//     // Find the maximum 'no' in the collection
+//     const maxNo = await CuttingMeasurementPoint.findOne()
+//       .sort({ no: -1 })
+//       .select("no");
+//     const newNo = maxNo ? maxNo.no + 1 : 1;
+//     // Create new document
+//     const newDoc = new CuttingMeasurementPoint({
+//       ...measurementPoint,
+//       no: newNo
+//     });
+//     await newDoc.save();
+//     res.status(200).json({ message: "Measurement point saved successfully" });
+//   } catch (error) {
+//     console.error("Error saving measurement point:", error);
+//     res.status(500).json({
+//       message: "Failed to save measurement point",
+//       error: error.message
+//     });
+//   }
+// });
 
 /* ------------------------------
    Cutting Measurement Points Edit ENDPOINTS
@@ -8360,6 +9588,35 @@ app.put("/api/update-measurement-point/:id", async (req, res) => {
   }
 });
 
+// ** NEW: Endpoint to delete a measurement point by _id **
+app.delete("/api/delete-measurement-point/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid measurement point ID format." });
+    }
+
+    const deletedPoint = await CuttingMeasurementPoint.findByIdAndDelete(id);
+
+    if (!deletedPoint) {
+      return res.status(404).json({ message: "Measurement point not found." });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Measurement point deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting measurement point:", error);
+    res.status(500).json({
+      message: "Failed to delete measurement point.",
+      error: error.message,
+    });
+  }
+});
+
 /* ------------------------------
   Cutting Fabric Defects ENDPOINTS
 ------------------------------ */
@@ -8373,6 +9630,154 @@ app.get("/api/cutting-fabric-defects", async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to fetch defects", error: error.message });
+  }
+});
+
+// POST - Add a new cutting fabric defect
+app.post("/api/cutting-fabric-defects", async (req, res) => {
+  try {
+    const { defectCode, defectNameEng, defectNameKhmer, defectNameChinese } =
+      req.body;
+
+    // Chinese name is optional, so only validate the mandatory fields
+    if (!defectCode || !defectNameEng || !defectNameKhmer) {
+      return res.status(400).json({
+        message: "Defect Code, English Name, and Khmer Name are required.",
+      });
+    }
+
+    const existingDefectByCode = await CuttingFabricDefect.findOne({
+      defectCode,
+    });
+    if (existingDefectByCode) {
+      return res
+        .status(409)
+        .json({ message: `Defect code '${defectCode}' already exists.` });
+    }
+    const existingDefectByName = await CuttingFabricDefect.findOne({
+      defectNameEng,
+    });
+    if (existingDefectByName) {
+      return res.status(409).json({
+        message: `Defect name (English) '${defectNameEng}' already exists.`,
+      });
+    }
+
+    const newDefect = new CuttingFabricDefect({
+      defectCode,
+      defectName: defectNameEng,
+      defectNameEng,
+      defectNameKhmer,
+      defectNameChinese: defectNameChinese || "", // Save empty string if not provided
+    });
+    await newDefect.save();
+    res.status(201).json({
+      message: "Cutting fabric defect added successfully",
+      defect: newDefect,
+    });
+  } catch (error) {
+    console.error("Error adding cutting fabric defect:", error);
+    if (error.code === 11000) {
+      return res
+        .status(409)
+        .json({ message: "Duplicate defect code or name." });
+    }
+    res
+      .status(500)
+      .json({ message: "Failed to add defect", error: error.message });
+  }
+});
+
+// PUT - Update an existing cutting fabric defect by ID
+app.put("/api/cutting-fabric-defects/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { defectCode, defectNameEng, defectNameKhmer, defectNameChinese } =
+      req.body;
+
+    // Chinese name is optional
+    if (!defectCode || !defectNameEng || !defectNameKhmer) {
+      return res.status(400).json({
+        message:
+          "Defect Code, English Name, and Khmer Name are required for update.",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid defect ID format." });
+    }
+
+    const existingDefectByCode = await CuttingFabricDefect.findOne({
+      defectCode,
+      _id: { $ne: id },
+    });
+    if (existingDefectByCode) {
+      return res.status(409).json({
+        message: `Defect code '${defectCode}' already exists for another defect.`,
+      });
+    }
+    const existingDefectByName = await CuttingFabricDefect.findOne({
+      defectNameEng,
+      _id: { $ne: id },
+    });
+    if (existingDefectByName) {
+      return res.status(409).json({
+        message: `Defect name (English) '${defectNameEng}' already exists for another defect.`,
+      });
+    }
+
+    const updatedDefect = await CuttingFabricDefect.findByIdAndUpdate(
+      id,
+      {
+        defectCode,
+        defectName: defectNameEng,
+        defectNameEng,
+        defectNameKhmer,
+        defectNameChinese: defectNameChinese || "", // Save empty string if not provided
+        updated_at: Date.now(),
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedDefect) {
+      return res.status(404).json({ message: "Defect not found." });
+    }
+    res.status(200).json({
+      message: "Cutting fabric defect updated successfully",
+      defect: updatedDefect,
+    });
+  } catch (error) {
+    console.error("Error updating cutting fabric defect:", error);
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "Update failed due to duplicate defect code or name.",
+      });
+    }
+    res
+      .status(500)
+      .json({ message: "Failed to update defect", error: error.message });
+  }
+});
+
+// DELETE - Delete a cutting fabric defect by ID (remains the same)
+app.delete("/api/cutting-fabric-defects/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid defect ID format." });
+    }
+    const deletedDefect = await CuttingFabricDefect.findByIdAndDelete(id);
+    if (!deletedDefect) {
+      return res.status(404).json({ message: "Defect not found." });
+    }
+    res
+      .status(200)
+      .json({ message: "Cutting fabric defect deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting cutting fabric defect:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to delete defect", error: error.message });
   }
 });
 
@@ -8397,17 +9802,7 @@ app.get("/api/cutting-issues", async (req, res) => {
 // Multer configuration for cutting images
 const cutting_storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.join(__dirname, "public/storage/cutting/");
-    try {
-      // Create directory synchronously if it doesn't exist
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      cb(null, dir);
-    } catch (error) {
-      console.error("Error creating directory:", error);
-      cb(error);
-    }
+    cb(null, "public/storage/cutting/");
   },
   filename: (req, file, cb) => {
     cb(null, `cutting-${Date.now()}${path.extname(file.originalname)}`);
@@ -9424,6 +10819,201 @@ app.get("/api/cutting/trend/top-defect-issues", async (req, res) => {
 });
 
 /* ------------------------------
+   Cutting Inspection Management ENDPOINTS
+------------------------------ */
+
+// GET Full Cutting Inspection Document for Management/Modification
+app.get("/api/cutting-inspection-full-details", async (req, res) => {
+  try {
+    const { moNo, tableNo, color } = req.query; // Color might be needed if moNo+tableNo isn't unique
+    if (!moNo || !tableNo) {
+      return res
+        .status(400)
+        .json({ message: "MO Number and Table Number are required" });
+    }
+
+    let query = { moNo, tableNo };
+    // If your records are uniquely identified by moNo, tableNo, AND color, add color to the query:
+    // if (color) query.color = color;
+    // For now, assuming moNo + tableNo is sufficient to find a unique parent record.
+
+    const inspectionDoc = await CuttingInspection.findOne(query).lean();
+
+    if (!inspectionDoc) {
+      return res.status(404).json({ message: "Inspection document not found" });
+    }
+    res.json(inspectionDoc);
+  } catch (error) {
+    console.error("Error fetching full inspection details:", error);
+    res.status(500).json({
+      message: "Failed to fetch full inspection details",
+      error: error.message,
+    });
+  }
+});
+
+// GET Full Cutting Inspection Document for Management (similar to modify, but might be simpler)
+app.get("/api/cutting-inspection-details-for-manage", async (req, res) => {
+  try {
+    const { moNo, tableNo } = req.query;
+    if (!moNo || !tableNo) {
+      return res
+        .status(400)
+        .json({ message: "MO Number and Table Number are required" });
+    }
+    // You might want to add color if moNo + tableNo is not unique enough
+    const inspectionDoc = await CuttingInspection.findOne({
+      moNo,
+      tableNo,
+    }).lean(); // Use lean for read-only
+
+    if (!inspectionDoc) {
+      return res.status(404).json({ message: "Inspection document not found" });
+    }
+    res.json(inspectionDoc);
+  } catch (error) {
+    console.error("Error fetching inspection details for management:", error);
+    res.status(500).json({
+      message: "Failed to fetch inspection details for management",
+      error: error.message,
+    });
+  }
+});
+
+// DELETE Entire Cutting Inspection Record by document _id
+app.delete("/api/cutting-inspection-record/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Record ID format." });
+    }
+
+    const deletedRecord = await CuttingInspection.findByIdAndDelete(id);
+
+    if (!deletedRecord) {
+      return res
+        .status(404)
+        .json({ message: "Cutting inspection record not found." });
+    }
+    res
+      .status(200)
+      .json({ message: "Cutting inspection record deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting cutting inspection record:", error);
+    res.status(500).json({
+      message: "Failed to delete cutting inspection record.",
+      error: error.message,
+    });
+  }
+});
+
+// DELETE Specific Inspected Size from a Cutting Inspection Record
+app.delete(
+  "/api/cutting-inspection-record/:id/size/:inspectedSize",
+  async (req, res) => {
+    try {
+      const { id, inspectedSize } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid Record ID format." });
+      }
+      if (!inspectedSize) {
+        return res
+          .status(400)
+          .json({ message: "Inspected size to delete is required." });
+      }
+
+      const record = await CuttingInspection.findById(id);
+      if (!record) {
+        return res
+          .status(404)
+          .json({ message: "Cutting inspection record not found." });
+      }
+
+      const initialLength = record.inspectionData.length;
+      record.inspectionData = record.inspectionData.filter(
+        (dataItem) => dataItem.inspectedSize !== inspectedSize
+      );
+
+      if (record.inspectionData.length === initialLength) {
+        return res.status(404).json({
+          message: `Inspected size '${inspectedSize}' not found in this record.`,
+        });
+      }
+
+      // If all sizes are deleted, consider if the parent document should also be deleted or kept empty.
+      // For now, we'll just remove the size. If inspectionData becomes empty, the parent still exists.
+      // You might want to add logic here: if (record.inspectionData.length === 0) { await CuttingInspection.findByIdAndDelete(id); ... }
+
+      record.updated_at = new Date();
+      record.markModified("inspectionData"); // Important for Mongoose to detect array changes
+      await record.save();
+
+      res.status(200).json({
+        message: `Inspection data for size '${inspectedSize}' deleted successfully.`,
+        data: record,
+      });
+    } catch (error) {
+      console.error(`Error deleting inspected size '${inspectedSize}':`, error);
+      res.status(500).json({
+        message: `Failed to delete inspection data for size '${inspectedSize}'.`,
+        error: error.message,
+      });
+    }
+  }
+);
+
+// PUT to update general information of a CuttingInspection document
+app.put("/api/cutting-inspection-general-update/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      inspectionDate, // Expecting 'M/D/YYYY' or 'MM/DD/YYYY' string from client
+      orderQty,
+      totalBundleQty,
+      bundleQtyCheck, // These are calculated on client, but we save them
+      totalInspectionQty, // These are calculated on client, but we save them
+      // Add other general fields here if they become editable later
+    } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Record ID format." });
+    }
+
+    const recordToUpdate = await CuttingInspection.findById(id);
+    if (!recordToUpdate) {
+      return res.status(404).json({ message: "Inspection record not found." });
+    }
+
+    // Update fields
+    if (inspectionDate !== undefined)
+      recordToUpdate.inspectionDate = inspectionDate; // Store as string 'M/D/YYYY'
+    if (orderQty !== undefined) recordToUpdate.orderQty = Number(orderQty);
+    if (totalBundleQty !== undefined)
+      recordToUpdate.totalBundleQty = Number(totalBundleQty);
+    if (bundleQtyCheck !== undefined)
+      recordToUpdate.bundleQtyCheck = Number(bundleQtyCheck);
+    if (totalInspectionQty !== undefined)
+      recordToUpdate.totalInspectionQty = Number(totalInspectionQty);
+
+    recordToUpdate.updated_at = new Date();
+
+    const updatedRecord = await recordToUpdate.save();
+
+    res.status(200).json({
+      message: "General inspection information updated successfully.",
+      data: updatedRecord,
+    });
+  } catch (error) {
+    console.error("Error updating general inspection information:", error);
+    res.status(500).json({
+      message: "Failed to update general inspection information.",
+      error: error.message,
+    });
+  }
+});
+
+/* ------------------------------
    AQL ENDPOINTS
 ------------------------------ */
 
@@ -9550,30 +11140,6 @@ app.get("/api/aql-details", async (req, res) => {
 });
 
 /* ------------------------------
-   Cutting Additional Measurement Points ENDPOINTS
------------------------------- */
-
-// Endpoint to save additional points
-app.post("/api/save-additional-points", async (req, res) => {
-  try {
-    const { moNo, orderQty, orderDetails, additionalPoints } = req.body;
-    const newDoc = new CuttingAdditionalPoint({
-      moNo,
-      orderQty,
-      orderDetails,
-      additionalPoints,
-    });
-    await newDoc.save();
-    res.status(200).json({ message: "Data saved successfully" });
-  } catch (error) {
-    console.error("Error saving additional points:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to save data", error: error.message });
-  }
-});
-
-/* ------------------------------
    User Auth ENDPOINTS
 ------------------------------ */
 
@@ -9639,117 +11205,6 @@ const upload = multer({
     }
   },
 }).single("profile");
-
-/* ------------------------------
-   Chat ENDPOINTS
------------------------------- */
-
-// Socket.io Logic for Live Users and Chat
-const onlineUsers = new Map(); // Map of emp_id to socketmeets.com socket ID
-
-io.on("connection", (socket) => {
-  console.log("New client connected");
-
-  socket.on("join", (empId) => {
-    if (empId) {
-      onlineUsers.set(empId, socket.id);
-      io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-    }
-  });
-
-  socket.on("sendMessage", async ({ senderId, recipientId, message }) => {
-    try {
-      const chatMessage = new Chat({
-        senderId,
-        recipientId,
-        message,
-        timestamp: new Date(),
-      });
-      await chatMessage.save();
-
-      const recipientSocketId = onlineUsers.get(recipientId);
-      if (recipientSocketId) {
-        io.to(recipientSocketId).emit("receiveMessage", chatMessage);
-      }
-
-      socket.emit("messageSent", chatMessage);
-    } catch (error) {
-      console.error("Error saving message:", error);
-      socket.emit("error", { message: "Failed to send message" });
-    }
-  });
-
-  socket.on("disconnect", () => {
-    for (let [empId, socketId] of onlineUsers.entries()) {
-      if (socketId === socket.id) {
-        onlineUsers.delete(empId);
-        io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-        break;
-      }
-    }
-    console.log("Client disconnected");
-  });
-});
-
-// Get chat history
-app.get(
-  "/api/chats/:userId/:otherUserId",
-  authenticateUser,
-  async (req, res) => {
-    try {
-      const { userId, otherUserId } = req.params;
-      const chats = await Chat.find({
-        $or: [
-          { senderId: userId, recipientId: otherUserId },
-          { senderId: otherUserId, recipientId: userId },
-        ],
-      }).sort({ timestamp: 1 });
-      res.status(200).json(chats);
-    } catch (error) {
-      console.error("Error fetching chats:", error);
-      res.status(500).json({ message: "Failed to fetch chats" });
-    }
-  }
-);
-
-// Get unread message counts per sender
-app.get("/api/unread-messages/:userId", authenticateUser, async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const unreadMessages = await Chat.aggregate([
-      { $match: { recipientId: userId, isRead: false } },
-      {
-        $group: {
-          _id: "$senderId",
-          count: { $sum: 1 },
-        },
-      },
-    ]);
-    res.status(200).json(unreadMessages);
-  } catch (error) {
-    console.error("Error fetching unread messages:", error);
-    res.status(500).json({ message: "Failed to fetch unread messages" });
-  }
-});
-
-// Mark messages as read
-app.post(
-  "/api/mark-messages-read/:userId/:senderId",
-  authenticateUser,
-  async (req, res) => {
-    try {
-      const { userId, senderId } = req.params;
-      await Chat.updateMany(
-        { senderId, recipientId: userId, isRead: false },
-        { $set: { isRead: true } }
-      );
-      res.status(200).json({ message: "Messages marked as read" });
-    } catch (error) {
-      console.error("Error marking messages as read:", error);
-      res.status(500).json({ message: "Failed to mark messages as read" });
-    }
-  }
-);
 
 /* ------------------------------
    User Management old ENDPOINTS
@@ -10557,780 +12012,780 @@ app.post("/api/update-user-roles", async (req, res) => {
   }
 });
 
-// /* ------------------------------
-//    End Points - Digital Measurement
-// ------------------------------ */
-
-// // New endpoint for filter options
-// app.get("/api/filter-options", async (req, res) => {
-//   try {
-//     const { factory, mono, custStyle, buyer, mode, country, origin, stage } =
-//       req.query;
-//     const orderFilter = {};
-//     if (factory) orderFilter.Factory = factory;
-//     if (mono) orderFilter.Order_No = mono;
-//     if (custStyle) orderFilter.CustStyle = custStyle;
-//     if (buyer) orderFilter.ShortName = buyer;
-//     if (mode) orderFilter.Mode = mode;
-//     if (country) orderFilter.Country = country;
-//     if (origin) orderFilter.Origin = origin;
-
-//     const factories = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .distinct("Factory", orderFilter);
-//     const monos = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .distinct("Order_No", orderFilter);
-//     const custStyles = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .distinct("CustStyle", orderFilter);
-//     const buyers = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .distinct("ShortName", orderFilter);
-//     const modes = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .distinct("Mode", orderFilter);
-//     const countries = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .distinct("Country", orderFilter);
-//     const origins = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .distinct("Origin", orderFilter);
-
-//     // Fetch distinct stages from measurement_data, filtered by dt_orders
-//     let measurementFilter = {};
-//     if (mono) {
-//       const order = await ymEcoConnection.db
-//         .collection("dt_orders")
-//         .findOne({ Order_No: mono }, { projection: { _id: 1 } });
-//       if (order) {
-//         measurementFilter.style_id = order._id.toString();
-//       }
-//     } else {
-//       const filteredOrders = await ymEcoConnection.db
-//         .collection("dt_orders")
-//         .find(orderFilter, { projection: { _id: 1 } })
-//         .toArray();
-//       const orderIds = filteredOrders.map((order) => order._id.toString());
-//       measurementFilter.style_id = { $in: orderIds };
-//     }
-//     if (stage) {
-//       measurementFilter.stage = stage;
-//     }
-
-//     const stages = await ymEcoConnection.db
-//       .collection("measurement_data")
-//       .distinct("stage", measurementFilter);
-
-//     // Fetch distinct emp_ids from UserMain where working_status is "Working"
-//     const empIds = await UserMain.distinct("emp_id", {
-//       working_status: "Working",
-//       emp_id: { $ne: null }, // Ensure emp_id is not null
-//     });
-
-//     // Add minDate and maxDate from measurement_data
-//     const dateRange = await ymEcoConnection.db
-//       .collection("measurement_data")
-//       .aggregate([
-//         {
-//           $group: {
-//             _id: null,
-//             minDate: { $min: "$created_at" },
-//             maxDate: { $max: "$created_at" },
-//           },
-//         },
-//       ])
-//       .toArray();
-//     const minDate = dateRange.length > 0 ? dateRange[0].minDate : null;
-//     const maxDate = dateRange.length > 0 ? dateRange[0].maxDate : null;
-
-//     res.json({
-//       factories,
-//       monos,
-//       custStyles,
-//       buyers,
-//       modes,
-//       countries,
-//       origins,
-//       stages, // Added stages
-//       empIds, // Added empIds
-//       minDate,
-//       maxDate,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching filter options:", error);
-//     res.status(500).json({ error: "Failed to fetch filter options" });
-//   }
-// });
-
-// // New endpoint for buyer spec order details
-// app.get("/api/buyer-spec-order-details/:mono", async (req, res) => {
-//   try {
-//     const collection = ymEcoConnection.db.collection("dt_orders");
-//     const order = await collection.findOne({ Order_No: req.params.mono });
-
-//     if (!order) return res.status(404).json({ error: "Order not found" });
-
-//     const colorSizeMap = {};
-//     const sizes = new Set();
-//     order.OrderColors.forEach((colorObj) => {
-//       const color = colorObj.Color.trim();
-//       colorSizeMap[color] = {};
-//       colorObj.OrderQty.forEach((sizeEntry) => {
-//         const sizeName = Object.keys(sizeEntry)[0].split(";")[0].trim();
-//         const quantity = sizeEntry[sizeName];
-//         if (quantity > 0) {
-//           colorSizeMap[color][sizeName] = quantity;
-//           sizes.add(sizeName);
-//         }
-//       });
-//     });
-
-//     // Apply the same tolerance correction logic as in /api/measurement-details
-//     const buyerSpec = order.SizeSpec.map((spec) => {
-//       // Adjust tolMinus and tolPlus to their fractional parts
-//       const tolMinusMagnitude =
-//         Math.abs(spec.ToleranceMinus.decimal) >= 1
-//           ? Math.abs(spec.ToleranceMinus.decimal) -
-//             Math.floor(Math.abs(spec.ToleranceMinus.decimal))
-//           : Math.abs(spec.ToleranceMinus.decimal);
-//       const tolPlusMagnitude =
-//         Math.abs(spec.TolerancePlus.decimal) >= 1
-//           ? Math.abs(spec.TolerancePlus.decimal) -
-//             Math.floor(Math.abs(spec.TolerancePlus.decimal))
-//           : Math.abs(spec.TolerancePlus.decimal);
-
-//       return {
-//         seq: spec.Seq,
-//         measurementPoint: spec.EnglishRemark,
-//         chineseRemark: spec.ChineseArea,
-//         tolMinus: tolMinusMagnitude === 0 ? 0 : -tolMinusMagnitude, // Ensure tolMinus is negative
-//         tolPlus: tolPlusMagnitude,
-//         specs: spec.Specs.reduce((acc, sizeSpec) => {
-//           const sizeName = Object.keys(sizeSpec)[0];
-//           acc[sizeName] = sizeSpec[sizeName].decimal;
-//           return acc;
-//         }, {}),
-//       };
-//     });
-
-//     res.json({
-//       moNo: order.Order_No,
-//       custStyle: order.CustStyle || "N/A",
-//       buyer: order.ShortName || "N/A",
-//       mode: order.Mode || "N/A",
-//       country: order.Country || "N/A",
-//       origin: order.Origin || "N/A",
-//       orderQty: order.TotalQty,
-//       colors: Object.keys(colorSizeMap),
-//       sizes: Array.from(sizes),
-//       colorSizeMap,
-//       buyerSpec,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching buyer spec order details:", error);
-//     res.status(500).json({ error: "Failed to fetch buyer spec order details" });
-//   }
-// });
-
-// // New endpoint for paginated MO Nos
-// app.get("/api/paginated-monos", async (req, res) => {
-//   try {
-//     const {
-//       page = 1,
-//       factory,
-//       custStyle,
-//       buyer,
-//       mode,
-//       country,
-//       origin,
-//     } = req.query;
-//     const pageSize = 1; // One MO No per page
-//     const skip = (parseInt(page) - 1) * pageSize;
-
-//     const filter = {};
-//     if (factory) filter.Factory = factory;
-//     if (custStyle) filter.CustStyle = custStyle;
-//     if (buyer) filter.ShortName = buyer;
-//     if (mode) filter.Mode = mode;
-//     if (country) filter.Country = country;
-//     if (origin) filter.Origin = origin;
-
-//     const total = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .countDocuments(filter);
-//     const monos = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .find(filter)
-//       .project({ Order_No: 1, _id: 0 })
-//       .skip(skip)
-//       .limit(pageSize)
-//       .toArray();
-
-//     res.json({
-//       monos: monos.map((m) => m.Order_No),
-//       totalPages: Math.ceil(total / pageSize),
-//       currentPage: parseInt(page),
-//     });
-//   } catch (error) {
-//     console.error("Error fetching paginated MONos:", error);
-//     res.status(500).json({ error: "Failed to fetch paginated MONos" });
-//   }
-// });
-
-// // New endpoint for overall measurement summary
-// app.get("/api/measurement-summary", async (req, res) => {
-//   try {
-//     const {
-//       factory,
-//       startDate,
-//       endDate,
-//       mono,
-//       custStyle,
-//       buyer,
-//       empId,
-//       stage,
-//     } = req.query;
-//     const orderFilter = {};
-//     if (factory) orderFilter.Factory = factory;
-//     if (mono) orderFilter.Order_No = mono;
-//     if (custStyle) orderFilter.CustStyle = custStyle;
-//     if (buyer) orderFilter.ShortName = buyer;
-
-//     const selectedOrders = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .find(orderFilter)
-//       .toArray();
-//     const orderIds = selectedOrders.map((order) => order._id.toString());
-
-//     const measurementFilter = { style_id: { $in: orderIds } };
-//     if (startDate || endDate) {
-//       measurementFilter.created_at = {};
-//       if (startDate) {
-//         measurementFilter.created_at.$gte = new Date(startDate);
-//       }
-//       if (endDate) {
-//         const end = new Date(endDate);
-//         end.setHours(23, 59, 59, 999);
-//         measurementFilter.created_at.$lte = end;
-//       }
-//     }
-
-//     if (empId) measurementFilter["user.name"] = empId;
-
-//     if (stage) measurementFilter.stage = stage;
-
-//     const measurementRecords = await ymEcoConnection.db
-//       .collection("measurement_data")
-//       .find(measurementFilter)
-//       .toArray();
-//     const orderIdToSizeSpec = {};
-//     selectedOrders.forEach((order) => {
-//       orderIdToSizeSpec[order._id.toString()] = order.SizeSpec.map((spec) => {
-//         const tolMinusMagnitude =
-//           Math.abs(spec.ToleranceMinus.decimal) >= 1
-//             ? Math.abs(spec.ToleranceMinus.decimal) -
-//               Math.floor(Math.abs(spec.ToleranceMinus.decimal))
-//             : Math.abs(spec.ToleranceMinus.decimal);
-//         const tolPlusMagnitude =
-//           Math.abs(spec.TolerancePlus.decimal) >= 1
-//             ? Math.abs(spec.TolerancePlus.decimal) -
-//               Math.floor(Math.abs(spec.TolerancePlus.decimal))
-//             : Math.abs(spec.TolerancePlus.decimal);
-
-//         return {
-//           ...spec,
-//           ToleranceMinus: {
-//             decimal: tolMinusMagnitude === 0 ? 0 : -tolMinusMagnitude,
-//           },
-//           TolerancePlus: { decimal: tolPlusMagnitude },
-//         };
-//       });
-//     });
-
-//     let orderQty = selectedOrders.reduce(
-//       (sum, order) => sum + order.TotalQty,
-//       0
-//     );
-//     let inspectedQty = measurementRecords.length;
-//     let totalPass = 0;
-
-//     measurementRecords.forEach((record) => {
-//       const sizeSpec = orderIdToSizeSpec[record.style_id];
-//       const size = record.size;
-//       let isPass = true;
-//       for (let i = 0; i < record.actual.length; i++) {
-//         if (record.actual[i].value === 0) continue;
-//         const spec = sizeSpec[i];
-//         const tolMinus = spec.ToleranceMinus.decimal;
-//         const tolPlus = spec.TolerancePlus.decimal;
-
-//         // Fix: Define specValue by extracting the buyer's spec for the given size
-//         const specValue = spec.Specs.find((s) => Object.keys(s)[0] === size)[
-//           size
-//         ].decimal;
-
-//         const lower = specValue + tolMinus;
-//         const upper = specValue + tolPlus;
-//         const actualValue = record.actual[i].value;
-//         if (actualValue < lower || actualValue > upper) {
-//           isPass = false;
-//           break;
-//         }
-//       }
-//       if (isPass) totalPass++;
-//     });
-
-//     const totalReject = inspectedQty - totalPass;
-//     const passRate =
-//       inspectedQty > 0 ? ((totalPass / inspectedQty) * 100).toFixed(2) : "0.00";
-
-//     res.json({ orderQty, inspectedQty, totalPass, totalReject, passRate });
-//   } catch (error) {
-//     console.error("Error fetching measurement summary:", error);
-//     res.status(500).json({ error: "Failed to fetch measurement summary" });
-//   }
-// });
-
-// // Updated endpoint for paginated measurement summary per MO No, only including MO Nos with inspectedQty > 0
-// app.get("/api/measurement-summary-per-mono", async (req, res) => {
-//   try {
-//     const {
-//       page = 1,
-//       pageSize = 10,
-//       factory,
-//       startDate,
-//       endDate,
-//       mono,
-//       custStyle,
-//       buyer,
-//       empId,
-//       stage,
-//     } = req.query;
-//     const skip = (parseInt(page) - 1) * parseInt(pageSize);
-
-//     // Build measurement filter
-//     const measurementFilter = {};
-//     if (startDate || endDate) {
-//       measurementFilter.created_at = {};
-//       if (startDate) {
-//         measurementFilter.created_at.$gte = new Date(startDate);
-//       }
-//       if (endDate) {
-//         const end = new Date(endDate);
-//         end.setHours(23, 59, 59, 999);
-//         measurementFilter.created_at.$lte = end;
-//       }
-//     }
-
-//     if (empId) measurementFilter["user.name"] = empId;
-
-//     if (stage) measurementFilter.stage = stage;
-
-//     // Build order filter
-//     const orderFilter = {};
-//     if (factory) orderFilter.Factory = factory;
-//     if (mono) orderFilter.Order_No = mono;
-//     if (custStyle) orderFilter.CustStyle = custStyle;
-//     if (buyer) orderFilter.ShortName = buyer;
-
-//     // Aggregation pipeline to join dt_orders with measurement_data
-//     const pipeline = [
-//       { $match: orderFilter },
-//       {
-//         $lookup: {
-//           from: "measurement_data",
-//           let: { orderId: { $toString: "$_id" } },
-//           pipeline: [
-//             {
-//               $match: {
-//                 $expr: { $eq: ["$style_id", "$$orderId"] },
-//                 ...measurementFilter,
-//               },
-//             },
-//           ],
-//           as: "measurements",
-//         },
-//       },
-//       { $match: { measurements: { $ne: [] } } }, // Only include orders with measurements
-//       { $sort: { Order_No: 1 } },
-//       {
-//         $facet: {
-//           metadata: [{ $count: "total" }],
-//           data: [{ $skip: skip }, { $limit: parseInt(pageSize) }],
-//         },
-//       },
-//     ];
-
-//     const result = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .aggregate(pipeline)
-//       .toArray();
-//     const orders = result[0].data || [];
-//     const totalOrders = result[0].metadata[0]?.total || 0;
-//     const totalPages = Math.ceil(totalOrders / parseInt(pageSize));
-
-//     const orderIds = orders.map((order) => order._id.toString());
-//     const measurementRecords = await ymEcoConnection.db
-//       .collection("measurement_data")
-//       .find({
-//         style_id: { $in: orderIds },
-//         ...measurementFilter,
-//       })
-//       .toArray();
-
-//     const recordsByOrder = {};
-//     measurementRecords.forEach((record) => {
-//       const styleId = record.style_id;
-//       if (!recordsByOrder[styleId]) recordsByOrder[styleId] = [];
-//       recordsByOrder[styleId].push(record);
-//     });
-
-//     const orderIdToSizeSpec = {};
-//     orders.forEach((order) => {
-//       orderIdToSizeSpec[order._id.toString()] = order.SizeSpec.map((spec) => {
-//         const tolMinusMagnitude =
-//           Math.abs(spec.ToleranceMinus.decimal) >= 1
-//             ? Math.abs(spec.ToleranceMinus.decimal) -
-//               Math.floor(Math.abs(spec.ToleranceMinus.decimal))
-//             : Math.abs(spec.ToleranceMinus.decimal);
-//         const tolPlusMagnitude =
-//           Math.abs(spec.TolerancePlus.decimal) >= 1
-//             ? Math.abs(spec.TolerancePlus.decimal) -
-//               Math.floor(Math.abs(spec.TolerancePlus.decimal))
-//             : Math.abs(spec.TolerancePlus.decimal);
-
-//         return {
-//           ...spec,
-//           ToleranceMinus: {
-//             decimal: tolMinusMagnitude === 0 ? 0 : -tolMinusMagnitude,
-//           },
-//           TolerancePlus: { decimal: tolPlusMagnitude },
-//         };
-//       });
-//     });
-
-//     const summaryPerMono = orders.map((order) => {
-//       const styleId = order._id.toString();
-//       const records = recordsByOrder[styleId] || [];
-//       let inspectedQty = records.length;
-//       let totalPass = 0;
-//       records.forEach((record) => {
-//         const sizeSpec = orderIdToSizeSpec[styleId];
-//         const size = record.size;
-//         let isPass = true;
-//         for (let i = 0; i < record.actual.length; i++) {
-//           if (record.actual[i].value === 0) continue;
-//           const spec = sizeSpec[i];
-//           const tolMinus = spec.ToleranceMinus.decimal;
-//           const tolPlus = spec.TolerancePlus.decimal;
-
-//           const specValue = spec.Specs.find((s) => Object.keys(s)[0] === size)[
-//             size
-//           ].decimal;
-//           const lower = specValue + tolMinus;
-//           const upper = specValue + tolPlus;
-//           const actualValue = record.actual[i].value;
-//           if (actualValue < lower || actualValue > upper) {
-//             isPass = false;
-//             break;
-//           }
-//         }
-//         if (isPass) totalPass++;
-//       });
-//       const totalReject = inspectedQty - totalPass;
-//       const passRate =
-//         inspectedQty > 0
-//           ? ((totalPass / inspectedQty) * 100).toFixed(2)
-//           : "0.00";
-//       return {
-//         moNo: order.Order_No,
-//         custStyle: order.CustStyle,
-//         buyer: order.ShortName,
-//         country: order.Country,
-//         origin: order.Origin,
-//         mode: order.Mode,
-//         orderQty: order.TotalQty,
-//         inspectedQty,
-//         totalPass,
-//         totalReject,
-//         passRate,
-//       };
-//     });
-
-//     res.json({ summaryPerMono, totalPages, currentPage: parseInt(page) });
-//   } catch (error) {
-//     console.error("Error fetching measurement summary per MO No:", error);
-//     res
-//       .status(500)
-//       .json({ error: "Failed to fetch measurement summary per MO No" });
-//   }
-// });
-
-// // Updated endpoint for measurement details by MO No
-
-// app.get("/api/measurement-details/:mono", async (req, res) => {
-//   try {
-//     const { startDate, endDate, empId, stage } = req.query;
-//     const order = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .findOne({ Order_No: req.params.mono });
-//     if (!order) return res.status(404).json({ error: "Order not found" });
-
-//     const styleId = order._id.toString();
-//     const measurementFilter = { style_id: styleId };
-//     if (startDate || endDate) {
-//       measurementFilter.created_at = {};
-//       if (startDate) {
-//         measurementFilter.created_at.$gte = new Date(startDate);
-//       }
-//       if (endDate) {
-//         const end = new Date(endDate);
-//         end.setHours(23, 59, 59, 999);
-//         measurementFilter.created_at.$lte = end;
-//       }
-//     }
-
-//     if (empId) measurementFilter["user.name"] = empId;
-
-//     if (stage) measurementFilter.stage = stage;
-
-//     const records = await ymEcoConnection.db
-//       .collection("measurement_data")
-//       .find(measurementFilter)
-//       .toArray();
-
-//     const correctedSizeSpec = order.SizeSpec.map((spec) => {
-//       const tolMinusMagnitude =
-//         Math.abs(spec.ToleranceMinus.decimal) >= 1
-//           ? Math.abs(spec.ToleranceMinus.decimal) -
-//             Math.floor(Math.abs(spec.ToleranceMinus.decimal))
-//           : Math.abs(spec.ToleranceMinus.decimal);
-//       const tolPlusMagnitude =
-//         Math.abs(spec.TolerancePlus.decimal) >= 1
-//           ? Math.abs(spec.TolerancePlus.decimal) -
-//             Math.floor(Math.abs(spec.TolerancePlus.decimal))
-//           : Math.abs(spec.TolerancePlus.decimal);
-
-//       return {
-//         ...spec,
-//         ToleranceMinus: {
-//           decimal: tolMinusMagnitude === 0 ? 0 : -tolMinusMagnitude,
-//         },
-//         TolerancePlus: {
-//           decimal: tolPlusMagnitude,
-//         },
-//       };
-//     });
-
-//     // Calculate the measurement point summary
-//     const measurementPointSummary = correctedSizeSpec
-//       .map((spec, index) => {
-//         const measurementPoint = spec.EnglishRemark;
-//         const tolMinus = spec.ToleranceMinus.decimal;
-//         const tolPlus = spec.TolerancePlus.decimal;
-
-//         let totalCount = 0;
-//         let totalPass = 0;
-
-//         records.forEach((record) => {
-//           const actualValue = record.actual[index]?.value || 0;
-//           if (actualValue === 0) return; // Skip if the value is 0
-
-//           totalCount++;
-
-//           // Get the buyer spec for the specific size of the record
-//           const buyerSpec =
-//             spec.Specs.find((s) => Object.keys(s)[0] === record.size)?.[
-//               record.size
-//             ]?.decimal || 0;
-
-//           const lower = buyerSpec + tolMinus;
-//           const upper = buyerSpec + tolPlus;
-
-//           if (actualValue >= lower && actualValue <= upper) {
-//             totalPass++;
-//           }
-//         });
-
-//         const totalFail = totalCount - totalPass;
-//         const passRate =
-//           totalCount > 0 ? ((totalPass / totalCount) * 100).toFixed(2) : "0.00";
-
-//         // Use the first valid size as a representative buyer spec (for summary display)
-//         const sampleRecord = records.find(
-//           (r) => r.size && spec.Specs.find((s) => Object.keys(s)[0] === r.size)
-//         );
-//         const buyerSpec = sampleRecord
-//           ? spec.Specs.find((s) => Object.keys(s)[0] === sampleRecord.size)?.[
-//               sampleRecord.size
-//             ]?.decimal || 0
-//           : 0;
-
-//         return {
-//           measurementPoint,
-//           buyerSpec,
-//           tolMinus,
-//           tolPlus,
-//           totalCount,
-//           totalPass,
-//           totalFail,
-//           passRate,
-//         };
-//       })
-//       .filter((summary) => summary.totalCount > 0); // Only include measurement points with non-zero counts
-
-//     res.json({
-//       records: records.map((record) => ({
-//         ...record,
-//         reference_no: record.reference_no, // Include reference_no in the response
-//       })),
-//       sizeSpec: correctedSizeSpec,
-//       measurementPointSummary, // Add the new summary data
-//     });
-//   } catch (error) {
-//     console.error("Error fetching measurement details:", error);
-//     res.status(500).json({ error: "Failed to fetch measurement details" });
-//   }
-// });
-
-// // New endpoint to update measurement value
-
-// app.put("/api/update-measurement-value", async (req, res) => {
-//   try {
-//     const { moNo, referenceNo, index, newValue } = req.body;
-
-//     // Validate inputs
-//     if (
-//       !moNo ||
-//       !referenceNo ||
-//       index === undefined ||
-//       newValue === undefined
-//     ) {
-//       return res.status(400).json({ error: "Missing required fields" });
-//     }
-
-//     // Convert newValue to a float and ensure it's a valid number
-//     const updatedValue = parseFloat(newValue);
-//     if (isNaN(updatedValue)) {
-//       return res.status(400).json({ error: "Invalid measurement value" });
-//     }
-
-//     // Find the dt_orders record to get its _id
-//     const order = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .findOne({ Order_No: moNo });
-//     if (!order) {
-//       return res.status(404).json({ error: "Order not found for MO No" });
-//     }
-
-//     const styleId = order._id.toString();
-
-//     // Find the measurement_data record with matching style_id and reference_no
-//     const record = await ymEcoConnection.db
-//       .collection("measurement_data")
-//       .findOne({ style_id: styleId, reference_no: referenceNo });
-
-//     if (!record) {
-//       return res.status(404).json({ error: "Measurement record not found" });
-//     }
-
-//     // Validate the index against the actual array length
-//     if (!record.actual || index < 0 || index >= record.actual.length) {
-//       return res.status(400).json({ error: "Invalid index for actual array" });
-//     }
-
-//     // Update the specific index in the actual array
-//     const result = await ymEcoConnection.db
-//       .collection("measurement_data")
-//       .updateOne(
-//         { style_id: styleId, reference_no: referenceNo },
-//         {
-//           $set: {
-//             [`actual.${index}.value`]: updatedValue,
-//             updated_at: new Date(),
-//           },
-//         }
-//       );
-
-//     if (result.matchedCount === 0) {
-//       return res.status(404).json({ error: "Record not found during update" });
-//     }
-
-//     if (result.modifiedCount === 0) {
-//       return res.status(500).json({ error: "Failed to update the record" });
-//     }
-
-//     res.json({ message: "Measurement value updated successfully" });
-//   } catch (error) {
-//     console.error(
-//       "Error updating measurement value:",
-//       error.message,
-//       error.stack
-//     );
-//     res.status(500).json({
-//       error: "Failed to update measurement value",
-//       details: error.message,
-//     });
-//   }
-// });
-
-// // New endpoint to delete measurement record
-// app.delete("/api/delete-measurement-record", async (req, res) => {
-//   try {
-//     const { moNo, referenceNo } = req.body;
-
-//     // Validate input
-//     if (!moNo || !referenceNo) {
-//       return res
-//         .status(400)
-//         .json({ error: "moNo and referenceNo are required" });
-//     }
-
-//     // Find the dt_orders record to get style_id
-//     const order = await ymEcoConnection.db
-//       .collection("dt_orders")
-//       .findOne({ Order_No: moNo }, { projection: { _id: 1 } });
-
-//     if (!order) {
-//       console.log("Order not found for MO No:", moNo);
-//       return res
-//         .status(404)
-//         .json({ error: `Order not found for MO No: ${moNo}` });
-//     }
-
-//     const styleId = order._id.toString();
-
-//     // Delete the measurement_data record
-//     const result = await ymEcoConnection.db
-//       .collection("measurement_data")
-//       .deleteOne({
-//         style_id: styleId,
-//         reference_no: referenceNo,
-//       });
-
-//     if (result.deletedCount === 0) {
-//       console.log("No measurement record found for:", { styleId, referenceNo });
-//       return res.status(404).json({
-//         error: `No measurement record found for reference_no: ${referenceNo}`,
-//       });
-//     }
-
-//     res
-//       .status(200)
-//       .json({ message: "Measurement record deleted successfully" });
-//   } catch (error) {
-//     console.error(
-//       "Error deleting measurement record:",
-//       error.message,
-//       error.stack
-//     );
-//     res.status(500).json({
-//       error: "Failed to delete measurement record",
-//       details: error.message,
-//     });
-//   }
-// });
+/* ------------------------------
+   End Points - Digital Measurement
+------------------------------ */
+
+// New endpoint for filter options
+app.get("/api/filter-options", async (req, res) => {
+  try {
+    const { factory, mono, custStyle, buyer, mode, country, origin, stage } =
+      req.query;
+    const orderFilter = {};
+    if (factory) orderFilter.Factory = factory;
+    if (mono) orderFilter.Order_No = mono;
+    if (custStyle) orderFilter.CustStyle = custStyle;
+    if (buyer) orderFilter.ShortName = buyer;
+    if (mode) orderFilter.Mode = mode;
+    if (country) orderFilter.Country = country;
+    if (origin) orderFilter.Origin = origin;
+
+    const factories = await ymEcoConnection.db
+      .collection("dt_orders")
+      .distinct("Factory", orderFilter);
+    const monos = await ymEcoConnection.db
+      .collection("dt_orders")
+      .distinct("Order_No", orderFilter);
+    const custStyles = await ymEcoConnection.db
+      .collection("dt_orders")
+      .distinct("CustStyle", orderFilter);
+    const buyers = await ymEcoConnection.db
+      .collection("dt_orders")
+      .distinct("ShortName", orderFilter);
+    const modes = await ymEcoConnection.db
+      .collection("dt_orders")
+      .distinct("Mode", orderFilter);
+    const countries = await ymEcoConnection.db
+      .collection("dt_orders")
+      .distinct("Country", orderFilter);
+    const origins = await ymEcoConnection.db
+      .collection("dt_orders")
+      .distinct("Origin", orderFilter);
+
+    // Fetch distinct stages from measurement_data, filtered by dt_orders
+    let measurementFilter = {};
+    if (mono) {
+      const order = await ymEcoConnection.db
+        .collection("dt_orders")
+        .findOne({ Order_No: mono }, { projection: { _id: 1 } });
+      if (order) {
+        measurementFilter.style_id = order._id.toString();
+      }
+    } else {
+      const filteredOrders = await ymEcoConnection.db
+        .collection("dt_orders")
+        .find(orderFilter, { projection: { _id: 1 } })
+        .toArray();
+      const orderIds = filteredOrders.map((order) => order._id.toString());
+      measurementFilter.style_id = { $in: orderIds };
+    }
+    if (stage) {
+      measurementFilter.stage = stage;
+    }
+
+    const stages = await ymEcoConnection.db
+      .collection("measurement_data")
+      .distinct("stage", measurementFilter);
+
+    // Fetch distinct emp_ids from UserMain where working_status is "Working"
+    const empIds = await UserMain.distinct("emp_id", {
+      working_status: "Working",
+      emp_id: { $ne: null }, // Ensure emp_id is not null
+    });
+
+    // Add minDate and maxDate from measurement_data
+    const dateRange = await ymEcoConnection.db
+      .collection("measurement_data")
+      .aggregate([
+        {
+          $group: {
+            _id: null,
+            minDate: { $min: "$created_at" },
+            maxDate: { $max: "$created_at" },
+          },
+        },
+      ])
+      .toArray();
+    const minDate = dateRange.length > 0 ? dateRange[0].minDate : null;
+    const maxDate = dateRange.length > 0 ? dateRange[0].maxDate : null;
+
+    res.json({
+      factories,
+      monos,
+      custStyles,
+      buyers,
+      modes,
+      countries,
+      origins,
+      stages, // Added stages
+      empIds, // Added empIds
+      minDate,
+      maxDate,
+    });
+  } catch (error) {
+    console.error("Error fetching filter options:", error);
+    res.status(500).json({ error: "Failed to fetch filter options" });
+  }
+});
+
+// New endpoint for buyer spec order details
+app.get("/api/buyer-spec-order-details/:mono", async (req, res) => {
+  try {
+    const collection = ymEcoConnection.db.collection("dt_orders");
+    const order = await collection.findOne({ Order_No: req.params.mono });
+
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    const colorSizeMap = {};
+    const sizes = new Set();
+    order.OrderColors.forEach((colorObj) => {
+      const color = colorObj.Color.trim();
+      colorSizeMap[color] = {};
+      colorObj.OrderQty.forEach((sizeEntry) => {
+        const sizeName = Object.keys(sizeEntry)[0].split(";")[0].trim();
+        const quantity = sizeEntry[sizeName];
+        if (quantity > 0) {
+          colorSizeMap[color][sizeName] = quantity;
+          sizes.add(sizeName);
+        }
+      });
+    });
+
+    // Apply the same tolerance correction logic as in /api/measurement-details
+    const buyerSpec = order.SizeSpec.map((spec) => {
+      // Adjust tolMinus and tolPlus to their fractional parts
+      const tolMinusMagnitude =
+        Math.abs(spec.ToleranceMinus.decimal) >= 1
+          ? Math.abs(spec.ToleranceMinus.decimal) -
+            Math.floor(Math.abs(spec.ToleranceMinus.decimal))
+          : Math.abs(spec.ToleranceMinus.decimal);
+      const tolPlusMagnitude =
+        Math.abs(spec.TolerancePlus.decimal) >= 1
+          ? Math.abs(spec.TolerancePlus.decimal) -
+            Math.floor(Math.abs(spec.TolerancePlus.decimal))
+          : Math.abs(spec.TolerancePlus.decimal);
+
+      return {
+        seq: spec.Seq,
+        measurementPoint: spec.EnglishRemark,
+        chineseRemark: spec.ChineseArea,
+        tolMinus: tolMinusMagnitude === 0 ? 0 : -tolMinusMagnitude, // Ensure tolMinus is negative
+        tolPlus: tolPlusMagnitude,
+        specs: spec.Specs.reduce((acc, sizeSpec) => {
+          const sizeName = Object.keys(sizeSpec)[0];
+          acc[sizeName] = sizeSpec[sizeName].decimal;
+          return acc;
+        }, {}),
+      };
+    });
+
+    res.json({
+      moNo: order.Order_No,
+      custStyle: order.CustStyle || "N/A",
+      buyer: order.ShortName || "N/A",
+      mode: order.Mode || "N/A",
+      country: order.Country || "N/A",
+      origin: order.Origin || "N/A",
+      orderQty: order.TotalQty,
+      colors: Object.keys(colorSizeMap),
+      sizes: Array.from(sizes),
+      colorSizeMap,
+      buyerSpec,
+    });
+  } catch (error) {
+    console.error("Error fetching buyer spec order details:", error);
+    res.status(500).json({ error: "Failed to fetch buyer spec order details" });
+  }
+});
+
+// New endpoint for paginated MO Nos
+app.get("/api/paginated-monos", async (req, res) => {
+  try {
+    const {
+      page = 1,
+      factory,
+      custStyle,
+      buyer,
+      mode,
+      country,
+      origin,
+    } = req.query;
+    const pageSize = 1; // One MO No per page
+    const skip = (parseInt(page) - 1) * pageSize;
+
+    const filter = {};
+    if (factory) filter.Factory = factory;
+    if (custStyle) filter.CustStyle = custStyle;
+    if (buyer) filter.ShortName = buyer;
+    if (mode) filter.Mode = mode;
+    if (country) filter.Country = country;
+    if (origin) filter.Origin = origin;
+
+    const total = await ymEcoConnection.db
+      .collection("dt_orders")
+      .countDocuments(filter);
+    const monos = await ymEcoConnection.db
+      .collection("dt_orders")
+      .find(filter)
+      .project({ Order_No: 1, _id: 0 })
+      .skip(skip)
+      .limit(pageSize)
+      .toArray();
+
+    res.json({
+      monos: monos.map((m) => m.Order_No),
+      totalPages: Math.ceil(total / pageSize),
+      currentPage: parseInt(page),
+    });
+  } catch (error) {
+    console.error("Error fetching paginated MONos:", error);
+    res.status(500).json({ error: "Failed to fetch paginated MONos" });
+  }
+});
+
+// New endpoint for overall measurement summary
+app.get("/api/measurement-summary", async (req, res) => {
+  try {
+    const {
+      factory,
+      startDate,
+      endDate,
+      mono,
+      custStyle,
+      buyer,
+      empId,
+      stage,
+    } = req.query;
+    const orderFilter = {};
+    if (factory) orderFilter.Factory = factory;
+    if (mono) orderFilter.Order_No = mono;
+    if (custStyle) orderFilter.CustStyle = custStyle;
+    if (buyer) orderFilter.ShortName = buyer;
+
+    const selectedOrders = await ymEcoConnection.db
+      .collection("dt_orders")
+      .find(orderFilter)
+      .toArray();
+    const orderIds = selectedOrders.map((order) => order._id.toString());
+
+    const measurementFilter = { style_id: { $in: orderIds } };
+    if (startDate || endDate) {
+      measurementFilter.created_at = {};
+      if (startDate) {
+        measurementFilter.created_at.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        measurementFilter.created_at.$lte = end;
+      }
+    }
+
+    if (empId) measurementFilter["user.name"] = empId;
+
+    if (stage) measurementFilter.stage = stage;
+
+    const measurementRecords = await ymEcoConnection.db
+      .collection("measurement_data")
+      .find(measurementFilter)
+      .toArray();
+    const orderIdToSizeSpec = {};
+    selectedOrders.forEach((order) => {
+      orderIdToSizeSpec[order._id.toString()] = order.SizeSpec.map((spec) => {
+        const tolMinusMagnitude =
+          Math.abs(spec.ToleranceMinus.decimal) >= 1
+            ? Math.abs(spec.ToleranceMinus.decimal) -
+              Math.floor(Math.abs(spec.ToleranceMinus.decimal))
+            : Math.abs(spec.ToleranceMinus.decimal);
+        const tolPlusMagnitude =
+          Math.abs(spec.TolerancePlus.decimal) >= 1
+            ? Math.abs(spec.TolerancePlus.decimal) -
+              Math.floor(Math.abs(spec.TolerancePlus.decimal))
+            : Math.abs(spec.TolerancePlus.decimal);
+
+        return {
+          ...spec,
+          ToleranceMinus: {
+            decimal: tolMinusMagnitude === 0 ? 0 : -tolMinusMagnitude,
+          },
+          TolerancePlus: { decimal: tolPlusMagnitude },
+        };
+      });
+    });
+
+    let orderQty = selectedOrders.reduce(
+      (sum, order) => sum + order.TotalQty,
+      0
+    );
+    let inspectedQty = measurementRecords.length;
+    let totalPass = 0;
+
+    measurementRecords.forEach((record) => {
+      const sizeSpec = orderIdToSizeSpec[record.style_id];
+      const size = record.size;
+      let isPass = true;
+      for (let i = 0; i < record.actual.length; i++) {
+        if (record.actual[i].value === 0) continue;
+        const spec = sizeSpec[i];
+        const tolMinus = spec.ToleranceMinus.decimal;
+        const tolPlus = spec.TolerancePlus.decimal;
+
+        // Fix: Define specValue by extracting the buyer's spec for the given size
+        const specValue = spec.Specs.find((s) => Object.keys(s)[0] === size)[
+          size
+        ].decimal;
+
+        const lower = specValue + tolMinus;
+        const upper = specValue + tolPlus;
+        const actualValue = record.actual[i].value;
+        if (actualValue < lower || actualValue > upper) {
+          isPass = false;
+          break;
+        }
+      }
+      if (isPass) totalPass++;
+    });
+
+    const totalReject = inspectedQty - totalPass;
+    const passRate =
+      inspectedQty > 0 ? ((totalPass / inspectedQty) * 100).toFixed(2) : "0.00";
+
+    res.json({ orderQty, inspectedQty, totalPass, totalReject, passRate });
+  } catch (error) {
+    console.error("Error fetching measurement summary:", error);
+    res.status(500).json({ error: "Failed to fetch measurement summary" });
+  }
+});
+
+// Updated endpoint for paginated measurement summary per MO No, only including MO Nos with inspectedQty > 0
+app.get("/api/measurement-summary-per-mono", async (req, res) => {
+  try {
+    const {
+      page = 1,
+      pageSize = 10,
+      factory,
+      startDate,
+      endDate,
+      mono,
+      custStyle,
+      buyer,
+      empId,
+      stage,
+    } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(pageSize);
+
+    // Build measurement filter
+    const measurementFilter = {};
+    if (startDate || endDate) {
+      measurementFilter.created_at = {};
+      if (startDate) {
+        measurementFilter.created_at.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        measurementFilter.created_at.$lte = end;
+      }
+    }
+
+    if (empId) measurementFilter["user.name"] = empId;
+
+    if (stage) measurementFilter.stage = stage;
+
+    // Build order filter
+    const orderFilter = {};
+    if (factory) orderFilter.Factory = factory;
+    if (mono) orderFilter.Order_No = mono;
+    if (custStyle) orderFilter.CustStyle = custStyle;
+    if (buyer) orderFilter.ShortName = buyer;
+
+    // Aggregation pipeline to join dt_orders with measurement_data
+    const pipeline = [
+      { $match: orderFilter },
+      {
+        $lookup: {
+          from: "measurement_data",
+          let: { orderId: { $toString: "$_id" } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$style_id", "$$orderId"] },
+                ...measurementFilter,
+              },
+            },
+          ],
+          as: "measurements",
+        },
+      },
+      { $match: { measurements: { $ne: [] } } }, // Only include orders with measurements
+      { $sort: { Order_No: 1 } },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: skip }, { $limit: parseInt(pageSize) }],
+        },
+      },
+    ];
+
+    const result = await ymEcoConnection.db
+      .collection("dt_orders")
+      .aggregate(pipeline)
+      .toArray();
+    const orders = result[0].data || [];
+    const totalOrders = result[0].metadata[0]?.total || 0;
+    const totalPages = Math.ceil(totalOrders / parseInt(pageSize));
+
+    const orderIds = orders.map((order) => order._id.toString());
+    const measurementRecords = await ymEcoConnection.db
+      .collection("measurement_data")
+      .find({
+        style_id: { $in: orderIds },
+        ...measurementFilter,
+      })
+      .toArray();
+
+    const recordsByOrder = {};
+    measurementRecords.forEach((record) => {
+      const styleId = record.style_id;
+      if (!recordsByOrder[styleId]) recordsByOrder[styleId] = [];
+      recordsByOrder[styleId].push(record);
+    });
+
+    const orderIdToSizeSpec = {};
+    orders.forEach((order) => {
+      orderIdToSizeSpec[order._id.toString()] = order.SizeSpec.map((spec) => {
+        const tolMinusMagnitude =
+          Math.abs(spec.ToleranceMinus.decimal) >= 1
+            ? Math.abs(spec.ToleranceMinus.decimal) -
+              Math.floor(Math.abs(spec.ToleranceMinus.decimal))
+            : Math.abs(spec.ToleranceMinus.decimal);
+        const tolPlusMagnitude =
+          Math.abs(spec.TolerancePlus.decimal) >= 1
+            ? Math.abs(spec.TolerancePlus.decimal) -
+              Math.floor(Math.abs(spec.TolerancePlus.decimal))
+            : Math.abs(spec.TolerancePlus.decimal);
+
+        return {
+          ...spec,
+          ToleranceMinus: {
+            decimal: tolMinusMagnitude === 0 ? 0 : -tolMinusMagnitude,
+          },
+          TolerancePlus: { decimal: tolPlusMagnitude },
+        };
+      });
+    });
+
+    const summaryPerMono = orders.map((order) => {
+      const styleId = order._id.toString();
+      const records = recordsByOrder[styleId] || [];
+      let inspectedQty = records.length;
+      let totalPass = 0;
+      records.forEach((record) => {
+        const sizeSpec = orderIdToSizeSpec[styleId];
+        const size = record.size;
+        let isPass = true;
+        for (let i = 0; i < record.actual.length; i++) {
+          if (record.actual[i].value === 0) continue;
+          const spec = sizeSpec[i];
+          const tolMinus = spec.ToleranceMinus.decimal;
+          const tolPlus = spec.TolerancePlus.decimal;
+
+          const specValue = spec.Specs.find((s) => Object.keys(s)[0] === size)[
+            size
+          ].decimal;
+          const lower = specValue + tolMinus;
+          const upper = specValue + tolPlus;
+          const actualValue = record.actual[i].value;
+          if (actualValue < lower || actualValue > upper) {
+            isPass = false;
+            break;
+          }
+        }
+        if (isPass) totalPass++;
+      });
+      const totalReject = inspectedQty - totalPass;
+      const passRate =
+        inspectedQty > 0
+          ? ((totalPass / inspectedQty) * 100).toFixed(2)
+          : "0.00";
+      return {
+        moNo: order.Order_No,
+        custStyle: order.CustStyle,
+        buyer: order.ShortName,
+        country: order.Country,
+        origin: order.Origin,
+        mode: order.Mode,
+        orderQty: order.TotalQty,
+        inspectedQty,
+        totalPass,
+        totalReject,
+        passRate,
+      };
+    });
+
+    res.json({ summaryPerMono, totalPages, currentPage: parseInt(page) });
+  } catch (error) {
+    console.error("Error fetching measurement summary per MO No:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to fetch measurement summary per MO No" });
+  }
+});
+
+// Updated endpoint for measurement details by MO No
+
+app.get("/api/measurement-details/:mono", async (req, res) => {
+  try {
+    const { startDate, endDate, empId, stage } = req.query;
+    const order = await ymEcoConnection.db
+      .collection("dt_orders")
+      .findOne({ Order_No: req.params.mono });
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    const styleId = order._id.toString();
+    const measurementFilter = { style_id: styleId };
+    if (startDate || endDate) {
+      measurementFilter.created_at = {};
+      if (startDate) {
+        measurementFilter.created_at.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        measurementFilter.created_at.$lte = end;
+      }
+    }
+
+    if (empId) measurementFilter["user.name"] = empId;
+
+    if (stage) measurementFilter.stage = stage;
+
+    const records = await ymEcoConnection.db
+      .collection("measurement_data")
+      .find(measurementFilter)
+      .toArray();
+
+    const correctedSizeSpec = order.SizeSpec.map((spec) => {
+      const tolMinusMagnitude =
+        Math.abs(spec.ToleranceMinus.decimal) >= 1
+          ? Math.abs(spec.ToleranceMinus.decimal) -
+            Math.floor(Math.abs(spec.ToleranceMinus.decimal))
+          : Math.abs(spec.ToleranceMinus.decimal);
+      const tolPlusMagnitude =
+        Math.abs(spec.TolerancePlus.decimal) >= 1
+          ? Math.abs(spec.TolerancePlus.decimal) -
+            Math.floor(Math.abs(spec.TolerancePlus.decimal))
+          : Math.abs(spec.TolerancePlus.decimal);
+
+      return {
+        ...spec,
+        ToleranceMinus: {
+          decimal: tolMinusMagnitude === 0 ? 0 : -tolMinusMagnitude,
+        },
+        TolerancePlus: {
+          decimal: tolPlusMagnitude,
+        },
+      };
+    });
+
+    // Calculate the measurement point summary
+    const measurementPointSummary = correctedSizeSpec
+      .map((spec, index) => {
+        const measurementPoint = spec.EnglishRemark;
+        const tolMinus = spec.ToleranceMinus.decimal;
+        const tolPlus = spec.TolerancePlus.decimal;
+
+        let totalCount = 0;
+        let totalPass = 0;
+
+        records.forEach((record) => {
+          const actualValue = record.actual[index]?.value || 0;
+          if (actualValue === 0) return; // Skip if the value is 0
+
+          totalCount++;
+
+          // Get the buyer spec for the specific size of the record
+          const buyerSpec =
+            spec.Specs.find((s) => Object.keys(s)[0] === record.size)?.[
+              record.size
+            ]?.decimal || 0;
+
+          const lower = buyerSpec + tolMinus;
+          const upper = buyerSpec + tolPlus;
+
+          if (actualValue >= lower && actualValue <= upper) {
+            totalPass++;
+          }
+        });
+
+        const totalFail = totalCount - totalPass;
+        const passRate =
+          totalCount > 0 ? ((totalPass / totalCount) * 100).toFixed(2) : "0.00";
+
+        // Use the first valid size as a representative buyer spec (for summary display)
+        const sampleRecord = records.find(
+          (r) => r.size && spec.Specs.find((s) => Object.keys(s)[0] === r.size)
+        );
+        const buyerSpec = sampleRecord
+          ? spec.Specs.find((s) => Object.keys(s)[0] === sampleRecord.size)?.[
+              sampleRecord.size
+            ]?.decimal || 0
+          : 0;
+
+        return {
+          measurementPoint,
+          buyerSpec,
+          tolMinus,
+          tolPlus,
+          totalCount,
+          totalPass,
+          totalFail,
+          passRate,
+        };
+      })
+      .filter((summary) => summary.totalCount > 0); // Only include measurement points with non-zero counts
+
+    res.json({
+      records: records.map((record) => ({
+        ...record,
+        reference_no: record.reference_no, // Include reference_no in the response
+      })),
+      sizeSpec: correctedSizeSpec,
+      measurementPointSummary, // Add the new summary data
+    });
+  } catch (error) {
+    console.error("Error fetching measurement details:", error);
+    res.status(500).json({ error: "Failed to fetch measurement details" });
+  }
+});
+
+// New endpoint to update measurement value
+
+app.put("/api/update-measurement-value", async (req, res) => {
+  try {
+    const { moNo, referenceNo, index, newValue } = req.body;
+
+    // Validate inputs
+    if (
+      !moNo ||
+      !referenceNo ||
+      index === undefined ||
+      newValue === undefined
+    ) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Convert newValue to a float and ensure it's a valid number
+    const updatedValue = parseFloat(newValue);
+    if (isNaN(updatedValue)) {
+      return res.status(400).json({ error: "Invalid measurement value" });
+    }
+
+    // Find the dt_orders record to get its _id
+    const order = await ymEcoConnection.db
+      .collection("dt_orders")
+      .findOne({ Order_No: moNo });
+    if (!order) {
+      return res.status(404).json({ error: "Order not found for MO No" });
+    }
+
+    const styleId = order._id.toString();
+
+    // Find the measurement_data record with matching style_id and reference_no
+    const record = await ymEcoConnection.db
+      .collection("measurement_data")
+      .findOne({ style_id: styleId, reference_no: referenceNo });
+
+    if (!record) {
+      return res.status(404).json({ error: "Measurement record not found" });
+    }
+
+    // Validate the index against the actual array length
+    if (!record.actual || index < 0 || index >= record.actual.length) {
+      return res.status(400).json({ error: "Invalid index for actual array" });
+    }
+
+    // Update the specific index in the actual array
+    const result = await ymEcoConnection.db
+      .collection("measurement_data")
+      .updateOne(
+        { style_id: styleId, reference_no: referenceNo },
+        {
+          $set: {
+            [`actual.${index}.value`]: updatedValue,
+            updated_at: new Date(),
+          },
+        }
+      );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Record not found during update" });
+    }
+
+    if (result.modifiedCount === 0) {
+      return res.status(500).json({ error: "Failed to update the record" });
+    }
+
+    res.json({ message: "Measurement value updated successfully" });
+  } catch (error) {
+    console.error(
+      "Error updating measurement value:",
+      error.message,
+      error.stack
+    );
+    res.status(500).json({
+      error: "Failed to update measurement value",
+      details: error.message,
+    });
+  }
+});
+
+// New endpoint to delete measurement record
+app.delete("/api/delete-measurement-record", async (req, res) => {
+  try {
+    const { moNo, referenceNo } = req.body;
+
+    // Validate input
+    if (!moNo || !referenceNo) {
+      return res
+        .status(400)
+        .json({ error: "moNo and referenceNo are required" });
+    }
+
+    // Find the dt_orders record to get style_id
+    const order = await ymEcoConnection.db
+      .collection("dt_orders")
+      .findOne({ Order_No: moNo }, { projection: { _id: 1 } });
+
+    if (!order) {
+      console.log("Order not found for MO No:", moNo);
+      return res
+        .status(404)
+        .json({ error: `Order not found for MO No: ${moNo}` });
+    }
+
+    const styleId = order._id.toString();
+
+    // Delete the measurement_data record
+    const result = await ymEcoConnection.db
+      .collection("measurement_data")
+      .deleteOne({
+        style_id: styleId,
+        reference_no: referenceNo,
+      });
+
+    if (result.deletedCount === 0) {
+      console.log("No measurement record found for:", { styleId, referenceNo });
+      return res.status(404).json({
+        error: `No measurement record found for reference_no: ${referenceNo}`,
+      });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Measurement record deleted successfully" });
+  } catch (error) {
+    console.error(
+      "Error deleting measurement record:",
+      error.message,
+      error.stack
+    );
+    res.status(500).json({
+      error: "Failed to delete measurement record",
+      details: error.message,
+    });
+  }
+});
 
 /* ------------------------------
    End Points - SCC HT/FU
@@ -11339,11 +12794,7 @@ app.post("/api/update-user-roles", async (req, res) => {
 // Multer setup for SCC image uploads
 const sccImageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.join(__dirname, "public/storage/scc_images");
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    cb(null, dir);
+    cb(null, "public/storage/scc_images");
   },
   filename: (req, file, cb) => {
     // imageType should be passed in the body: 'referenceSample-HT', 'afterWash-FU', etc.
@@ -11359,6 +12810,29 @@ const sccImageStorage = multer.diskStorage({
     cb(null, filename);
   },
 });
+
+// const sccImageStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     const dir = path.join(__dirname, "public/storage/scc_images");
+//     if (!fs.existsSync(dir)) {
+//       fs.mkdirSync(dir, { recursive: true });
+//     }
+//     cb(null, dir);
+//   },
+//   filename: (req, file, cb) => {
+//     // imageType should be passed in the body: 'referenceSample-HT', 'afterWash-FU', etc.
+//     const { imageType, inspectionDate } = req.body;
+//     const datePart = inspectionDate
+//       ? inspectionDate.replace(/\//g, "-")
+//       : new Date().toISOString().split("T")[0];
+//     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+//     // Filename: imageType-date-uniqueSuffix.extension
+//     const filename = `${
+//       imageType || "sccimage"
+//     }-${datePart}-${uniqueSuffix}${path.extname(file.originalname)}`;
+//     cb(null, filename);
+//   }
+// });
 
 const sccUpload = multer({ storage: sccImageStorage });
 
@@ -11843,6 +13317,132 @@ app.get("/api/scc/daily-testing", async (req, res) => {
     });
   }
 });
+
+// 7. PUT /api/scc/daily-htfu/update-test-result/:docId
+//    Updates stretch or washing test results for a specific DailyTestingHTFU document.
+app.put("/api/scc/daily-htfu/update-test-result/:docId", async (req, res) => {
+  try {
+    const { docId } = req.params;
+    const {
+      stretchTestResult,
+      stretchTestRejectReasons,
+      washingTestResult,
+      emp_id, // Employee performing the update
+    } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(docId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Document ID." });
+    }
+
+    const record = await DailyTestingHTFU.findById(docId);
+    if (!record) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Daily testing record not found." });
+    }
+
+    const updateFields = {};
+    let updated = false;
+
+    if (stretchTestResult !== undefined) {
+      if (
+        !["Pass", "Reject", "Pending", ""].includes(stretchTestResult) &&
+        stretchTestResult !== null
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Stretch Test Result value.",
+        });
+      }
+      updateFields.stretchTestResult =
+        stretchTestResult === "" ? "Pending" : stretchTestResult; // Treat empty as Pending
+      if (stretchTestResult === "Reject") {
+        updateFields.stretchTestRejectReasons = Array.isArray(
+          stretchTestRejectReasons
+        )
+          ? stretchTestRejectReasons
+          : [];
+      } else {
+        updateFields.stretchTestRejectReasons = []; // Clear reasons if not 'Reject'
+      }
+      updated = true;
+    }
+
+    if (washingTestResult !== undefined) {
+      if (
+        !["Pass", "Reject", "Pending", ""].includes(washingTestResult) &&
+        washingTestResult !== null
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Washing Test Result value.",
+        });
+      }
+      updateFields.washingTestResult =
+        washingTestResult === "" ? "Pending" : washingTestResult; // Treat empty as Pending
+      updated = true;
+    }
+
+    // Mark that at least one of these tests has been actioned if not already done.
+    // This can be more sophisticated if needed.
+    if (updated && !record.isStretchWashingTestDone) {
+      if (stretchTestResult && stretchTestResult !== "Pending")
+        updateFields.isStretchWashingTestDone = true;
+      if (washingTestResult && washingTestResult !== "Pending")
+        updateFields.isStretchWashingTestDone = true;
+    }
+
+    if (!updated) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid test result fields provided for update.",
+      });
+    }
+
+    // Update who last modified this record (optional, good for auditing)
+    if (emp_id) {
+      updateFields.emp_id = emp_id; // Overwrites previous emp_id, consider an audit trail if needed
+      const now = new Date();
+      updateFields.inspectionTime = `${String(now.getHours()).padStart(
+        2,
+        "0"
+      )}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+        now.getSeconds()
+      ).padStart(2, "0")}`;
+    }
+
+    const updatedRecord = await DailyTestingHTFU.findByIdAndUpdate(
+      docId,
+      { $set: updateFields },
+      { new: true, runValidators: true } // Return the updated document and run schema validators
+    );
+
+    if (!updatedRecord) {
+      // Should not happen if findById found the record, but as a safeguard
+      return res.status(404).json({
+        success: false,
+        message:
+          "Failed to update record, record not found after update attempt.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Test result updated successfully.",
+      data: updatedRecord,
+    });
+  } catch (error) {
+    console.error("Error updating test result:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update test result",
+      error: error.message,
+    });
+  }
+});
+
 /* ------------------------------
    End Points - SCC Daily HT/FU QC Test
 ------------------------------ */
@@ -11855,253 +13455,483 @@ const parsePressureToNumber = (pressureStr) => {
   return isNaN(num) ? null : num;
 };
 
-// GET Endpoint to fetch existing Daily HT/FU Test data or MO list
-app.get("/api/scc/daily-htfu-test", async (req, res) => {
-  try {
-    const { inspectionDate, machineNo, moNo, color } = req.query;
-    const formattedDate = inspectionDate
-      ? formatDateToMMDDYYYY(inspectionDate)
-      : null;
+// Helper function to escape special characters for regex
+function escapeRegex(string) {
+  if (typeof string !== "string") {
+    return "";
+  }
+  return string.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
 
-    if (!formattedDate || !machineNo) {
-      return res
-        .status(400)
-        .json({ message: "Inspection Date and Machine No are required." });
+// 1. GET /api/scc/ht-first-output/search-active-mos?term=<searchTerm>
+//    Searches ht_first_outputs for MOs based on a search term.
+app.get("/api/scc/ht-first-output/search-active-mos", async (req, res) => {
+  try {
+    const { term } = req.query;
+
+    // Uncomment for debugging
+    // console.log("[SERVER] /search-active-mos - Received term:", term);
+
+    if (!term || typeof term !== "string" || term.trim() === "") {
+      // console.log("[SERVER] /search-active-mos - No valid term, returning [].");
+      return res.json([]);
     }
 
-    if (moNo && color) {
-      const record = await DailyTestingHTFU.findOne({
-        inspectionDate: formattedDate,
-        machineNo,
-        moNo,
-        color,
-      }).lean(); // Use .lean() for faster queries if not modifying directly
+    const trimmedTerm = term.trim();
+    if (trimmedTerm === "") {
+      return res.json([]);
+    }
+    const escapedTerm = escapeRegex(trimmedTerm); // Escape the trimmed term
 
-      if (!record) {
-        return res
-          .status(200)
-          .json({ message: "DAILY_HTFU_RECORD_NOT_FOUND", data: null });
-      }
-      return res.json({ message: "RECORD_FOUND", data: record });
-    } else {
-      const distinctEntries = await DailyTestingHTFU.aggregate([
-        { $match: { inspectionDate: formattedDate, machineNo } },
-        {
-          $group: {
-            _id: { moNo: "$moNo", color: "$color" },
-            buyer: { $first: "$buyer" },
-            buyerStyle: { $first: "$buyerStyle" },
-            docId: { $first: "$_id" },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            moNo: "$_id.moNo",
-            color: "$_id.color",
-            buyer: "$buyer",
-            buyerStyle: "$buyerStyle",
-            docId: "$docId",
-          },
-        },
-        { $sort: { moNo: 1, color: 1 } },
-      ]);
+    // Ensure HTFirstOutput is correctly defined and connected
+    if (!HTFirstOutput || typeof HTFirstOutput.aggregate !== "function") {
+      console.error(
+        "[SERVER] HTFirstOutput model is not correctly defined or initialized."
+      );
+      return res.status(500).json({ message: "Server configuration error." });
+    }
 
-      if (distinctEntries.length === 0) {
-        return res
-          .status(200)
-          .json({ message: "NO_RECORDS_FOR_DATE_MACHINE", data: [] });
+    const mos = await HTFirstOutput.aggregate([
+      {
+        $match: {
+          // Changed from `^${escapedTerm}` (starts with) to `escapedTerm` (contains)
+          moNo: { $regex: escapedTerm, $options: "i" },
+        },
+      },
+      {
+        // Sorting helps $first pick a consistent (e.g., latest) buyer/style if multiple entries exist for an MO
+        $sort: { moNo: 1, createdAt: -1 },
+      },
+      {
+        $group: {
+          _id: "$moNo", // Group by MO number to get distinct MOs
+          moNo: { $first: "$moNo" },
+          buyer: { $first: "$buyer" },
+          buyerStyle: { $first: "$buyerStyle" },
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the default _id from group stage
+          moNo: 1,
+          buyer: { $ifNull: ["$buyer", ""] }, // Ensure buyer is always a string
+          buyerStyle: { $ifNull: ["$buyerStyle", ""] }, // Ensure buyerStyle is always a string
+        },
+      },
+      { $limit: 15 }, // Limit results for performance, increased slightly
+    ]);
+
+    // Uncomment for debugging
+    // console.log("[SERVER] /search-active-mos - Found MOs:", mos.length, JSON.stringify(mos));
+    res.json(mos);
+  } catch (error) {
+    console.error(
+      "[SERVER] Error searching active MOs from HTFirstOutput:",
+      error
+    );
+    res
+      .status(500)
+      .json({ message: "Failed to search MOs", error: error.message });
+  }
+});
+
+// 2. GET /api/scc/ht-first-output/mo-details-for-registration?moNo=<moNo>
+//    Fetches buyer, buyerStyle, and distinct colors for a given MO from ht_first_outputs.
+app.get(
+  "/api/scc/ht-first-output/mo-details-for-registration",
+  async (req, res) => {
+    try {
+      const { moNo } = req.query;
+      if (!moNo) {
+        return res.status(400).json({ message: "MO No is required." });
       }
-      return res.json({
-        message: "MULTIPLE_MO_COLOR_FOUND",
-        data: distinctEntries,
+
+      const sampleRecord = await HTFirstOutput.findOne({ moNo })
+        .sort({ inspectionDate: -1, createdAt: -1 }) // Get the latest overall record for buyer/style consistency
+        .lean();
+
+      if (!sampleRecord) {
+        return res
+          .status(404)
+          .json({ message: "MO not found in HT First Output records." });
+      }
+
+      // Fetch distinct colors for the MO across all its records.
+      const distinctColors = await HTFirstOutput.distinct("color", { moNo });
+
+      res.json({
+        buyer: sampleRecord.buyer || "",
+        buyerStyle: sampleRecord.buyerStyle || "",
+        colors: distinctColors.sort() || [], // Sort colors alphabetically
+      });
+    } catch (error) {
+      console.error("Error fetching MO details for registration:", error);
+      res.status(500).json({
+        message: "Failed to fetch MO details",
+        error: error.message,
       });
     }
+  }
+);
+
+// 3. GET /api/scc/ht-first-output/specs-for-registration?moNo=<moNo>&color=<color>
+//    Fetches the standard specs (Temp, Time, Pressure) for a given MO/Color from ht_first_outputs.
+app.get("/api/scc/ht-first-output/specs-for-registration", async (req, res) => {
+  try {
+    const { moNo, color } = req.query;
+
+    if (!moNo || !color || moNo.trim() === "" || color.trim() === "") {
+      console.log(
+        "[SPECS_ENDPOINT] Validation Error: MO No and Color are required and cannot be empty."
+      );
+      return res
+        .status(400)
+        .json({ message: "MO No and Color are required and cannot be empty." });
+    }
+
+    const trimmedMoNo = moNo.trim();
+    const trimmedColor = color.trim();
+
+    const record = await HTFirstOutput.findOne({
+      moNo: trimmedMoNo,
+      color: trimmedColor,
+    })
+      .sort({ inspectionDate: -1, createdAt: -1 }) // Get the latest based on date, then creation
+      .lean();
+
+    if (!record) {
+      return res.status(200).json({
+        // Send 200 with message, client handles it
+        message: "SPECS_NOT_FOUND_NO_RECORD",
+        reqTemp: null,
+        reqTime: null,
+        reqPressure: null,
+      });
+    }
+
+    if (
+      !record.standardSpecification ||
+      record.standardSpecification.length === 0
+    ) {
+      return res.status(200).json({
+        message: "SPECS_NOT_FOUND_STANDARD_SPEC_ARRAY_EMPTY",
+        reqTemp: null,
+        reqTime: null,
+        reqPressure: null,
+      });
+    }
+
+    // Primary target: 'first' type spec with all values non-null
+    let firstSpec = record.standardSpecification.find(
+      (s) =>
+        s.type === "first" &&
+        s.tempC != null &&
+        s.timeSec != null &&
+        s.pressure != null
+    );
+
+    if (firstSpec) {
+      return res.json({
+        reqTemp: firstSpec.tempC,
+        reqTime: firstSpec.timeSec,
+        reqPressure: firstSpec.pressure,
+      });
+    }
+
+    // Fallback: If no complete 'first' spec, try to find any 'first' spec
+
+    firstSpec = record.standardSpecification.find((s) => s.type === "first");
+
+    if (firstSpec) {
+      return res.json({
+        reqTemp: firstSpec.tempC !== undefined ? firstSpec.tempC : null,
+        reqTime: firstSpec.timeSec !== undefined ? firstSpec.timeSec : null,
+        reqPressure:
+          firstSpec.pressure !== undefined ? firstSpec.pressure : null,
+      });
+    }
+
+    // If no 'first' spec of any kind is found
+
+    return res.status(200).json({
+      message: "SPECS_NOT_FOUND_NO_FIRST_TYPE",
+      reqTemp: null,
+      reqTime: null,
+      reqPressure: null,
+    });
   } catch (error) {
-    console.error("Error fetching Daily HT/FU Test data:", error);
+    console.error(
+      `[SPECS_ENDPOINT] Critical error fetching specs for MO: "${req.query.moNo}", Color: "${req.query.color}":`,
+      error
+    );
     res.status(500).json({
-      message: "Failed to fetch Daily HT/FU Test data",
+      message: "Failed to fetch specifications due to server error",
       error: error.message,
     });
   }
 });
 
-// POST Endpoint to save/update Daily HT/FU Test data
-app.post("/api/scc/daily-htfu-test", async (req, res) => {
+// 4. POST /api/scc/daily-htfu/register-machine
+//    Registers a machine for daily testing. Creates a new document in daily_testing_ht_fus.
+app.post("/api/scc/daily-htfu/register-machine", async (req, res) => {
   try {
     const {
-      _id,
       inspectionDate,
       machineNo,
       moNo,
       buyer,
       buyerStyle,
       color,
+      baseReqTemp, // These now come from the frontend state, populated by endpoint 3
+      baseReqTime,
+      baseReqPressure,
       emp_id,
       emp_kh_name,
       emp_eng_name,
       emp_dept_name,
       emp_sect_name,
       emp_job_title,
-      baseReqTemp,
-      baseReqTime,
-      baseReqPressure, // Expecting number or null from frontend now due to schema change
-      currentInspection,
-      stretchTestResult,
-      stretchTestRejectReasons, // New field
-      washingTestResult,
     } = req.body;
 
-    const formattedDate = formatDateToMMDDYYYY(inspectionDate);
-    if (!formattedDate || !machineNo || !moNo || !color || !currentInspection) {
-      return res
-        .status(400)
-        .json({ message: "Missing required fields for submission." });
+    const formattedDate = inspectionDate; // Already formatted by frontend's formatDateForAPI
+
+    if (!formattedDate || !machineNo || !moNo || !color) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Missing required fields: Inspection Date, Machine No, MO No, and Color.",
+      });
     }
+    // It's acceptable for baseReqTemp, baseReqTime, baseReqPressure to be null if not found
 
     const now = new Date();
-    const inspectionTime = `${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+    const registrationTime = `${String(now.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+      now.getSeconds()
+    ).padStart(2, "0")}`;
 
-    const query = { inspectionDate: formattedDate, machineNo, moNo, color };
-    let record = await DailyTestingHTFU.findOne(query);
+    const existingRegistration = await DailyTestingHTFU.findOne({
+      inspectionDate: formattedDate,
+      machineNo,
+      moNo,
+      color,
+    });
 
-    // Prepare currentInspection with numeric pressures
-    const processedCurrentInspection = {
-      ...currentInspection,
-      pressure_req: parsePressureToNumber(currentInspection.pressure_req),
-      pressure_actual: parsePressureToNumber(currentInspection.pressure_actual),
-    };
-
-    if (record) {
-      // Update existing record
-      record.baseReqTemp =
-        baseReqTemp !== undefined ? baseReqTemp : record.baseReqTemp;
-      record.baseReqTime =
-        baseReqTime !== undefined ? baseReqTime : record.baseReqTime;
-      record.baseReqPressure =
-        baseReqPressure !== undefined
-          ? baseReqPressure
-          : record.baseReqPressure; // Expecting number or null
-
-      record.emp_id = emp_id;
-      record.emp_kh_name = emp_kh_name;
-      record.emp_eng_name = emp_eng_name;
-      record.emp_dept_name = emp_dept_name;
-      record.emp_sect_name = emp_sect_name;
-      record.emp_job_title = emp_job_title;
-      record.inspectionTime = inspectionTime;
-
-      const slotIndex = record.inspections.findIndex(
-        (insp) => insp.timeSlotKey === processedCurrentInspection.timeSlotKey
-      );
-      if (slotIndex > -1) {
-        record.inspections[slotIndex] = {
-          ...record.inspections[slotIndex],
-          ...processedCurrentInspection,
-          inspectionTimestamp: new Date(),
-        };
-      } else {
-        record.inspections.push({
-          ...processedCurrentInspection,
-          inspectionTimestamp: new Date(),
-        });
-      }
-      record.inspections.sort(
-        (a, b) => (a.inspectionNo || 0) - (b.inspectionNo || 0)
-      );
-
-      if (stretchTestResult && stretchTestResult !== "Pending") {
-        record.stretchTestResult = stretchTestResult;
-        if (stretchTestResult === "Reject") {
-          record.stretchTestRejectReasons = Array.isArray(
-            stretchTestRejectReasons
-          )
-            ? stretchTestRejectReasons
-            : [];
-        } else {
-          record.stretchTestRejectReasons = []; // Clear reasons if not Reject
-        }
-      }
-
-      if (washingTestResult && washingTestResult !== "Pending") {
-        record.washingTestResult = washingTestResult;
-      }
-
-      if (
-        (record.stretchTestResult === "Pass" ||
-          record.stretchTestResult === "Reject") &&
-        (record.washingTestResult === "Pass" ||
-          record.washingTestResult === "Reject")
-      ) {
-        record.isStretchWashingTestDone = true;
-      }
-    } else {
-      // Create new record
-      record = new DailyTestingHTFU({
-        inspectionDate: formattedDate,
-        machineNo,
-        moNo,
-        buyer,
-        buyerStyle,
-        color,
-        emp_id,
-        emp_kh_name,
-        emp_eng_name,
-        emp_dept_name,
-        emp_sect_name,
-        emp_job_title,
-        inspectionTime,
-        baseReqTemp,
-        baseReqTime,
-        baseReqPressure, // Expecting number or null
-        inspections: [
-          { ...processedCurrentInspection, inspectionTimestamp: new Date() },
-        ],
-        stretchTestResult:
-          stretchTestResult && stretchTestResult !== "Pending"
-            ? stretchTestResult
-            : "Pending",
-        stretchTestRejectReasons:
-          stretchTestResult === "Reject" &&
-          Array.isArray(stretchTestRejectReasons)
-            ? stretchTestRejectReasons
-            : [],
-        washingTestResult:
-          washingTestResult && washingTestResult !== "Pending"
-            ? washingTestResult
-            : "Pending",
+    if (existingRegistration) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "This Machine-MO-Color combination is already registered for this date.",
+        data: existingRegistration,
       });
-      if (
-        (record.stretchTestResult === "Pass" ||
-          record.stretchTestResult === "Reject") &&
-        (record.washingTestResult === "Pass" ||
-          record.washingTestResult === "Reject")
-      ) {
-        record.isStretchWashingTestDone = true;
-      }
     }
 
-    await record.save();
+    const newRegistration = new DailyTestingHTFU({
+      inspectionDate: formattedDate,
+      machineNo,
+      moNo,
+      buyer,
+      buyerStyle,
+      color,
+      baseReqTemp: baseReqTemp !== undefined ? baseReqTemp : null,
+      baseReqTime: baseReqTime !== undefined ? baseReqTime : null,
+      baseReqPressure: baseReqPressure !== undefined ? baseReqPressure : null,
+      emp_id,
+      emp_kh_name,
+      emp_eng_name,
+      emp_dept_name,
+      emp_sect_name,
+      emp_job_title,
+      inspectionTime: registrationTime,
+      inspections: [],
+      stretchTestResult: "Pending",
+      washingTestResult: "Pending",
+      isStretchWashingTestDone: false,
+    });
+
+    await newRegistration.save();
     res.status(201).json({
-      message: "Daily HT/FU QC Test saved successfully",
-      data: record,
+      success: true,
+      message: "Machine registered successfully for daily HT/FU QC.",
+      data: newRegistration,
     });
   } catch (error) {
-    console.error("Error saving Daily HT/FU QC Test:", error);
+    console.error("Error registering machine for Daily HT/FU QC:", error);
     if (error.code === 11000) {
       return res.status(409).json({
+        success: false,
         message:
-          "A record with this Date, Machine No, MO No, and Color already exists. Submission failed.",
+          "Duplicate entry. This registration might already exist (unique index violation).",
         error: error.message,
-        errorCode: "DUPLICATE_KEY",
       });
     }
     res.status(500).json({
-      message: "Failed to save Daily HT/FU QC Test",
+      success: false,
+      message: "Failed to register machine",
       error: error.message,
-      details: error,
+    });
+  }
+});
+
+// 5. GET /api/scc/daily-htfu/by-date?inspectionDate=<date>
+//    Fetches all DailyTestingHTFU records for a given inspection date.
+app.get("/api/scc/daily-htfu/by-date", async (req, res) => {
+  try {
+    const { inspectionDate } = req.query;
+    if (!inspectionDate) {
+      return res.status(400).json({ message: "Inspection Date is required." });
+    }
+    const formattedDate = inspectionDate; // Expecting MM/DD/YYYY from frontend
+
+    const records = await DailyTestingHTFU.find({
+      inspectionDate: formattedDate,
+    })
+      .sort({ machineNo: 1 }) // Consider `collation` for proper numeric sort if machineNo can be "1", "10", "2"
+      .lean();
+
+    res.json(records || []);
+  } catch (error) {
+    console.error("Error fetching Daily HT/FU records by date:", error);
+    res.status(500).json({
+      message: "Failed to fetch daily records",
+      error: error.message,
+    });
+  }
+});
+
+// 6. POST /api/scc/daily-htfu/submit-slot-inspection
+//    Submits inspection data for a specific time slot for ONE machine.
+app.post("/api/scc/daily-htfu/submit-slot-inspection", async (req, res) => {
+  try {
+    const {
+      inspectionDate,
+      timeSlotKey,
+      inspectionNo,
+      dailyTestingDocId,
+      temp_req, // This will be machineDoc.baseReqTemp from frontend
+      temp_actual,
+      temp_isNA,
+      temp_isUserModified,
+      time_req, // machineDoc.baseReqTime
+      time_actual,
+      time_isNA,
+      time_isUserModified,
+      pressure_req, // machineDoc.baseReqPressure
+      pressure_actual,
+      pressure_isNA,
+      pressure_isUserModified,
+      emp_id,
+    } = req.body;
+
+    // Validate required fields for a single submission
+    if (
+      !inspectionDate ||
+      !timeSlotKey ||
+      !inspectionNo || // Ensure inspectionNo is a valid number
+      !dailyTestingDocId ||
+      (temp_actual === undefined && !temp_isNA) || // actual is required if not N/A
+      (time_actual === undefined && !time_isNA) ||
+      (pressure_actual === undefined && !pressure_isNA)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Missing or invalid required fields for slot inspection submission.",
+      });
+    }
+
+    const formattedDate = inspectionDate; // Already formatted
+
+    const record = await DailyTestingHTFU.findById(dailyTestingDocId);
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: `Daily testing record not found for ID: ${dailyTestingDocId}`,
+      });
+    }
+
+    if (record.inspectionDate !== formattedDate) {
+      return res.status(400).json({
+        success: false,
+        message: `Date mismatch for record ID: ${dailyTestingDocId}. Expected ${formattedDate}, found ${record.inspectionDate}`,
+      });
+    }
+
+    const slotData = {
+      inspectionNo: Number(inspectionNo),
+      timeSlotKey,
+      temp_req: temp_req !== undefined ? temp_req : null,
+      temp_actual: temp_isNA
+        ? null
+        : temp_actual !== undefined
+        ? temp_actual
+        : null,
+      temp_isNA: !!temp_isNA,
+      temp_isUserModified: !!temp_isUserModified,
+      time_req: time_req !== undefined ? time_req : null,
+      time_actual: time_isNA
+        ? null
+        : time_actual !== undefined
+        ? time_actual
+        : null,
+      time_isNA: !!time_isNA,
+      time_isUserModified: !!time_isUserModified,
+      pressure_req: pressure_req !== undefined ? pressure_req : null,
+      pressure_actual: pressure_isNA
+        ? null
+        : pressure_actual !== undefined
+        ? pressure_actual
+        : null,
+      pressure_isNA: !!pressure_isNA,
+      pressure_isUserModified: !!pressure_isUserModified,
+      inspectionTimestamp: new Date(),
+    };
+
+    const existingSlotIndex = record.inspections.findIndex(
+      (insp) => insp.timeSlotKey === timeSlotKey
+    );
+
+    if (existingSlotIndex > -1) {
+      // If you want to allow updates, replace the item:
+      // record.inspections[existingSlotIndex] = slotData;
+      // For now, prevent re-submission as per original logic:
+      return res.status(409).json({
+        success: false,
+        message: `Slot ${timeSlotKey} has already been submitted for this record. Updates are not currently supported via this endpoint.`,
+      });
+    } else {
+      record.inspections.push(slotData);
+    }
+
+    record.inspections.sort(
+      (a, b) => (a.inspectionNo || 0) - (b.inspectionNo || 0)
+    );
+
+    // Update general record info
+    record.emp_id = emp_id;
+    const now = new Date();
+    record.inspectionTime = `${String(now.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+      now.getSeconds()
+    ).padStart(2, "0")}`;
+
+    await record.save();
+
+    res.status(201).json({
+      success: true,
+      message: `Inspection for slot ${timeSlotKey} submitted successfully.`,
+      data: record, // Return the updated document
+    });
+  } catch (error) {
+    console.error("Error submitting slot inspection:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to submit slot inspection",
+      error: error.message,
     });
   }
 });
@@ -12109,264 +13939,358 @@ app.post("/api/scc/daily-htfu-test", async (req, res) => {
 /* ------------------------------
    End Point - SCC FU First Output - Specific Temp
 ------------------------------ */
-app.get("/api/scc/fu-first-output-temp", async (req, res) => {
+
+// 1. Search Active MOs for FUQC Registration (from fu_first_outputs)
+app.get("/api/scc/fu-first-output/search-active-mos", async (req, res) => {
   try {
-    const { moNo, color, inspectionDate } = req.query;
-    if (!moNo || !color || !inspectionDate) {
-      return res
-        .status(400)
-        .json({ message: "MO No, Color, and Inspection Date are required." });
-    }
-    const formattedDate = formatDateToMMDDYYYY(inspectionDate);
+    const { term } = req.query;
+    if (!term || typeof term !== "string" || term.trim() === "")
+      return res.json([]);
+    const trimmedTerm = term.trim();
+    if (trimmedTerm === "") return res.json([]);
+    const escapedTerm = escapeRegex(trimmedTerm);
 
-    const fuRecord = await FUFirstOutput.findOne({
-      // Assuming FUFirstOutput is your model name
-      moNo,
-      color,
-      inspectionDate: formattedDate,
-    }).lean();
-
-    let tempC = null;
-    if (fuRecord && fuRecord.standardSpecification) {
-      // Prioritize 'afterHat' if available, otherwise 'first'
-      const afterHatSpec = fuRecord.standardSpecification.find(
-        (s) =>
-          s.type === "afterHat" && s.tempC !== null && s.tempC !== undefined
+    if (!FUFirstOutput || typeof FUFirstOutput.aggregate !== "function") {
+      console.error(
+        "[SERVER FUQC] FUFirstOutput model is not correctly defined."
       );
-      const firstSpec = fuRecord.standardSpecification.find(
-        (s) => s.type === "first" && s.tempC !== null && s.tempC !== undefined
-      );
-
-      if (afterHatSpec) {
-        tempC = afterHatSpec.tempC;
-      } else if (firstSpec) {
-        tempC = firstSpec.tempC;
-      }
+      return res.status(500).json({ message: "Server configuration error." });
     }
 
-    if (tempC === null) {
-      return res
-        .status(200)
-        .json({ message: "FU_TEMP_SPEC_NOT_FOUND", tempC: null });
-    }
-    res.json({ tempC: tempC });
+    const mos = await FUFirstOutput.aggregate([
+      { $match: { moNo: { $regex: escapedTerm, $options: "i" } } },
+      { $sort: { moNo: 1, createdAt: -1 } },
+      {
+        $group: {
+          _id: "$moNo",
+          moNo: { $first: "$moNo" },
+          buyer: { $first: "$buyer" },
+          buyerStyle: { $first: "$buyerStyle" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          moNo: 1,
+          buyer: { $ifNull: ["$buyer", ""] },
+          buyerStyle: { $ifNull: ["$buyerStyle", ""] },
+        },
+      },
+      { $limit: 15 },
+    ]);
+    res.json(mos);
   } catch (error) {
-    console.error("Error fetching FU first output temperature:", error);
-    res.status(500).json({
-      message: "Failed to fetch FU first output temperature",
-      error: error.message,
-    });
+    console.error("[SERVER FUQC] Error searching active FU MOs:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to search FU MOs", error: error.message });
   }
 });
 
-/* ------------------------------
-   End Points - SCC Daily FU QC Test
------------------------------- */
+// 2. Get MO Details for FUQC Registration (from fu_first_outputs)
+app.get(
+  "/api/scc/fu-first-output/mo-details-for-registration",
+  async (req, res) => {
+    try {
+      const { moNo } = req.query;
+      if (!moNo) return res.status(400).json({ message: "MO No is required." });
 
-// GET Endpoint to fetch existing Daily FUQC Test data or MO list
-app.get("/api/scc/daily-fuqc-test", async (req, res) => {
-  try {
-    const { inspectionDate, machineNo, moNo, color } = req.query;
-    const formattedDate = inspectionDate
-      ? formatDateToMMDDYYYY(inspectionDate)
-      : null;
-
-    if (!formattedDate || !machineNo) {
-      return res
-        .status(400)
-        .json({ message: "Inspection Date and Machine No are required." });
-    }
-
-    if (moNo && color) {
-      const record = await DailyTestingFUQC.findOne({
-        inspectionDate: formattedDate,
-        machineNo,
-        moNo,
-        color,
-      }).lean(); // Use .lean() for faster queries
-
-      if (!record) {
+      const sampleRecord = await FUFirstOutput.findOne({ moNo })
+        .sort({ inspectionDate: -1, createdAt: -1 })
+        .lean();
+      if (!sampleRecord)
         return res
-          .status(200)
-          .json({ message: "DAILY_FUQC_RECORD_NOT_FOUND", data: null });
-      }
-      // Ensure temp_offset is included if it exists, or default
-      const dataToSend = { ...record, temp_offset: record.temp_offset ?? 5 };
-      return res.json({ message: "RECORD_FOUND", data: dataToSend });
-    } else {
-      const distinctEntries = await DailyTestingFUQC.aggregate([
-        { $match: { inspectionDate: formattedDate, machineNo } },
-        {
-          $group: {
-            _id: { moNo: "$moNo", color: "$color" },
-            buyer: { $first: "$buyer" },
-            buyerStyle: { $first: "$buyerStyle" },
-            docId: { $first: "$_id" },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            moNo: "$_id.moNo",
-            color: "$_id.color",
-            buyer: "$buyer",
-            buyerStyle: "$buyerStyle",
-            docId: "$docId",
-          },
-        },
-        { $sort: { moNo: 1, color: 1 } },
-      ]);
+          .status(404)
+          .json({ message: "MO not found in Fusing First Output records." });
 
-      if (distinctEntries.length === 0) {
-        return res
-          .status(200)
-          .json({ message: "NO_RECORDS_FOR_DATE_MACHINE", data: [] });
-      }
-      return res.json({
-        message: "MULTIPLE_MO_COLOR_FOUND",
-        data: distinctEntries,
+      const distinctColors = await FUFirstOutput.distinct("color", { moNo });
+      res.json({
+        buyer: sampleRecord.buyer || "",
+        buyerStyle: sampleRecord.buyerStyle || "",
+        colors: distinctColors.sort() || [],
+      });
+    } catch (error) {
+      console.error(
+        "[SERVER FUQC] Error fetching FU MO details for registration:",
+        error
+      );
+      res.status(500).json({
+        message: "Failed to fetch FU MO details",
+        error: error.message,
       });
     }
+  }
+);
+
+// 3. Get Specs (Temp only) for FUQC Registration (from fu_first_outputs)
+app.get("/api/scc/fu-first-output/specs-for-registration", async (req, res) => {
+  try {
+    const { moNo, color } = req.query;
+    if (!moNo || !color || moNo.trim() === "" || color.trim() === "") {
+      return res.status(400).json({ message: "MO No and Color are required." });
+    }
+    const record = await FUFirstOutput.findOne({
+      moNo: moNo.trim(),
+      color: color.trim(),
+    })
+      .sort({ inspectionDate: -1, createdAt: -1 })
+      .lean();
+
+    if (
+      !record ||
+      !record.standardSpecification ||
+      record.standardSpecification.length === 0
+    ) {
+      return res
+        .status(200)
+        .json({ message: "FU_SPECS_NOT_FOUND", reqTemp: null });
+    }
+    const firstSpec = record.standardSpecification.find(
+      (s) => s.type === "first" && s.tempC != null
+    );
+
+    if (!firstSpec) {
+      const anyFirstSpec = record.standardSpecification.find(
+        (s) => s.type === "first"
+      );
+      if (anyFirstSpec) {
+        return res.json({
+          reqTemp: anyFirstSpec.tempC !== undefined ? anyFirstSpec.tempC : null,
+        });
+      }
+      return res
+        .status(200)
+        .json({ message: "FU_FIRST_TYPE_SPEC_INCOMPLETE", reqTemp: null });
+    }
+    res.json({ reqTemp: firstSpec.tempC });
   } catch (error) {
-    console.error("Error fetching Daily FUQC Test data:", error);
+    console.error(
+      "[SERVER FUQC] Error fetching FU specs for registration:",
+      error
+    );
     res.status(500).json({
-      message: "Failed to fetch Daily FUQC Test data",
+      message: "Failed to fetch FU specifications",
       error: error.message,
     });
   }
 });
 
-// POST Endpoint to save/update Daily FUQC Test data
-app.post("/api/scc/daily-fuqc-test", async (req, res) => {
+// 4. Register Machine for Daily FUQC
+app.post("/api/scc/daily-fuqc/register-machine", async (req, res) => {
   try {
     const {
-      _id,
       inspectionDate,
       machineNo,
       moNo,
       buyer,
       buyerStyle,
       color,
+      baseReqTemp, // Only baseReqTemp for FUQC
       emp_id,
       emp_kh_name,
       emp_eng_name,
       emp_dept_name,
       emp_sect_name,
       emp_job_title,
-      baseReqTemp,
-      temp_offset, // New field from frontend
-      currentInspection,
-      remarks,
     } = req.body;
 
-    const formattedDate = formatDateToMMDDYYYY(inspectionDate);
-    if (!formattedDate || !machineNo || !moNo || !color || !currentInspection) {
-      return res
-        .status(400)
-        .json({ message: "Missing required fields for submission." });
+    const formattedDate = inspectionDate; // Assuming MM/DD/YYYY from frontend
+    if (!formattedDate || !machineNo || !moNo || !color) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields for FUQC machine registration.",
+      });
     }
-    if (
-      currentInspection.temp_req === undefined ||
-      currentInspection.temp_actual === undefined ||
-      typeof currentInspection.temp_isNA !== "boolean" ||
-      !currentInspection.result
-    ) {
-      return res
-        .status(400)
-        .json({ message: "Invalid currentInspection data structure." });
-    }
-
     const now = new Date();
-    const inspectionTime = `${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-    const query = { inspectionDate: formattedDate, machineNo, moNo, color };
-    let record = await DailyTestingFUQC.findOne(query);
-    const currentRemarks =
-      remarks?.trim() === "" ? "NA" : remarks?.trim() || "NA";
+    const registrationTime = `${String(now.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+      now.getSeconds()
+    ).padStart(2, "0")}`;
 
-    const inspectionDataToSave = {
-      ...currentInspection,
+    const existingRegistration = await DailyTestingFUQC.findOne({
+      inspectionDate: formattedDate,
+      machineNo,
+      moNo,
+      color,
+    });
+    if (existingRegistration) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "This Machine-MO-Color is already registered for FUQC on this date.",
+        data: existingRegistration,
+      });
+    }
+
+    const newRegistration = new DailyTestingFUQC({
+      inspectionDate: formattedDate,
+      machineNo,
+      moNo,
+      buyer,
+      buyerStyle,
+      color,
+      baseReqTemp: baseReqTemp !== undefined ? baseReqTemp : null,
+      temp_offset: 5, // Default offset, can be made configurable later if needed
+      emp_id,
+      emp_kh_name,
+      emp_eng_name,
+      emp_dept_name,
+      emp_sect_name,
+      emp_job_title,
+      inspectionTime: registrationTime,
+      inspections: [],
+      remarks: "NA",
+    });
+    await newRegistration.save();
+    res.status(201).json({
+      success: true,
+      message: "Machine registered successfully for Daily FUQC.",
+      data: newRegistration,
+    });
+  } catch (error) {
+    console.error(
+      "[SERVER FUQC] Error registering machine for Daily FUQC:",
+      error
+    );
+    if (error.code === 11000)
+      return res.status(409).json({
+        success: false,
+        message: "Duplicate FUQC registration.",
+        error: error.message,
+      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to register machine for FUQC",
+      error: error.message,
+    });
+  }
+});
+
+// 5. Get Daily FUQC Records by Date
+app.get("/api/scc/daily-fuqc/by-date", async (req, res) => {
+  try {
+    const { inspectionDate } = req.query;
+    if (!inspectionDate)
+      return res.status(400).json({ message: "Inspection Date is required." });
+    const records = await DailyTestingFUQC.find({
+      inspectionDate: inspectionDate,
+    })
+      .sort({ machineNo: 1 })
+      .lean();
+    res.json(records || []);
+  } catch (error) {
+    console.error(
+      "[SERVER FUQC] Error fetching Daily FUQC records by date:",
+      error
+    );
+    res.status(500).json({
+      message: "Failed to fetch daily FUQC records",
+      error: error.message,
+    });
+  }
+});
+
+// 6. Submit Slot Inspection for Daily FUQC
+app.post("/api/scc/daily-fuqc/submit-slot-inspection", async (req, res) => {
+  try {
+    const {
+      inspectionDate,
+      timeSlotKey,
+      inspectionNo,
+      dailyFUQCDocId, // Changed key
+      temp_req,
+      temp_actual,
+      temp_isNA,
+      temp_isUserModified,
+      emp_id,
+    } = req.body;
+
+    if (
+      !inspectionDate ||
+      !timeSlotKey ||
+      !inspectionNo ||
+      !dailyFUQCDocId ||
+      (temp_actual === undefined && !temp_isNA)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields for FUQC slot submission.",
+      });
+    }
+    const record = await DailyTestingFUQC.findById(dailyFUQCDocId);
+    if (!record)
+      return res.status(404).json({
+        success: false,
+        message: `FUQC Record not found: ${dailyFUQCDocId}`,
+      });
+    if (record.inspectionDate !== inspectionDate)
+      return res
+        .status(400)
+        .json({ success: false, message: "Date mismatch for FUQC record." });
+
+    // Determine result based on actual, req, and offset stored in the record
+    let result = "Pending";
+    if (temp_isNA) {
+      result = "N/A";
+    } else if (temp_actual !== null && temp_req !== null) {
+      const diff = Math.abs(Number(temp_actual) - Number(temp_req));
+      result = diff <= (record.temp_offset || 0) ? "Pass" : "Reject";
+    }
+
+    const slotData = {
+      inspectionNo: Number(inspectionNo),
+      timeSlotKey,
+      temp_req: temp_req !== undefined ? temp_req : null,
+      temp_actual: temp_isNA
+        ? null
+        : temp_actual !== undefined
+        ? temp_actual
+        : null,
+      temp_isNA: !!temp_isNA,
+      // temp_isUserModified: !!temp_isUserModified, // Schema for FUQC slot does not have this
+      result: result, // Calculated result
       inspectionTimestamp: new Date(),
     };
-    if (inspectionDataToSave.temp_isNA) {
-      inspectionDataToSave.result = "N/A";
-      inspectionDataToSave.temp_actual = null;
-    }
 
-    const effectiveTempOffset =
-      temp_offset !== undefined && temp_offset !== null
-        ? Number(temp_offset)
-        : 5;
-
-    if (record) {
-      // Update existing record
-      record.baseReqTemp = baseReqTemp ?? record.baseReqTemp;
-      record.temp_offset = effectiveTempOffset; // Update temp_offset
-      record.remarks = currentRemarks;
-      record.emp_id = emp_id;
-      record.emp_kh_name = emp_kh_name;
-      record.emp_eng_name = emp_eng_name;
-      record.emp_dept_name = emp_dept_name;
-      record.emp_sect_name = emp_sect_name;
-      record.emp_job_title = emp_job_title;
-      record.inspectionTime = inspectionTime;
-
-      const slotIndex = record.inspections.findIndex(
-        (insp) => insp.timeSlotKey === inspectionDataToSave.timeSlotKey
-      );
-      if (slotIndex > -1) {
-        record.inspections[slotIndex] = {
-          ...record.inspections[slotIndex],
-          ...inspectionDataToSave,
-        };
-      } else {
-        record.inspections.push(inspectionDataToSave);
-      }
-      record.inspections.sort(
-        (a, b) => (a.inspectionNo || 0) - (b.inspectionNo || 0)
-      );
-    } else {
-      // Create new record
-      record = new DailyTestingFUQC({
-        inspectionDate: formattedDate,
-        machineNo,
-        moNo,
-        buyer,
-        buyerStyle,
-        color,
-        emp_id,
-        emp_kh_name,
-        emp_eng_name,
-        emp_dept_name,
-        emp_sect_name,
-        emp_job_title,
-        inspectionTime,
-        baseReqTemp,
-        temp_offset: effectiveTempOffset, // Save temp_offset
-        remarks: currentRemarks,
-        inspections: [inspectionDataToSave],
-      });
-    }
-
-    await record.save();
-    res
-      .status(201)
-      .json({ message: "Daily FUQC Test saved successfully", data: record });
-  } catch (error) {
-    console.error("Error saving Daily FUQC Test:", error);
-    if (error.code === 11000) {
+    const existingSlotIndex = record.inspections.findIndex(
+      (insp) => insp.timeSlotKey === timeSlotKey
+    );
+    if (existingSlotIndex > -1) {
       return res.status(409).json({
-        message:
-          "A record with this Date, Machine No, MO No, and Color already exists.",
-        error: error.message,
-        errorCode: "DUPLICATE_KEY",
+        success: false,
+        message: `Slot ${timeSlotKey} already submitted for this FUQC record.`,
       });
+    } else {
+      record.inspections.push(slotData);
     }
+    record.inspections.sort(
+      (a, b) => (a.inspectionNo || 0) - (b.inspectionNo || 0)
+    );
+    record.emp_id = emp_id;
+    const now = new Date();
+    record.inspectionTime = `${String(now.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+      now.getSeconds()
+    ).padStart(2, "0")}`;
+    await record.save();
+    res.status(201).json({
+      success: true,
+      message: `FUQC Inspection for slot ${timeSlotKey} submitted.`,
+      data: record,
+    });
+  } catch (error) {
+    console.error(
+      "[SERVER FUQC] Error submitting FUQC slot inspection:",
+      error
+    );
     res.status(500).json({
-      message: "Failed to save Daily FUQC Test",
+      success: false,
+      message: "Failed to submit FUQC slot inspection",
       error: error.message,
-      details: error,
     });
   }
 });
@@ -12385,10 +14309,165 @@ app.get("/api/scc/defects", async (req, res) => {
   }
 });
 
+// POST - Add a new SCC defect
+app.post("/api/scc/defects", async (req, res) => {
+  try {
+    const { no, defectNameEng, defectNameKhmer, defectNameChinese } = req.body;
+
+    // Validate required fields (Chinese name is optional)
+    if (no === undefined || no === null || !defectNameEng || !defectNameKhmer) {
+      return res.status(400).json({
+        message: "Defect No, English Name, and Khmer Name are required.",
+      });
+    }
+    if (isNaN(parseInt(no)) || parseInt(no) <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Defect No must be a positive number." });
+    }
+
+    // Check for duplicate 'no'
+    const existingDefectByNo = await SCCDefect.findOne({ no: Number(no) });
+    if (existingDefectByNo) {
+      return res
+        .status(409)
+        .json({ message: `Defect No '${no}' already exists.` });
+    }
+    // Check for duplicate English name (optional, but good for data integrity)
+    const existingDefectByName = await SCCDefect.findOne({ defectNameEng });
+    if (existingDefectByName) {
+      return res.status(409).json({
+        message: `Defect name (English) '${defectNameEng}' already exists.`,
+      });
+    }
+
+    const newSccDefect = new SCCDefect({
+      no: Number(no),
+      defectNameEng,
+      defectNameKhmer,
+      defectNameChinese: defectNameChinese || "", // Save empty string if not provided
+    });
+    await newSccDefect.save();
+    res
+      .status(201)
+      .json({ message: "SCC defect added successfully", defect: newSccDefect });
+  } catch (error) {
+    console.error("Error adding SCC defect:", error);
+    if (error.code === 11000) {
+      // Mongoose duplicate key error (if unique index is on more than just 'no')
+      return res.status(409).json({
+        message: "Duplicate entry. Defect No or Name might already exist.",
+      });
+    }
+    res
+      .status(500)
+      .json({ message: "Failed to add SCC defect", error: error.message });
+  }
+});
+
+// PUT - Update an existing SCC defect by ID
+app.put("/api/scc/defects/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { no, defectNameEng, defectNameKhmer, defectNameChinese } = req.body;
+
+    // Validate required fields (Chinese name is optional)
+    if (no === undefined || no === null || !defectNameEng || !defectNameKhmer) {
+      return res.status(400).json({
+        message:
+          "Defect No, English Name, and Khmer Name are required for update.",
+      });
+    }
+    if (isNaN(parseInt(no)) || parseInt(no) <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Defect No must be a positive number." });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid defect ID format." });
+    }
+
+    // Check for duplicate 'no' (excluding the current document being updated)
+    const existingDefectByNo = await SCCDefect.findOne({
+      no: Number(no),
+      _id: { $ne: id },
+    });
+    if (existingDefectByNo) {
+      return res.status(409).json({
+        message: `Defect No '${no}' already exists for another defect.`,
+      });
+    }
+    // Check for duplicate English name (excluding the current document)
+    const existingDefectByName = await SCCDefect.findOne({
+      defectNameEng,
+      _id: { $ne: id },
+    });
+    if (existingDefectByName) {
+      return res.status(409).json({
+        message: `Defect name (English) '${defectNameEng}' already exists for another defect.`,
+      });
+    }
+
+    const updatedSccDefect = await SCCDefect.findByIdAndUpdate(
+      id,
+      {
+        no: Number(no),
+        defectNameEng,
+        defectNameKhmer,
+        defectNameChinese: defectNameChinese || "", // Save empty string if not provided
+        // timestamps: true in schema will automatically update updated_at
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedSccDefect) {
+      return res.status(404).json({ message: "SCC Defect not found." });
+    }
+    res.status(200).json({
+      message: "SCC defect updated successfully",
+      defect: updatedSccDefect,
+    });
+  } catch (error) {
+    console.error("Error updating SCC defect:", error);
+    if (error.code === 11000) {
+      return res
+        .status(409)
+        .json({ message: "Update failed due to duplicate Defect No or Name." });
+    }
+    res
+      .status(500)
+      .json({ message: "Failed to update SCC defect", error: error.message });
+  }
+});
+
+// DELETE - Delete an SCC defect by ID
+app.delete("/api/scc/defects/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid defect ID format." });
+    }
+
+    const deletedSccDefect = await SCCDefect.findByIdAndDelete(id);
+    if (!deletedSccDefect) {
+      return res.status(404).json({ message: "SCC Defect not found." });
+    }
+    res.status(200).json({ message: "SCC defect deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting SCC defect:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to delete SCC defect", error: error.message });
+  }
+});
+
 /* ------------------------------
    End Points - SCC HT Inspection
 ------------------------------ */
 
+// 1. POST /api/scc/ht-inspection-report
 app.post("/api/scc/ht-inspection-report", async (req, res) => {
   try {
     const {
@@ -12400,6 +14479,8 @@ app.post("/api/scc/ht-inspection-report", async (req, res) => {
       buyerStyle,
       color,
       batchNo,
+      tableNo, // New field
+      actualLayers, // New field
       totalBundle,
       totalPcs,
       aqlData,
@@ -12407,8 +14488,7 @@ app.post("/api/scc/ht-inspection-report", async (req, res) => {
       result,
       defects,
       remarks,
-      // defectImageFile is handled by SCCPage, we expect defectImageUrl here if uploaded
-      defectImageUrl, // Expecting URL from client if image was uploaded/kept
+      defectImageUrl,
       emp_id,
       emp_kh_name,
       emp_eng_name,
@@ -12424,12 +14504,16 @@ app.post("/api/scc/ht-inspection-report", async (req, res) => {
       !moNo ||
       !color ||
       !batchNo ||
+      !tableNo || // Validate new field
+      actualLayers === undefined ||
+      actualLayers === null || // Validate new field (can be 0 if allowed, but usually >0)
       !totalPcs ||
       !aqlData
     ) {
-      return res
-        .status(400)
-        .json({ message: "Missing required fields for HT Inspection Report." });
+      return res.status(400).json({
+        message:
+          "Missing required fields for HT Inspection Report, including Table No and Actual Layers.",
+      });
     }
 
     const now = new Date();
@@ -12445,6 +14529,8 @@ app.post("/api/scc/ht-inspection-report", async (req, res) => {
       buyerStyle,
       color,
       batchNo,
+      tableNo, // Save new field
+      actualLayers: Number(actualLayers), // Save new field as number
       totalBundle: Number(totalBundle),
       totalPcs: Number(totalPcs),
       aqlData,
@@ -12452,7 +14538,7 @@ app.post("/api/scc/ht-inspection-report", async (req, res) => {
       result,
       defects,
       remarks: remarks?.trim() || "NA",
-      defectImageUrl: defectImageUrl || null, // Use the URL passed from client
+      defectImageUrl: defectImageUrl || null,
       emp_id,
       emp_kh_name,
       emp_eng_name,
@@ -12464,7 +14550,6 @@ app.post("/api/scc/ht-inspection-report", async (req, res) => {
 
     let savedReport;
     if (_id) {
-      // Update existing
       savedReport = await HTInspectionReport.findByIdAndUpdate(
         _id,
         reportData,
@@ -12475,10 +14560,6 @@ app.post("/api/scc/ht-inspection-report", async (req, res) => {
           .status(404)
           .json({ message: "Report not found for update." });
     } else {
-      // Create new
-      // Optional: Check for duplicates before creating, if unique index is not strictly enforced or for better user feedback
-      // const existing = await HTInspectionReport.findOne({ inspectionDate: reportData.inspectionDate, machineNo, moNo, color, batchNo });
-      // if (existing) return res.status(409).json({ message: "Duplicate report found for this date, machine, MO, color, and batch." });
       savedReport = new HTInspectionReport(reportData);
       await savedReport.save();
     }
@@ -12490,7 +14571,6 @@ app.post("/api/scc/ht-inspection-report", async (req, res) => {
   } catch (error) {
     console.error("Error saving HT Inspection Report:", error);
     if (error.code === 11000) {
-      // Mongoose duplicate key error
       return res.status(409).json({
         message: "Duplicate entry. This report might already exist.",
         error: error.message,
@@ -12543,6 +14623,226 @@ app.get("/api/scc/ht-inspection-report", async (req, res) => {
     console.error("Error fetching HT Inspection Report:", error);
     res.status(500).json({
       message: "Failed to fetch HT Inspection Report",
+      error: error.message,
+    });
+  }
+});
+
+/* ------------------------------
+   End Points - SCC Elastic Report
+------------------------------ */
+
+// 1. POST /api/scc/elastic-report/register-machine
+//    Registers a machine for the Elastic Checking Report.
+app.post("/api/scc/elastic-report/register-machine", async (req, res) => {
+  try {
+    const {
+      inspectionDate, // Expecting YYYY-MM-DD
+      machineNo,
+      moNo,
+      buyer,
+      buyerStyle,
+      color,
+      emp_id,
+      emp_kh_name,
+      emp_eng_name,
+    } = req.body;
+
+    if (!inspectionDate || !machineNo || !moNo || !color) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Missing required fields: Inspection Date, Machine No, MO No, and Color.",
+      });
+    }
+
+    const now = new Date();
+    const registrationTime = `${String(now.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+      now.getSeconds()
+    ).padStart(2, "0")}`;
+
+    const existingRegistration = await ElasticReport.findOne({
+      inspectionDate,
+      machineNo,
+      moNo,
+      color,
+    });
+
+    if (existingRegistration) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "This Machine-MO-Color combination is already registered for this date for Elastic Report.",
+        data: existingRegistration,
+      });
+    }
+
+    const newRegistration = new ElasticReport({
+      inspectionDate,
+      machineNo,
+      moNo,
+      buyer,
+      buyerStyle,
+      color,
+      registeredBy_emp_id: emp_id,
+      registeredBy_emp_kh_name: emp_kh_name,
+      registeredBy_emp_eng_name: emp_eng_name,
+      registrationTime,
+      inspections: [], // Initialize with empty inspections array
+    });
+
+    await newRegistration.save();
+    res.status(201).json({
+      success: true,
+      message: "Machine registered successfully for Elastic Report.",
+      data: newRegistration,
+    });
+  } catch (error) {
+    console.error("Error registering machine for Elastic Report:", error);
+    if (error.code === 11000) {
+      // Handle MongoDB duplicate key error
+      return res.status(409).json({
+        success: false,
+        message:
+          "Duplicate entry. This registration might already exist (unique index violation).",
+        error: error.message,
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: "Failed to register machine for Elastic Report",
+      error: error.message,
+    });
+  }
+});
+
+// 2. GET /api/scc/elastic-report/by-date?inspectionDate=<date>
+//    Fetches all ElasticReport records for a given inspection date.
+app.get("/api/scc/elastic-report/by-date", async (req, res) => {
+  try {
+    const { inspectionDate } = req.query; // Expecting YYYY-MM-DD
+    if (!inspectionDate) {
+      return res.status(400).json({ message: "Inspection Date is required." });
+    }
+
+    const records = await ElasticReport.find({ inspectionDate })
+      .sort({ machineNo: 1 }) // Sort by machine number
+      .lean(); // Use .lean() for faster queries if you don't need Mongoose model instances
+
+    res.json(records || []);
+  } catch (error) {
+    console.error("Error fetching Elastic Report records by date:", error);
+    res.status(500).json({
+      message: "Failed to fetch Elastic Report daily records",
+      error: error.message,
+    });
+  }
+});
+
+// 3. POST /api/scc/elastic-report/submit-slot-inspection
+//    Submits inspection data for a specific time slot for ONE machine in Elastic Report.
+app.post("/api/scc/elastic-report/submit-slot-inspection", async (req, res) => {
+  try {
+    const {
+      inspectionDate, // Expecting YYYY-MM-DD
+      timeSlotKey,
+      inspectionNo,
+      elasticReportDocId, // _id of the parent ElasticReport document
+      checkedQty,
+      qualityIssue,
+      measurement,
+      defects,
+      result,
+      remarks,
+      emp_id,
+      isUserModified,
+    } = req.body;
+
+    // Basic validation
+    if (
+      !inspectionDate ||
+      !timeSlotKey ||
+      inspectionNo === undefined ||
+      !elasticReportDocId ||
+      checkedQty === undefined ||
+      checkedQty === null ||
+      !qualityIssue ||
+      !measurement ||
+      !defects ||
+      !result
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Missing or invalid required fields for Elastic slot inspection submission.",
+      });
+    }
+
+    const reportDoc = await ElasticReport.findById(elasticReportDocId);
+    if (!reportDoc) {
+      return res.status(404).json({
+        success: false,
+        message: `Elastic Report document not found for ID: ${elasticReportDocId}`,
+      });
+    }
+
+    if (reportDoc.inspectionDate !== inspectionDate) {
+      return res.status(400).json({
+        success: false,
+        message: `Date mismatch for Elastic Report ID: ${elasticReportDocId}. Expected ${inspectionDate}, found ${reportDoc.inspectionDate}`,
+      });
+    }
+
+    const slotData = {
+      inspectionNo: Number(inspectionNo),
+      timeSlotKey,
+      checkedQty: Number(checkedQty),
+      qualityIssue,
+      measurement,
+      defects,
+      result,
+      remarks: remarks || "",
+      emp_id,
+      isUserModified: !!isUserModified,
+      inspectionTimestamp: new Date(),
+    };
+
+    const existingSlotIndex = reportDoc.inspections.findIndex(
+      (insp) => insp.timeSlotKey === timeSlotKey
+    );
+
+    if (existingSlotIndex > -1) {
+      // Update existing slot
+      reportDoc.inspections[existingSlotIndex] = {
+        ...reportDoc.inspections[existingSlotIndex],
+        ...slotData,
+      };
+    } else {
+      // Add new slot
+      reportDoc.inspections.push(slotData);
+    }
+
+    // Ensure inspections are sorted
+    reportDoc.inspections.sort(
+      (a, b) => (a.inspectionNo || 0) - (b.inspectionNo || 0)
+    );
+
+    await reportDoc.save();
+
+    res.status(200).json({
+      // 200 for update, 201 for new usually, but 200 is fine for upsert-like logic
+      success: true,
+      message: `Elastic inspection for slot ${timeSlotKey} submitted/updated successfully.`,
+      data: reportDoc,
+    });
+  } catch (error) {
+    console.error("Error submitting Elastic slot inspection:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to submit Elastic slot inspection",
       error: error.message,
     });
   }
@@ -15136,6 +17436,419 @@ app.get("/api/packing/hourly-summary", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch hourly Packing summary" });
   }
 });
+
+/* ------------------------------------
+   End Points - Audit Image
+------------------------------------ */
+
+// Multer configuration for audit images
+const audit_storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "public/storage/audit_images/"; // Main directory
+    // You might want to create subdirectories, e.g., by auditId or date
+    // fs.mkdirSync(dir, { recursive: true }); // Ensure directory exists (if not using dynamic subdirs)
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    // Sanitize requirementId or use a UUID for more robust filenames
+    const requirementId = req.body.requirementId || "unknown";
+    cb(
+      null,
+      `audit-${requirementId}-${Date.now()}${path.extname(file.originalname)}`
+    );
+  },
+});
+
+const audit_image_upload = multer({
+  storage: audit_storage,
+  fileFilter: (req, file, cb) => {
+    // Same fileFilter as your cutting_upload
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"]; // Added GIF
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only JPEG, PNG, GIF images are allowed"), false);
+    }
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+});
+
+// Audit Image upload endpoint
+app.post(
+  "/api/audit/upload-image",
+  audit_image_upload.single("auditImage"), // field name in FormData
+  (req, res) => {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded" });
+    }
+    // Store relative path to be used with API_BASE_URL on client
+    const relativePath = `/storage/audit_images/${req.file.filename}`;
+    res.status(200).json({
+      success: true,
+      filePath: relativePath,
+      message: "Image uploaded successfully",
+    });
+  }
+);
+
+/* ------------------------------------
+   End Points - Audit Check Points
+------------------------------------ */
+
+// GET all audit checkpoints, sorted by mainTitleNo
+app.get("/api/audit-checkpoints", async (req, res) => {
+  try {
+    const checkpoints = await AuditCheckPoint.find({})
+      .sort({ mainTitleNo: 1 })
+      .lean();
+    res.json(checkpoints);
+  } catch (error) {
+    console.error("Error fetching audit checkpoints:", error);
+    res
+      .status(500)
+      .json({ message: "Server error fetching audit checkpoints" });
+  }
+});
+
+// GET unique section titles for dropdowns
+app.get("/api/audit-checkpoints/unique-section-titles", async (req, res) => {
+  try {
+    const titles = await AuditCheckPoint.aggregate([
+      {
+        $group: {
+          _id: null,
+          eng: { $addToSet: "$sectionTitleEng" },
+          khmer: { $addToSet: "$sectionTitleKhmer" },
+          chinese: { $addToSet: "$sectionTitleChinese" },
+        },
+      },
+      { $project: { _id: 0, eng: 1, khmer: 1, chinese: 1 } },
+    ]);
+    res.json(
+      titles.length > 0 ? titles[0] : { eng: [], khmer: [], chinese: [] }
+    );
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching unique section titles" });
+  }
+});
+
+// GET unique main topics for dropdowns (can be filtered by mainTitle if needed)
+app.get("/api/audit-checkpoints/unique-main-topics", async (req, res) => {
+  try {
+    // This gets all unique topics across all checkpoints.
+    // You might want to filter by a specific checkpoint if adding to an existing one.
+    const topics = await AuditCheckPoint.aggregate([
+      { $unwind: "$requirements" },
+      {
+        $group: {
+          _id: null,
+          eng: { $addToSet: "$requirements.mainTopicEng" },
+          khmer: { $addToSet: "$requirements.mainTopicKhmer" },
+          chinese: { $addToSet: "$requirements.mainTopicChinese" },
+        },
+      },
+      { $project: { _id: 0, eng: 1, khmer: 1, chinese: 1 } },
+    ]);
+    res.json(
+      topics.length > 0 ? topics[0] : { eng: [], khmer: [], chinese: [] }
+    );
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching unique main topics" });
+  }
+});
+
+// POST - Create a new audit checkpoint section (e.g., QMS, Fabric)
+app.post("/api/audit-checkpoints", async (req, res) => {
+  try {
+    const {
+      mainTitle,
+      mainTitleNo,
+      sectionTitleEng,
+      sectionTitleKhmer,
+      sectionTitleChinese,
+      // requirements array will be empty initially or can be sent
+    } = req.body;
+
+    if (
+      !mainTitle ||
+      mainTitleNo === undefined ||
+      !sectionTitleEng ||
+      !sectionTitleKhmer ||
+      !sectionTitleChinese
+    ) {
+      return res
+        .status(400)
+        .json({
+          message: "All main title and section title fields are required.",
+        });
+    }
+
+    const existingCheckpointByNo = await AuditCheckPoint.findOne({
+      mainTitleNo,
+    });
+    if (existingCheckpointByNo) {
+      return res
+        .status(409)
+        .json({ message: `Main Title No '${mainTitleNo}' already exists.` });
+    }
+    const existingCheckpointByTitle = await AuditCheckPoint.findOne({
+      mainTitle,
+    });
+    if (existingCheckpointByTitle) {
+      return res
+        .status(409)
+        .json({ message: `Main Title '${mainTitle}' already exists.` });
+    }
+
+    const newCheckpoint = new AuditCheckPoint({
+      mainTitle,
+      mainTitleNo,
+      sectionTitleEng,
+      sectionTitleKhmer,
+      sectionTitleChinese,
+      requirements: [], // Start with no requirements, add them separately
+    });
+    await newCheckpoint.save();
+    res
+      .status(201)
+      .json({
+        message: "Audit checkpoint section created successfully",
+        checkpoint: newCheckpoint,
+      });
+  } catch (error) {
+    console.error("Error creating audit checkpoint section:", error);
+    if (error.code === 11000)
+      return res
+        .status(409)
+        .json({ message: "Duplicate Main Title or Main Title No." });
+    res
+      .status(500)
+      .json({ message: "Server error creating checkpoint section" });
+  }
+});
+
+// PUT - Update an audit checkpoint section's titles (not requirements here)
+app.put("/api/audit-checkpoints/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      mainTitle,
+      mainTitleNo,
+      sectionTitleEng,
+      sectionTitleKhmer,
+      sectionTitleChinese,
+    } = req.body;
+
+    if (
+      !mainTitle ||
+      mainTitleNo === undefined ||
+      !sectionTitleEng ||
+      !sectionTitleKhmer ||
+      !sectionTitleChinese
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "All main title and section title fields are required for update.",
+        });
+    }
+
+    // Check for duplicates excluding current
+    const existingByNo = await AuditCheckPoint.findOne({
+      mainTitleNo,
+      _id: { $ne: id },
+    });
+    if (existingByNo)
+      return res
+        .status(409)
+        .json({ message: `Main Title No '${mainTitleNo}' already taken.` });
+    const existingByTitle = await AuditCheckPoint.findOne({
+      mainTitle,
+      _id: { $ne: id },
+    });
+    if (existingByTitle)
+      return res
+        .status(409)
+        .json({ message: `Main Title '${mainTitle}' already taken.` });
+
+    const updatedCheckpoint = await AuditCheckPoint.findByIdAndUpdate(
+      id,
+      {
+        mainTitle,
+        mainTitleNo,
+        sectionTitleEng,
+        sectionTitleKhmer,
+        sectionTitleChinese,
+      },
+      { new: true, runValidators: true }
+    );
+    if (!updatedCheckpoint)
+      return res
+        .status(404)
+        .json({ message: "Audit checkpoint section not found." });
+    res.json({
+      message: "Audit checkpoint section updated successfully",
+      checkpoint: updatedCheckpoint,
+    });
+  } catch (error) {
+    console.error("Error updating audit checkpoint section:", error);
+    if (error.code === 11000)
+      return res
+        .status(409)
+        .json({ message: "Duplicate Main Title or Main Title No on update." });
+    res
+      .status(500)
+      .json({ message: "Server error updating checkpoint section" });
+  }
+});
+
+// DELETE - Delete an entire audit checkpoint section
+app.delete("/api/audit-checkpoints/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedCheckpoint = await AuditCheckPoint.findByIdAndDelete(id);
+    if (!deletedCheckpoint)
+      return res
+        .status(404)
+        .json({ message: "Audit checkpoint section not found." });
+    res.json({ message: "Audit checkpoint section deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting audit checkpoint section:", error);
+    res
+      .status(500)
+      .json({ message: "Server error deleting checkpoint section" });
+  }
+});
+
+// --- Requirements within a Checkpoint Section ---
+
+// POST - Add a requirement to a specific checkpoint section
+app.post(
+  "/api/audit-checkpoints/:checkpointId/requirements",
+  async (req, res) => {
+    try {
+      const { checkpointId } = req.params;
+      const requirementData = req.body; // { mainTopicEng, ..., mustHave }
+
+      // Basic validation for requirement data
+      if (
+        !requirementData.mainTopicEng ||
+        !requirementData.no ||
+        !requirementData.pointTitleEng ||
+        !requirementData.pointDescriptionEng ||
+        requirementData.levelValue === undefined ||
+        requirementData.mustHave === undefined
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Missing required fields for the requirement." });
+      }
+
+      const checkpoint = await AuditCheckPoint.findById(checkpointId);
+      if (!checkpoint)
+        return res
+          .status(404)
+          .json({ message: "Audit checkpoint section not found." });
+
+      // Check if requirement 'no' already exists in this section
+      const existingRequirementNo = checkpoint.requirements.find(
+        (r) => r.no === requirementData.no
+      );
+      if (existingRequirementNo) {
+        return res
+          .status(409)
+          .json({
+            message: `Requirement No. '${requirementData.no}' already exists in this section.`,
+          });
+      }
+
+      checkpoint.requirements.push(requirementData);
+      await checkpoint.save();
+      res
+        .status(201)
+        .json({ message: "Requirement added successfully", checkpoint });
+    } catch (error) {
+      console.error("Error adding requirement:", error);
+      res.status(500).json({ message: "Server error adding requirement" });
+    }
+  }
+);
+
+// PUT - Update a specific requirement within a checkpoint section
+app.put(
+  "/api/audit-checkpoints/:checkpointId/requirements/:requirementId",
+  async (req, res) => {
+    try {
+      const { checkpointId, requirementId } = req.params;
+      const updatedRequirementData = req.body;
+
+      const checkpoint = await AuditCheckPoint.findById(checkpointId);
+      if (!checkpoint)
+        return res
+          .status(404)
+          .json({ message: "Audit checkpoint section not found." });
+
+      const requirement = checkpoint.requirements.id(requirementId);
+      if (!requirement)
+        return res.status(404).json({ message: "Requirement not found." });
+
+      // Check for 'no' conflict if 'no' is being changed
+      if (
+        updatedRequirementData.no &&
+        updatedRequirementData.no !== requirement.no
+      ) {
+        const existingRequirementNo = checkpoint.requirements.find(
+          (r) =>
+            r.no === updatedRequirementData.no &&
+            r._id.toString() !== requirementId
+        );
+        if (existingRequirementNo) {
+          return res
+            .status(409)
+            .json({
+              message: `Requirement No. '${updatedRequirementData.no}' already exists in this section for another item.`,
+            });
+        }
+      }
+
+      Object.assign(requirement, updatedRequirementData); // Update the subdocument
+      await checkpoint.save();
+      res.json({ message: "Requirement updated successfully", checkpoint });
+    } catch (error) {
+      console.error("Error updating requirement:", error);
+      res.status(500).json({ message: "Server error updating requirement" });
+    }
+  }
+);
+
+// DELETE - Delete a specific requirement from a checkpoint section
+app.delete(
+  "/api/audit-checkpoints/:checkpointId/requirements/:requirementId",
+  async (req, res) => {
+    try {
+      const { checkpointId, requirementId } = req.params;
+      const checkpoint = await AuditCheckPoint.findById(checkpointId);
+      if (!checkpoint)
+        return res
+          .status(404)
+          .json({ message: "Audit checkpoint section not found." });
+
+      const requirement = checkpoint.requirements.id(requirementId);
+      if (!requirement)
+        return res.status(404).json({ message: "Requirement not found." });
+
+      requirement.remove(); // Mongoose subdocument remove method
+      await checkpoint.save();
+      res.json({ message: "Requirement deleted successfully", checkpoint });
+    } catch (error) {
+      console.error("Error deleting requirement:", error);
+      res.status(500).json({ message: "Server error deleting requirement" });
+    }
+  }
+);
 
 // Start the server
 server.listen(PORT, "0.0.0.0", () => {

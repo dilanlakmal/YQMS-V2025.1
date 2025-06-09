@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  MessageSquare,
   Package,
   Settings,
   User,
@@ -20,7 +19,6 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../config";
 import LanguageSwitcher from "../components/layout/LangSwitch";
-import YQMSChat from "../pages/YQMSChat";
 import { useAuth } from "./authentication/AuthContext";
 
 export default function Navbar({ onLogout }) {
@@ -33,7 +31,6 @@ export default function Navbar({ onLogout }) {
   const [expandedSection, setExpandedSection] = useState(null);
   const [roleManagement, setRoleManagement] = useState(null);
   const [userRoles, setUserRoles] = useState([]);
-  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     fetchRoleManagement();
@@ -66,6 +63,7 @@ export default function Navbar({ onLogout }) {
   const isAdmin = userRoles.includes("Admin");
   const isAllowedSuperAdmin = ["YM6702", "YM7903"].includes(user?.emp_id);
 
+  // Updated hasAccess function to check jobTitles instead of users
   const hasAccess = (requiredRoles) => {
     if (!user || !roleManagement) return false;
     if (isSuperAdmin || isAdmin) return true;
@@ -108,6 +106,11 @@ export default function Navbar({ onLogout }) {
           path: "/scc",
           title: t("home.scc"),
           requiredRoles: ["Super Admin", "Admin", "SCC"],
+        },
+        {
+          path: "/sysadmin",
+          title: t("home.systemadmin"),
+          requiredRoles: ["Super Admin", "System Administration"],
         },
       ],
     },
@@ -273,16 +276,10 @@ export default function Navbar({ onLogout }) {
     <nav className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16 items-center">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center">
             <Link to="/home" className="text-xl font-bold text-blue-600">
               YQMS
             </Link>
-            <button
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              className="text-gray-900 hover:text-blue-600 focus:outline-none"
-            >
-              <MessageSquare className="h-6 w-6" />
-            </button>
           </div>
 
           <div className="hidden sm:flex sm:space-x-8">
@@ -496,20 +493,6 @@ export default function Navbar({ onLogout }) {
                 </div>
               </>
             )}
-          </div>
-        </div>
-      )}
-
-      {isChatOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-4xl h-[80vh] relative">
-            <button
-              onClick={() => setIsChatOpen(false)}
-              className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
-            >
-              <X className="h-6 w-6" />
-            </button>
-            <YQMSChat onClose={() => setIsChatOpen(false)} />
           </div>
         </div>
       )}

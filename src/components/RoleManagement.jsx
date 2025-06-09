@@ -1,10 +1,10 @@
 import axios from "axios";
-import { X } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useAuth } from "../components/authentication/AuthContext";
-import { API_BASE_URL } from "../../config";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "../../config";
+import { useAuth } from "../components/authentication/AuthContext";
 
 export default function RoleManagement() {
   const { user } = useAuth();
@@ -131,7 +131,7 @@ export default function RoleManagement() {
     try {
       await axios.post(`${API_BASE_URL}/api/role-management`, {
         role: selectedRole,
-        jobTitles: selectedJobTitles
+        jobTitles: selectedJobTitles,
       });
 
       setSuccessMessage(
@@ -172,7 +172,7 @@ export default function RoleManagement() {
             user.eng_name || "N/A",
             user.job_title || "N/A",
             user.dept_name || "N/A",
-            user.sect_name || "N/A"
+            user.sect_name || "N/A",
           ]);
         });
     });
@@ -185,7 +185,7 @@ export default function RoleManagement() {
       "Eng Name",
       "Job Title",
       "Department",
-      "Section"
+      "Section",
     ];
 
     // Generate table using autoTable
@@ -196,7 +196,7 @@ export default function RoleManagement() {
       styles: { fontSize: 8 }, // Smaller font size for table content
       headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255] }, // Blue header with white text
       alternateRowStyles: { fillColor: [240, 240, 240] }, // Light gray for alternate rows
-      margin: { top: 30 }
+      margin: { top: 30 },
     });
 
     // Set the file name based on the selected role
@@ -223,7 +223,8 @@ export default function RoleManagement() {
     "Download Data",
     "Live Dashboard",
     "Power BI",
-    "QC1 Sunrise"
+    "QC1 Sunrise",
+    "System Administration",
   ];
 
   // Prepare sorted table data for rendering

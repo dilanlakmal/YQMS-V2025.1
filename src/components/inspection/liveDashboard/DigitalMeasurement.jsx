@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "antd/dist/reset.css";
 import { Modal } from "antd";
+import "antd/dist/reset.css";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { FaClock } from "react-icons/fa";
-import DigitalMeasurementFilterPane from "../digital_measurement/DigitalMeasurementFilterPane";
-import DigialMeasurementSummaryCards from "../digital_measurement/DigialMeasurementSummaryCards";
-import DigitalMeasurementTotalSummary from "../digital_measurement/DigitalMeasurementTotalSummary";
 import { API_BASE_URL } from "../../../../config";
+import DigialMeasurementSummaryCards from "../digital_measurement/DigialMeasurementSummaryCards";
+import DigitalMeasurementFilterPane from "../digital_measurement/DigitalMeasurementFilterPane";
+import DigitalMeasurementTotalSummary from "../digital_measurement/DigitalMeasurementTotalSummary";
 
 const DigitalMeasurement = () => {
   const [filters, setFilters] = useState({
@@ -17,7 +17,7 @@ const DigitalMeasurement = () => {
     custStyle: "",
     buyer: "",
     empId: "",
-    stage: ""
+    stage: "",
   });
 
   const [filterOptions, setFilterOptions] = useState({
@@ -28,7 +28,7 @@ const DigitalMeasurement = () => {
     empIds: [],
     stages: [],
     minDate: null,
-    maxDate: null
+    maxDate: null,
   });
 
   const [summaryData, setSummaryData] = useState(null);
@@ -50,17 +50,17 @@ const DigitalMeasurement = () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/filter-options`, {
           params: filters,
-          withCredentials: true
+          withCredentials: true,
         });
         setFilterOptions({
           factories: response.data.factories.map((f) => ({
             value: f,
-            label: f
+            label: f,
           })),
           monos: response.data.monos.map((m) => ({ value: m, label: m })),
           custStyles: response.data.custStyles.map((cs) => ({
             value: cs,
-            label: cs
+            label: cs,
           })),
           buyers: response.data.buyers.map((b) => ({ value: b, label: b })),
           empIds: response.data.empIds.map((e) => ({ value: e, label: e })),
@@ -70,7 +70,7 @@ const DigitalMeasurement = () => {
             : null,
           maxDate: response.data.maxDate
             ? new Date(response.data.maxDate)
-            : null
+            : null,
         });
       } catch (error) {
         console.error("Error fetching filter options:", error);
@@ -89,13 +89,13 @@ const DigitalMeasurement = () => {
         custStyle: filters.custStyle,
         buyer: filters.buyer,
         empId: filters.empId,
-        stage: filters.stage
+        stage: filters.stage,
       };
       const response = await axios.get(
         `${API_BASE_URL}/api/measurement-summary`,
         {
           params,
-          withCredentials: true
+          withCredentials: true,
         }
       );
       setSummaryData(response.data);
@@ -117,13 +117,13 @@ const DigitalMeasurement = () => {
         custStyle: filters.custStyle,
         buyer: filters.buyer,
         empId: filters.empId,
-        stage: filters.stage
+        stage: filters.stage,
       };
       const response = await axios.get(
         `${API_BASE_URL}/api/measurement-summary-per-mono`,
         {
           params,
-          withCredentials: true
+          withCredentials: true,
         }
       );
       setMeasurementSummary(response.data.summaryPerMono);
@@ -144,13 +144,13 @@ const DigitalMeasurement = () => {
           startDate: filters.startDate ? filters.startDate.toISOString() : null,
           endDate: filters.endDate ? filters.endDate.toISOString() : null,
           empId: filters.empId,
-          stage: filters.stage
+          stage: filters.stage,
         };
         const response = await axios.get(
           `${API_BASE_URL}/api/measurement-details/${selectedMono}`,
           {
             params,
-            withCredentials: true
+            withCredentials: true,
           }
         );
         setMeasurementDetails(response.data);
@@ -207,7 +207,7 @@ const DigitalMeasurement = () => {
       { value: 0.75, fraction: { numerator: 3, denominator: 4 } },
       { value: 0.8125, fraction: { numerator: 13, denominator: 16 } },
       { value: 0.875, fraction: { numerator: 7, denominator: 8 } },
-      { value: 0.9375, fraction: { numerator: 15, denominator: 16 } }
+      { value: 0.9375, fraction: { numerator: 15, denominator: 16 } },
     ];
 
     const tolerance = 0.01;
@@ -265,7 +265,7 @@ const DigitalMeasurement = () => {
           moNo,
           referenceNo,
           index: actualIndex,
-          newValue
+          newValue,
         },
         { withCredentials: true }
       );
@@ -280,7 +280,7 @@ const DigitalMeasurement = () => {
       await Promise.all([
         fetchSummaryData(),
         fetchMeasurementSummary(),
-        fetchMeasurementDetails()
+        fetchMeasurementDetails(),
       ]);
     } catch (error) {
       console.error(
@@ -447,6 +447,12 @@ const DigitalMeasurement = () => {
                 sizeSpec={measurementDetails.sizeSpec || []}
                 decimalToFraction={decimalToFraction}
               />
+              {/* <DigitalMeasurementTotalSummaryCPK
+                summaryData={measurementDetails.measurementPointSummary || []}
+                records={measurementDetails.records || []}
+                sizeSpec={measurementDetails.sizeSpec || []}
+                decimalToFraction={decimalToFraction}
+              /> */}
               <h2 className="text-lg font-semibold mb-4">
                 Inspected Summary for MO No: {selectedMono}
               </h2>
@@ -474,7 +480,7 @@ const DigitalMeasurement = () => {
                         ).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "2-digit",
-                          day: "2-digit"
+                          day: "2-digit",
                         });
                         const garmentNo = garmentIndex + 1;
                         const size = record.size || "N/A";
@@ -506,7 +512,7 @@ const DigitalMeasurement = () => {
                               diff,
                               status,
                               actualIndex: index,
-                              referenceNo: record.reference_no
+                              referenceNo: record.reference_no,
                             };
                           })
                           .filter((p) => p !== null);
@@ -549,20 +555,20 @@ const DigitalMeasurement = () => {
                                                   data: {
                                                     moNo: selectedMono,
                                                     referenceNo:
-                                                      point.referenceNo
+                                                      point.referenceNo,
                                                   },
                                                   withCredentials: true,
                                                   headers: {
                                                     "Content-Type":
-                                                      "application/json"
-                                                  }
+                                                      "application/json",
+                                                  },
                                                 }
                                               );
                                               // Refresh all data
                                               await Promise.all([
                                                 fetchSummaryData(),
                                                 fetchMeasurementSummary(),
-                                                fetchMeasurementDetails()
+                                                fetchMeasurementDetails(),
                                               ]);
                                             } catch (error) {
                                               console.error(
@@ -574,10 +580,10 @@ const DigitalMeasurement = () => {
                                                 title: "Deletion Failed",
                                                 content:
                                                   error.response?.data?.error ||
-                                                  error.message
+                                                  error.message,
                                               });
                                             }
-                                          }
+                                          },
                                         })
                                       }
                                       className="mt-1 px-2 py-1 bg-red-500 text-white rounded-md border-2 border-red-800 hover:bg-red-600 text-sm"
@@ -603,7 +609,7 @@ const DigitalMeasurement = () => {
                                         hour12: false,
                                         hour: "2-digit",
                                         minute: "2-digit",
-                                        second: "2-digit"
+                                        second: "2-digit",
                                       })}
                                     </span>
                                     <span

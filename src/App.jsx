@@ -28,7 +28,9 @@ import QC2InspectionPage from "./pages/QC2Inspection";
 import QCSunriseReport from "./pages/QCSunriseReport.jsx";
 import Return from "./pages/Return";
 import RovingPage from "./pages/Roving";
+import SCCPage from "./pages/SCC.jsx";
 import Setting from "./pages/Setting";
+import SystemAdmin from "./pages/SystemAdmin.jsx";
 import WashingPage from "./pages/Washing";
 
 //Languages
@@ -46,8 +48,7 @@ import { AuthProvider } from "./components/authentication/AuthContext.jsx";
 import { BluetoothProvider } from "./components/context/BluetoothContext.jsx";
 import { FormDataProvider } from "./components/context/FormDataContext";
 import CuttingPage from "./pages/Cutting.jsx";
-import SCCPage from "./pages/SCC.jsx";
-import YQMSChat from "./pages/YQMSChat";
+import QAAudit from "./pages/QAAudit.jsx";
 
 export const BluetoothContext = createContext(null);
 
@@ -344,12 +345,13 @@ function AppContent() {
               <Route path="/roving" element={<RovingPage />} />
               <Route path="/cutting" element={<CuttingPage />} />
               <Route path="/scc" element={<SCCPage />} />
+              <Route path="/sysadmin" element={<SystemAdmin />} />
+              <Route path="/audit" element={<QAAudit />} />
               <Route path="/inline-emp" element={<EmpData />} />
               <Route path="/opa" element={<OPAPage />} />
               <Route path="/packing" element={<PackingPage />} />
               <Route path="/qc2-inspection" element={<QC2InspectionPage />} />
               <Route path="/download-data" element={<DownloadData />} />
-              <Route path="/chat" element={<YQMSChat />} />
             </>
           ) : (
             <Route path="*" element={<Navigate to="/" replace />} />

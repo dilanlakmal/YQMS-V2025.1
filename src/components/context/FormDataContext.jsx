@@ -1,11 +1,4 @@
-// import React, {
-//   createContext,
-//   useCallback,
-//   useContext,
-//   useEffect,
-//   useMemo,
-//   useState,
-// } from "react"; // Added useCallback
+// import React, { createContext, useContext, useEffect, useState } from "react";
 // import { useAuth } from "../authentication/AuthContext";
 
 // const FormDataContext = createContext();
@@ -14,149 +7,114 @@
 //   const { user } = useAuth();
 //   const userId = user?.emp_id || "anonymous";
 
-//   const getDefaultData = () => ({
-//     // Helper function for default data
-//     bundleRegistration: {
-//       date: new Date().toISOString(), // Store date as ISO string for easier serialization
-//       department: "",
-//       selectedMono: "",
-//       buyer: "",
-//       orderQty: "",
-//       factoryInfo: "",
-//       custStyle: "",
-//       country: "",
-//       color: "",
-//       size: "",
-//       bundleQty: 1,
-//       lineNo: "",
-//       count: 10,
-//       colorCode: "",
-//       chnColor: "",
-//       colorKey: "",
-//       sizeOrderQty: "",
-//       planCutQty: "",
-//       isSubCon: false,
-//       subConName: "",
-//     },
-//     washing: {},
-//     dyeing: {},
-//     ironing: {},
-//     packing: {},
-//     qc1Inspection: {},
-//     qc2Inspection: {},
-//     qaAudit: {},
-//   });
-
+//   // Initialize state from localStorage if available, with user-specific key
 //   const [formData, setFormData] = useState(() => {
-//     try {
-//       const savedData = localStorage.getItem(`formData_${userId}`);
-//       if (savedData) {
-//         const parsedData = JSON.parse(savedData);
-//         // Ensure date is a Date object when read, if needed by DatePicker immediately
-//         // However, it's often better to handle Date object creation in the component using the date string
-//         if (
-//           parsedData.bundleRegistration &&
-//           parsedData.bundleRegistration.date
-//         ) {
-//           // Assuming DatePicker can handle ISO string directly, or convert in component
-//         }
-//         return parsedData;
-//       }
-//     } catch (error) {
-//       console.error("Error parsing saved form data:", error);
+//     const savedData = localStorage.getItem(`formData_${userId}`);
+//     const defaultData = {
+//       bundleRegistration: {
+//         date: new Date(),
+//         department: "",
+//         selectedMono: "",
+//         buyer: "",
+//         orderQty: "",
+//         factoryInfo: "",
+//         custStyle: "",
+//         country: "",
+//         color: "",
+//         size: "",
+//         bundleQty: 1,
+//         lineNo: "",
+//         count: 10,
+//         colorCode: "",
+//         chnColor: "",
+//         colorKey: "",
+//         sizeOrderQty: "",
+//         planCutQty: "",
+//         isSubCon: false,
+//         subConName: "",
+//       },
+//       washing: {},
+//       dyeing: {},
+//       ironing: {},
+//       packing: {},
+//       qc1Inspection: {},
+//       qc2Inspection: {},
+//       qaAudit: {},
+//     };
+
+//     if (savedData) {
+//       const parsedData = JSON.parse(savedData);
+//       // Ensure date is converted back to Date object
+//       //   if (parsedData.bundleRegistration?.date) {
+//       //     parsedData.bundleRegistration.date = new Date(
+//       //       parsedData.bundleRegistration.date
+//       //     );
+//       //   }
+//       return parsedData;
 //     }
-//     return getDefaultData();
+
+//     return defaultData;
 //   });
 
-//   // Save to localStorage whenever formData changes
+//   // Save to localStorage whenever formData changes, using user-specific key
 //   useEffect(() => {
 //     if (userId && userId !== "anonymous") {
 //       localStorage.setItem(`formData_${userId}`, JSON.stringify(formData));
 //     }
-//     // This effect depends on formData. If formData is frequently changing reference
-//     // without actual content change, this could be an issue, but usually stringify handles it.
-//     // The main loop is often caused by unstable context functions.
 //   }, [formData, userId]);
 
-//   // Effect to load data or reset when userId changes
+//   // Clear previous user's data when user changes
 //   useEffect(() => {
-//     if (userId && userId !== "anonymous") {
-//       try {
-//         const savedData = localStorage.getItem(`formData_${userId}`);
-//         if (savedData) {
-//           const parsedData = JSON.parse(savedData);
-//           setFormData(parsedData); // This will trigger the above useEffect to save again if it's the first load, which is fine.
-//         } else {
-//           setFormData(getDefaultData());
-//         }
-//       } catch (error) {
-//         console.error(
-//           "Error loading/parsing saved form data on user change:",
-//           error
-//         );
-//         setFormData(getDefaultData());
-//       }
-//     } else if (userId === "anonymous") {
-//       // User logged out or not yet loaded
-//       setFormData(getDefaultData());
+//     if (userId === "anonymous") {
+//       setFormData({
+//         bundleRegistration: {
+//           date: new Date(),
+//         },
+//         washing: {},
+//         dyeing: {},
+//         ironing: {},
+//         packing: {},
+//         qc1Inspection: {},
+//         qc2Inspection: {},
+//         qaAudit: {},
+//       });
 //     }
 //   }, [userId]);
 
-//   const updateFormData = useCallback((formName, data) => {
-//     setFormData((prev) => {
-//       const updatedForm = {
+//   const updateFormData = (formName, data) => {
+//     setFormData((prev) => ({
+//       ...prev,
+//       [formName]: {
 //         ...prev[formName],
 //         ...data,
-//       };
-//       // Ensure date is stored as ISO string if it's a Date object
-//       if (updatedForm.date && updatedForm.date instanceof Date) {
-//         updatedForm.date = updatedForm.date.toISOString();
-//       }
-//       return {
-//         ...prev,
-//         [formName]: updatedForm,
-//       };
-//     });
-//   }, []); // Empty dependency array: function is created once
+//       },
+//     }));
+//   };
 
-//   const clearFormData = useCallback((formName) => {
-//     setFormData((prev) => {
-//       const defaultFormState =
-//         formName === "bundleRegistration"
-//           ? { date: new Date().toISOString() } // Store as ISO string
-//           : {};
-//       return {
-//         ...prev,
-//         [formName]: defaultFormState,
-//       };
-//     });
-//     // localStorage update will be handled by the useEffect listening to formData changes
-//   }, []); // Empty dependency array
+//   const clearFormData = (formName) => {
+//     setFormData((prev) => ({
+//       ...prev,
+//       [formName]: formName === "bundleRegistration" ? { date: new Date() } : {},
+//     }));
 
-//   // Convert date strings back to Date objects when providing formData from context
-//   // This ensures components receive Date objects if they expect them (e.g., DatePicker)
-//   const formDataWithDateObjects = useMemo(() => {
-//     const newFormData = { ...formData };
-//     if (
-//       newFormData.bundleRegistration &&
-//       newFormData.bundleRegistration.date &&
-//       typeof newFormData.bundleRegistration.date === "string"
-//     ) {
-//       newFormData.bundleRegistration = {
-//         ...newFormData.bundleRegistration,
-//         date: new Date(newFormData.bundleRegistration.date),
-//       };
+//     // Also clear from localStorage
+//     if (userId && userId !== "anonymous") {
+//       const savedData = JSON.parse(
+//         localStorage.getItem(`formData_${userId}`) || "{}"
+//       );
+//       savedData[formName] =
+//         formName === "bundleRegistration" ? { date: new Date() } : {};
+//       localStorage.setItem(`formData_${userId}`, JSON.stringify(savedData));
 //     }
-//     // Add similar conversions for other forms if they store dates
-//     return newFormData;
-//   }, [formData]);
+//   };
 
 //   return (
 //     <FormDataContext.Provider
 //       value={{
-//         formData: formDataWithDateObjects, // Provide formData with Date objects
+//         formData,
 //         updateFormData,
 //         clearFormData,
+//         //clearUserData,
 //       }}
 //     >
 //       {children}
@@ -172,7 +130,6 @@
 //   return context;
 // };
 
-// FormDataContext.jsx
 import React, {
   createContext,
   useCallback,
